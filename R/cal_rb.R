@@ -132,26 +132,33 @@ fill_fail <- function(s_gt,fail = "Fail"){
 
 ## s_gt:: genotypes of a sample along markers on one chromosome
 ## chr:: a vector of characters indicating the chromosome locations of these markers
-## type = "status"
 ## type = "counts"
-count_cos <- function(s_gt, chrs, type = "status"){
+## type = "bool"
+
+count_cos <- function(s_gt, chrs, type = "bool"){
 
   stopifnot(length(s_gt)==length(chrs))
+
   temp_df <- data.frame(marker_ID = paste0("ID_",seq(1:length(s_gt))),
                         gt = s_gt,
                         chrs = chrs,stringsAsFactors = FALSE)
 
-  temp_df2 <- temp_df[!is.na(temp_df$gt),]
-  temp_df2$gt_before <- temp_df2$gt
-  temp_df2$chr_before <-  temp_df2$chrs
-  temp_df2$gt_before[2:nrow(temp_df2)] <- temp_df2$gt[1:(nrow(temp_df2)-1)]
-  temp_df2$chr_before[2:nrow(temp_df2)] <- temp_df2$chrs[1:(nrow(temp_df2)-1)]
-  temp_df2$is_rb <- (temp_df2$gt !=temp_df2$gt_before & temp_df2$chrs == temp_df2$chr_before)
-  temp_df2 <- temp_df2 %>% group_by(chrs) %>% mutate(cum_rb = cumsum(is_rb))
+
+  temp_df$gt_before <- temp_df$gt
+  temp_df$chr_before <-  temp_df$chrs
+  temp_df$gt_before[2:nrow(temp_df)] <- temp_df$gt[1:(nrow(temp_df)-1)]
+  temp_df$chr_before[2:nrow(temp_df)] <- temp_df$chrs[1:(nrow(temp_df)-1)]
+
+  temp_df$is_rb <- (temp_df$gt != temp_df$gt_before & temp_df$chrs == temp_df$chr_before)
+
+  temp_df$is_rb_na_asF <- temp_df$is_rb
+  temp_df$is_rb_na_asF[is.na(temp_df$is_rb_na_asF)] <- FALSE
+
+  temp_df <- temp_df %>% group_by(chrs) %>% mutate(cum_rb = cumsum(is_rb_na_asF))
   #  temp_df2$cum_rb <- cumsum(temp_df2$is_rb )
-  temp_df2 <- data.frame(temp_df2)
-  rownames(temp_df2) <- temp_df2$marker_ID
-  co_counts <- temp_df2[temp_df$marker_ID,]
+  temp_df <- data.frame(temp_df)
+  rownames(temp_df) <- temp_df$marker_ID
+  co_counts <- temp_df[temp_df$marker_ID,]
   #
   # co_counts_perchr <- sapply(unique(as.character(temp_df2$chrs)), function(chr){
   #   s_gt_chr <- temp_df2$gt[chrs == chr]
@@ -176,13 +183,63 @@ count_cos <- function(s_gt, chrs, type = "status"){
   # })
   # co_counts <- Reduce(append,co_counts_perchr)
   #
-  if(type == "status")
+  if(type == "bool")
   {
     return (co_counts$is_rb)
   } else {
     return (co_counts$cum_rb)
   }
 }
+
+# count_cos <- function(s_gt, chrs, type = "status"){
+#
+#   stopifnot(length(s_gt)==length(chrs))
+#   temp_df <- data.frame(marker_ID = paste0("ID_",seq(1:length(s_gt))),
+#                         gt = s_gt,
+#                         chrs = chrs,stringsAsFactors = FALSE)
+#
+#   temp_df2 <- temp_df[!is.na(temp_df$gt),]
+#   temp_df2$gt_before <- temp_df2$gt
+#   temp_df2$chr_before <-  temp_df2$chrs
+#   temp_df2$gt_before[2:nrow(temp_df2)] <- temp_df2$gt[1:(nrow(temp_df2)-1)]
+#   temp_df2$chr_before[2:nrow(temp_df2)] <- temp_df2$chrs[1:(nrow(temp_df2)-1)]
+#   temp_df2$is_rb <- (temp_df2$gt !=temp_df2$gt_before & temp_df2$chrs == temp_df2$chr_before)
+#   temp_df2 <- temp_df2 %>% group_by(chrs) %>% mutate(cum_rb = cumsum(is_rb))
+#   #  temp_df2$cum_rb <- cumsum(temp_df2$is_rb )
+#   temp_df2 <- data.frame(temp_df2)
+#   rownames(temp_df2) <- temp_df2$marker_ID
+#   co_counts <- temp_df2[temp_df$marker_ID,]
+#   #
+#   # co_counts_perchr <- sapply(unique(as.character(temp_df2$chrs)), function(chr){
+#   #   s_gt_chr <- temp_df2$gt[chrs == chr]
+#   #   co_counts_chr <- rep(0,length(s_gt_chr))
+#   #
+#   #   for (i in c(2:length(s_gt_chr))){
+#   #     if(identical(s_gt_chr[i],s_gt_chr[i-1]) & !anyNA(c(s_gt_chr[i],s_gt_chr[i-1]))){
+#   #       co_counts_chr[i] <-  co_counts_chr[i-1]
+#   #     } else {
+#   #       if(is.na(s_gt_chr[i-1])){
+#   #         co_counts_chr[i]  <-  NA
+#   #       } else if(is.na(s_gt_chr[i-1])){
+#   #         co_counts_chr[i]  <- NA
+#   #       } else {
+#   #         co_counts_chr[i]  <-  co_counts_chr[i-1] +1
+#   #       }
+#   #
+#   #     }
+#   #
+#   #   }
+#   #   co_counts_chr
+#   # })
+#   # co_counts <- Reduce(append,co_counts_perchr)
+#   #
+#   if(type == "status")
+#   {
+#     return (co_counts$is_rb)
+#   } else {
+#     return (co_counts$cum_rb)
+#   }
+# }
 
 
 
@@ -231,4 +288,74 @@ count_cos <- function(s_gt, chrs, type = "status"){
 
 ## Count Crossovers
 
+## gt_matrix is a matrix of marker by samples with values as genotypes such as
+## AA,GC,GT etc
 
+## ref is the reference genotype
+## alt is the alternative genotype
+
+## the function returns a matrix of marker by crossover happens
+
+## type:: counts, counts of how many crossovers happened until this marker
+
+
+detect_co <-function(gt_matrix, ref, alt,prefix = "Sample_",
+                     chrs, type = "bool"){
+  ### change  GT to labels
+  row_names <- rownames(gt_matrix)
+  gt_matrix <- apply(as.matrix(gt_matrix),2, label_gt,
+                     ref = ref,
+                     alt = alt)
+  gt_matrix <- apply(as.matrix(gt_matrix),2, correct_ref)
+
+
+
+  ### Fill in Fail or put NA in Fail
+  gt_matrix <- apply(as.matrix(gt_matrix),2, fill_fail)
+
+  gt_matrix <- apply(as.matrix(gt_matrix),2, change_missing)
+
+  colnames(gt_matrix) <- paste0(prefix,colnames(gt_matrix))
+  #
+  #   gt_matrix_co_counts <- apply(gt_matrix,2, count_cos,
+  #                                chrs = chrs,
+  #                                type = "counts")
+
+  gt_matrix_co <-apply(gt_matrix,2, count_cos,
+                       chrs = chrs, type = type)
+  stopifnot(nrow(gt_matrix) == nrow(gt_matrix_co))
+  rownames(gt_matrix_co) <- row_names
+  return(gt_matrix_co)
+}
+
+
+
+cal_geneticMap <- function(gt_matrix_co_by_marker){
+
+  #gt_matrix_co
+
+  gt_matrix_dst <- gt_matrix_co_by_marker %>%  group_by(CHR_POS) %>% summarise(t_counts = sum(Cross_over == TRUE,na.rm = TRUE),
+                                                                               f_counts = sum(Cross_over == FALSE,na.rm = TRUE),
+                                                                               total_calls = (f_counts+t_counts),
+                                                                               total_na = sum(is.na(Cross_over)),
+                                                                               total_samples = length(Cross_over))
+  if(any(gt_matrix_dst$total_calls == 0)){
+    message(paste0(sum(gt_matrix_dst$total_calls == 0)," marker(s) do not have calls across all samples, they will be removed"))
+  }
+
+  gt_matrix_dst <- gt_matrix_dst[gt_matrix_dst$total_calls != 0,]
+  gt_matrix_dst <- gt_matrix_dst %>%  group_by(CHR_POS) %>% mutate(co_rate = t_counts/total_calls,
+                                                                   na_rate = total_na/total_samples)
+
+  if(any(gt_matrix_dst$co_rate >= 0.5)){
+    message(paste0(sum(gt_matrix_dst$co_rate >= 0.5)," markers have cross-over fraction larger or equal to 0.5,they will be removed"))
+  }
+
+  gt_matrix_dst <- gt_matrix_dst[gt_matrix_dst$co_rate <0.5,]
+
+  gt_matrix_dst <- gt_matrix_dst %>%  group_by(CHR_POS) %>% summarise(haldane = -0.5*log(1-2*co_rate),
+                                                                      kosambi = 0.25*log( (1+2*co_rate)/(1-2*co_rate)))
+
+
+  return(gt_matrix_dst)
+}

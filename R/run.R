@@ -5,26 +5,41 @@ suppressPackageStartupMessages({
   library(dplyr)
   library(reshape2)
   library(chromoMap)
+  library(UpSetR)
 })
 
 ## Load data sheet
 
 
-mutate_inform <- read_excel(path = "/mnt/mcfiles/rlyu/Projects/Snakemake_projects/yeln_2019_spermtyping/analysis/All_data_May_to_August_2019.xlsx",
+mutate_inform1 <- read_excel(path = "/mnt/mcfiles/rlyu/Projects/Snakemake_projects/yeln_2019_spermtyping/analysis/All_data_May_to_August_2019.xlsx",
                             sheet = "mutant_25-6-19_informative")
+mutate_inform2<- read_excel(path = "/mnt/mcfiles/rlyu/Projects/Snakemake_projects/yeln_2019_spermtyping/analysis/All_data_May_to_August_2019.xlsx",
+                            sheet = "mutant_30-08-2019_informative")
 
-mutate_inform$CHR_POS <- paste0(mutate_inform$CHR,"_",mutate_inform$POS)
-## Example for mutate_inform
+markers_1 <- paste0(mutate_inform1$CHR,"_",mutate_inform1$POS)
 
-gt_matrix <- mutate_inform[,grep("[0-9].*[0-9]$",colnames(mutate_inform))]
+markers_2 <- paste0(mutate_inform2$CHR,"_",mutate_inform2$POS)
+
+
+## same markers
+listInput <- list(markers_1 = markers_1, markers_2 =markers_2)
+
+upset(fromList(listInput), order.by = "freq")
+
+mutate_inform_merge <- merge.data.frame(mutate_inform1,mutate_inform2,all = TRUE)
+
+mutate_inform_merge$CHR_POS <- paste0(mutate_inform_merge$CHR,"_",mutate_inform_merge$POS)
+## Example for mutate_inform_merge
+
+gt_matrix <- mutate_inform_merge[,grep("[0-9].*[0-9]$",colnames(mutate_inform_merge))]
 
 ## sample IDs
 
 ### change  GT to labels
 
 gt_matrix <- apply(as.matrix(gt_matrix),2, label_gt,
-                   ref = mutate_inform$`C57BL/6J`,
-                   alt = mutate_inform$`FVB/NJ [i]`)
+                   ref = mutate_inform_merge$`C57BL/6J`,
+                   alt = mutate_inform_merge$`FVB/NJ [i]`)
 
 
 
@@ -35,27 +50,36 @@ gt_matrix <- apply(as.matrix(gt_matrix),2, correct_ref)
 
 ### Fill in Fail or put NA in Fail
 gt_matrix <- apply(as.matrix(gt_matrix),2, fill_fail)
+
 gt_matrix <- apply(as.matrix(gt_matrix),2, change_missing)
 
 colnames(gt_matrix) <- paste0("Sample_",colnames(gt_matrix))
-full_matrix <- cbind(mutate_inform[,c(1:5,ncol(mutate_inform))], gt_matrix)
+full_matrix <- cbind(mutate_inform_merge[,c(1:5,ncol(mutate_inform_merge))],
+                     gt_matrix)
 
+count.samples <- rowSums(is.na(full_matrix))
 
+full_matrix$na_rate <- count.samples
 ### Add annotation back to the matrix
 
 
 head(full_matrix)
 
+#missing_rate <- apply(gt_matrix,1, is.na)
+
+ggplot(data = full_matrix)+geom_point(mapping = aes(x = POS, y = na_rate))+
+  facet_wrap(.~CHR)+geom_text(data=full_matrix[full_matrix$na_rate > (0.5*(ncol(full_matrix)-7)),],mapping =aes(x = POS, y = na_rate,label = rsID))
+
 gt_matrix_co_counts <- apply(gt_matrix,2, count_cos,
-                             chrs = mutate_inform$CHR,
+                             chrs = mutate_inform_merge$CHR,
                              type = "counts")
 gt_matrix_co <-apply(gt_matrix,2, count_cos,
-                     chrs = mutate_inform$CHR)
+                     chrs = mutate_inform_merge$CHR)
 #gt_matrix_co
 
 
 
-df  = cbind(mutate_inform[,c(1:5,ncol(mutate_inform))], gt_matrix_co_counts)
+df  = cbind(mutate_inform_merge[,c(1:5,ncol(mutate_inform_merge))], gt_matrix_co_counts)
 df = data.frame(df)
 
 head(df)
@@ -70,17 +94,16 @@ head(df)
 
 
 
-gt_matrix_co <- cbind(mutate_inform[,"CHR_POS"], gt_matrix_co)
+gt_matrix_co <- cbind(mutate_inform_merge[,"CHR_POS"], gt_matrix_co)
 gt_matrix_co_df = melt(gt_matrix_co,id.vars = "CHR_POS")
 head(gt_matrix_co_df)
 
 gt_matrix_dst <- gt_matrix_co_df %>%  group_by(CHR_POS) %>% summarise(t_counts = sum(value == TRUE,na.rm = TRUE),
                                                                       f_counts = sum(value == FALSE,na.rm = TRUE),
                                                                       co_rate = t_counts/(f_counts+t_counts),
-                                                                      haldane = -0.5*log10(1-2*co_rate),
-                                                                      kosambi = 0.25*log10( (1+2*co_rate)/(1-2*co_rate)))
+                                                                      haldane = -0.5*log(1-2*co_rate),
+                                                                      kosambi = 0.25*log( (1+2*co_rate)/(1-2*co_rate)))
 
-sum(gt_matrix_dst$co_rate*100,na.rm = TRUE)
 
 head(gt_matrix_dst)
 
@@ -99,7 +122,6 @@ gt_matrix_dst <- gt_matrix_dst %>% group_by(CHR) %>% mutate(cum_haldane = cumsum
 
 #gt_matrix_dst[sort(gt_matrix_dst$CHR,gt_matrix_dst$POS),]
 
-sum(gt_matrix_dst$co_rate*100,na.rm = TRUE)
 
 
 

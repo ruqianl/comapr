@@ -1,15 +1,38 @@
+
 #title: "YELN_2019_09_04_Genetic-mapsTest"
 #author: "Ruqian Lyu"
 #date: "9/4/2019"
 
 
+#' @import methods
+NULL
 
-
-## Function label GT
-
-## s_gt, a column of genotypes for one sample across all markers
-## s_gt, a column of genotypes for reference across all markers
-## s_gt, a column of genotypes for alternative across all markers
+#' Function label_gt for changing genotypes to labels
+#'
+#' It turns a vector of Genotypes to Labels: Homo_ref, Homo_alt, Het
+#' given the known reference and alternative genotypes
+#'
+#'
+#' @param s_gt
+#' s_gt, a vector of genotypes for one sample across markers
+#'
+#' @param ref
+#' ref, a vector of genotypes for reference across markers
+#'
+#' @param alt
+#' alt, a vector of genotypes for alternative across markers
+#'
+#' @return
+#' a vector of labels indicating the progeny's genotypes across markers
+#' : Homo_ref, Homo_alt, Het
+#'
+#' @details
+#'
+#' This function takes the a sample's genotype vector and checks for each SNP marker
+#' to see whether it matches with homogeneous reference, or homogeneous alternative
+#' or heterozygous genotypes.
+#' @keywords internal
+#' @author Ruqian Lyu
 
 label_gt <- function(s_gt,ref,alt,fail ="Fail"){
   ## initialise the vector of GT with NAs
@@ -31,8 +54,6 @@ label_gt <- function(s_gt,ref,alt,fail ="Fail"){
   ## the wrong GT will be NAs
   ## the wrong GTs will be neither home_ref, home_alt, Het or Fail
 
-
-
   return(tem)
 }
 
@@ -40,14 +61,23 @@ label_gt <- function(s_gt,ref,alt,fail ="Fail"){
 
 
 
-## Function correct Markers
+#' Function for correct Markers
+#'
+#' If we see home ref markers in the samples, then something is wrong.
+#' We can change all home_ref to hets
+#'
+#' @param s_gt
+#' a vector of genotype labels as returned by \code{label_gt}
+#'
+#' @param change_to
+#' by default, the Home_ref is changed to \code{Het}, but it can be changed to any labels
+#' such as \code{Fail} fi we want to exclude these wrong labels.
+#' @keywords internal
+#' @return
+#' a vector of genotype labels with Home_ref corrected to \code{Het} or \code{Fail} as
+#' specified by the argument change_to.
 
-#If we see home ref markers in the samples, then something is wrong. We change all home_ref to hets or marker as NA
-
-
-
-
-correct_ref <- function(s_gt,change_to = 'Het'){
+correct_ref <- function(s_gt, change_to = 'Het'){
 
   if(! any(s_gt == "Homo_ref")){
     # if for this sample, there is no Homo_ref called across all marker,
@@ -63,23 +93,16 @@ correct_ref <- function(s_gt,change_to = 'Het'){
   }
 }
 
-#(test_gt <- label_gt(mutate_inform$`56`,mutate_inform$`C57BL/6J`,mutate_inform$`FVB/NJ [i]`))
-
-#(correct_ref(test_gt))
 
 
 
+#' change 'missing' labels to \code{NA}
+#'
+#' @param s_gt, a column of labelled genotypes
+#' @param missing, the string used for encoding missing values default to \code{missing}
 
+change_missing <- function(s_gt, missing = "missing"){
 
-## Function fill in FAIL
-
-# If we have a `FAIL` in the data and the `FAIL` in a block of either Home_alt, or Het, we fill in the FAIL using values of the ones adjacent to it, otherwise we fill in "NA" as missing value.
-
-
-## change 'missing' to 'NA'
-## s_gt, a column of labelled genotypes
-
-change_missing <- function(s_gt ,missing = "missing"){
   if(! any(s_gt == missing)){
     return(s_gt)
   } else {
@@ -91,6 +114,17 @@ change_missing <- function(s_gt ,missing = "missing"){
   return(s_gt)
 }
 
+
+
+#' Function fill in FAIL
+
+#' If we have a \code{FAIL} in the genotype data and the \code{FAIL} in a block of either Home_alt,
+#' or Het, we fill in the \code{FAIL} using values of the ones adjacent to it,
+#' otherwise we fill in "NA" as missing value.
+#'
+#' @param s_gt, a column of labelled genotypes
+#' @param fail, the string that is used for encoding failed genotype results, default to \code{Fail}
+#' @keywords internal
 
 fill_fail <- function(s_gt,fail = "Fail"){
   if(! any(s_gt == fail)){
@@ -108,22 +142,6 @@ fill_fail <- function(s_gt,fail = "Fail"){
     return(s_gt)
   }
 }
-
-
-
-
-
-
-# plot_df <- data.frame(full_matrix)
-# plot_df$CHR = factor(plot_df$CHR,levels = c(1:19,"X"))
-#
-# ggplot(data = plot_df)+
-#   geom_point(mapping = aes(x = POS,y = Sample_56))+facet_wrap(~CHR)
-#
-# ggplot(data = plot_df)+
-#   geom_point(mapping = aes(x = POS,y = Sample_57))+facet_wrap(~CHR)+theme(axis.text.x = element_text(face="bold", color="#993333",size=8,
-#                                                                                                      angle = 45))+ scale_x_continuous(labels = scales::comma)
-
 
 
 ### Count crossovers
@@ -285,24 +303,36 @@ count_cos <- function(s_gt, chrs, type = "bool"){
 
 
 
+#' correctGT
+#'
+#' map GT to genotype labels, change Homo_ref to Hets, infer missing data,
+#' and change "missing" to NA for counting crossover later
+#'
+#'
+#' @param gt_matrix
+#' the input from excel with rownames as marker IDs and column names as sample IDs
+#'
+#' @param ref
+#'  is the reference genotype
+#' @param alt
+#' is the alternative genotype.
+#'
+#' @details
+#' This function changes genotype code to labels by calling \code{lable_gt}, corrects
+#' the Home reference geneotype calls to Hets by calling \code{correct_ref}, infer the
+#' failed genotype calls by calling \code{fill_fail} and change missing values to NA by
+#' calling \code{change_missing}.
+#'
+#' @export
+#'
+#' @author Ruqian Lyu
 
-## Count Crossovers
+correctGT <- function(gt_matrix, ref, alt)
+{
 
-## gt_matrix is a matrix of marker by samples with values as genotypes such as
-## AA,GC,GT etc
-
-## ref is the reference genotype
-## alt is the alternative genotype
-
-## the function returns a matrix of marker by crossover happens
-
-## type:: counts, counts of how many crossovers happened until this marker
-
-
-detect_co <-function(gt_matrix, ref, alt,prefix = "Sample_",
-                     chrs, type = "bool"){
   ### change  GT to labels
   row_names <- rownames(gt_matrix)
+
   gt_matrix <- apply(as.matrix(gt_matrix),2, label_gt,
                      ref = ref,
                      alt = alt)
@@ -315,6 +345,42 @@ detect_co <-function(gt_matrix, ref, alt,prefix = "Sample_",
 
   gt_matrix <- apply(as.matrix(gt_matrix),2, change_missing)
 
+  rownames(gt_matrix) <- row_names
+
+  gt_matrix
+
+}
+
+
+#' detect crossovers
+#'
+#' detect crossovers between every two markers by examining change in genotype patterns
+#'
+#' @param gt_matix
+#'
+#' correct genotype matrix returned by `correct_gt`
+#'
+#' @param prefix
+#'
+#' what prefix to add to sample IDs
+#'
+#' @param  type
+#'
+#' whether return boolean value indicating whether crossover happens or integer value
+#' indicating how many crossovers happen from all preceding intevals
+#'
+#' @param  chr
+#'
+#' the chromosomes for markers on the rows
+#'
+#' @return
+#'
+#' a matrix of marker by samples with values indicating crossovers
+#' @export
+#'
+detect_co <-function(gt_matrix, prefix = "Sample_",
+                     chrs, type = "bool"){
+  row_names <- rownames(gt_matrix)
   colnames(gt_matrix) <- paste0(prefix,colnames(gt_matrix))
   #
   #   gt_matrix_co_counts <- apply(gt_matrix,2, count_cos,
@@ -324,38 +390,357 @@ detect_co <-function(gt_matrix, ref, alt,prefix = "Sample_",
   gt_matrix_co <-apply(gt_matrix,2, count_cos,
                        chrs = chrs, type = type)
   stopifnot(nrow(gt_matrix) == nrow(gt_matrix_co))
+
   rownames(gt_matrix_co) <- row_names
+
   return(gt_matrix_co)
 }
 
 
+#' Calculate genetic map length
+#'
+#' Given whether crossover happens in every two marker interval, calculate the
+#' recombination fraction and then derive the Haldane or Kosambi morgans.
+#'
+#' @param gt_matrix_co_by_marker
+#' data.frame, from `melt` the matrix returned by `detect_co`
+#'
+#' @return data.frame
+#' data.frame for all markers with Haldane and Kosambi morgans calculated
+#'
 
 cal_geneticMap <- function(gt_matrix_co_by_marker){
 
+
   #gt_matrix_co
 
-  gt_matrix_dst <- gt_matrix_co_by_marker %>%  group_by(CHR_POS) %>% summarise(t_counts = sum(Cross_over == TRUE,na.rm = TRUE),
-                                                                               f_counts = sum(Cross_over == FALSE,na.rm = TRUE),
-                                                                               total_calls = (f_counts+t_counts),
-                                                                               total_na = sum(is.na(Cross_over)),
-                                                                               total_samples = length(Cross_over))
-  if(any(gt_matrix_dst$total_calls == 0)){
-    message(paste0(sum(gt_matrix_dst$total_calls == 0)," marker(s) do not have calls across all samples, they will be removed"))
+  gt_matrix_dst <-
+    gt_matrix_co_by_marker %>%  group_by(CHR_POS) %>% summarise(
+      t_counts = sum(Cross_over == TRUE, na.rm = TRUE),
+      f_counts = sum(Cross_over == FALSE, na.rm = TRUE),
+      total_calls = (f_counts +
+                       t_counts),
+      total_na = sum(is.na(Cross_over)),
+      total_samples = length(Cross_over)
+    )
+  if (any(gt_matrix_dst$total_calls == 0)) {
+    message(paste0(
+      sum(gt_matrix_dst$total_calls == 0),
+      " marker(s) do not have calls across all samples, they will be removed"
+    ))
   }
 
-  gt_matrix_dst <- gt_matrix_dst[gt_matrix_dst$total_calls != 0,]
-  gt_matrix_dst <- gt_matrix_dst %>%  group_by(CHR_POS) %>% mutate(co_rate = t_counts/total_calls,
-                                                                   na_rate = total_na/total_samples)
+  gt_matrix_dst <- gt_matrix_dst[gt_matrix_dst$total_calls != 0, ]
+  gt_matrix_dst <-
+    gt_matrix_dst %>%  group_by(CHR_POS) %>% mutate(co_rate = t_counts / total_calls,
+                                                    na_rate = total_na /
+                                                      total_samples)
 
-  if(any(gt_matrix_dst$co_rate >= 0.5)){
-    message(paste0(sum(gt_matrix_dst$co_rate >= 0.5)," markers have cross-over fraction larger or equal to 0.5,they will be removed"))
+  if (any(gt_matrix_dst$co_rate >= 0.5)) {
+    warning(
+      paste0(
+        sum(gt_matrix_dst$co_rate >= 0.5),
+        " markers have cross-over fraction larger or equal to 0.5,
+        please check whether they are informative: ",
+        paste0(gt_matrix_dst$CHR_POS[gt_matrix_dst$co_rate >= 0.5], collapse = ",")
+      )
+    )
+
   }
 
-  gt_matrix_dst <- gt_matrix_dst[gt_matrix_dst$co_rate <0.5,]
+  gt_matrix_dst <- gt_matrix_dst[gt_matrix_dst$co_rate < 0.5, ]
 
-  gt_matrix_dst <- gt_matrix_dst %>%  group_by(CHR_POS) %>% summarise(haldane = -0.5*log(1-2*co_rate),
-                                                                      kosambi = 0.25*log( (1+2*co_rate)/(1-2*co_rate)))
+  gt_matrix_dst <-
+    gt_matrix_dst %>%  group_by(CHR_POS) %>%
+    summarise(haldane = -0.5 * log(1 - 2 * co_rate),
+              kosambi = 0.25 * log((1 + 2 * co_rate) / (1 - 2 * co_rate)))
 
 
   return(gt_matrix_dst)
 }
+
+#' Plot markers with missing genotypes
+#'
+#' @author Ruqian Lyu
+#'
+#' @param gt_matrix the genotype matrix of markers by samples
+#' @param plot_wg
+#' whether to plot all markers across whole genome or just the missing markers
+#'
+#' @param missing
+#' the label in the matrix that is used for encoding the missing or failed data
+#'
+#' @return
+#' a plot for markers with missing genotype across samples
+#'
+plotMissingGT <- function(gt_matrix, missing = "Fail", plot_wg = TRUE){
+
+  mis_matrix <- apply(gt_matrix, 2, function(es){
+    is.na(es) | es == missing
+    })
+
+  plot_df <- melt(mis_matrix)
+
+  plot_df$CHR <- sapply(strsplit(as.character(plot_df$Var1),"_"),`[[`,1)
+  plot_df$POS <- as.numeric(sapply(strsplit(as.character(plot_df$Var1),"_"),`[[`,2))
+  plot_df$CHR <- factor(plot_df$CHR,levels = c(seq(1:19),"X","Y"))
+  plot_df <- plot_df[order(plot_df$CHR, xtfrm(plot_df$POS)), ]
+  plot_df$Var1 <- factor(plot_df$Var1,levels = unique(plot_df$Var1))
+  #plot_df <- plot_df[plot_df$value,]
+  if(plot_wg){
+    ggplot(data = plot_df)+geom_point(mapping = aes(x = Var1, colour = value, y = Var2))+xlab("markers")+ylab("samples")+
+    theme(axis.text.x = element_blank())+
+    labs(colour = "is_missing")+scale_color_manual(values = c("TRUE" = "red",
+                                                              "FALSE"= "white"))
+  } else {
+
+    plot_df <- plot_df[plot_df$value,]
+    ggplot(data = plot_df)+geom_point(mapping = aes(x = Var1, colour = value, y = Var2))+xlab("markers")+ylab("samples")+
+      theme(axis.text.x = element_blank())+
+      labs(colour = "is_missing")+scale_color_manual(values = c("TRUE" = "red",
+                                                                "FALSE"= "white"))
+  }
+}
+
+#' countGT
+#' count how many samples have genotypes calls across all markers
+#' and count how many markers that each individual have genotypes
+#'
+#' @importFrom plotly plot_ly subplot
+#' @importFrom gridExtra grid.arrange
+
+#' @author Ruqian Lyu
+#' @param gt_matrix, the genotype matrix of marker by samples after correction by
+#' funcion \code{correctGT}
+#' @param plot, it determines whether a plot will be generated.
+#'
+#' @export
+#'
+#' @return
+#' A list of two elements including \code{n_markers} and \code{n_samples}
+
+countGT <- function(gt_matrix, plot =TRUE,interactive=FALSE){
+  if(plot){
+    if(interactive){
+
+      ply1 <- plotly::plot_ly(data = data.frame(marker_index = seq(1:length(rowSums(!is.na(gt_matrix)))),
+                                No.Samples =  rowSums(!is.na(gt_matrix)),
+                                marker_ID = rownames(gt_matrix)),
+              x = ~marker_index, y = ~No.Samples,
+              text = ~marker_ID,name = "No. samples by marker",mode = "markers",
+              type = "scatter")
+
+      ply2 <- plotly::plot_ly(data = data.frame(sample_index = seq(1:length(colSums(!is.na(gt_matrix)))),
+                                No.Markers =  colSums(!is.na(gt_matrix)),
+                                sample_ID = colnames(gt_matrix)),
+              x = ~sample_index, y = ~No.Markers,
+              text = ~sample_ID, name = "No. markers by sample",type = "scatter",
+              mode = "markers")
+      p <- plotly::subplot(ply1,ply2)
+      return(list(ply = p,n_samples = rowSums(!is.na(gt_matrix)),
+                  n_markers = colSums(!is.na(gt_matrix))))
+
+    } else {
+      # par(mfrow=c(1,2))
+      # plot(rowSums(!is.na(gt_matrix)),ylab = "Number of samples",xlab="markers index",
+      #      main = "No. samples by marker")
+      # plot(colSums(!is.na(gt_matrix)),ylab = "Number of markers",xlab="samples index",
+      #      main = "No. markers by sample")
+      p1 <- ggplot()+geom_point(mapping = aes(x = seq(1:length(rowSums(!is.na(gt_matrix)))),
+                                              y = rowSums(!is.na(gt_matrix))))+theme_classic()+
+        ylab("Number of samples")+xlab("markers index")+ggtitle("No. samples by marker")
+
+      p2 <- ggplot()+geom_point(mapping = aes(x = seq(1:length(colSums(!is.na(gt_matrix)))),
+                                              y = colSums(!is.na(gt_matrix))))+theme_classic()+
+        ylab("Number of markers")+xlab("samples index")+ggtitle("No. markers by sample")
+     p <- gridExtra::grid.arrange(p1, p2, nrow = 1)
+    }
+    return(list(plot = p,
+                n_samples = rowSums(!is.na(gt_matrix)),
+                n_markers = colSums(!is.na(gt_matrix))))
+  }
+
+  return(list(n_samples = rowSums(!is.na(gt_matrix)),
+              n_markers = colSums(!is.na(gt_matrix))))
+}
+
+#' filterGT
+#'
+#' Filter markers or samples that have too many missing values.
+#' @param gt_matrx the genotype matrix of marker by samples after correction by
+#' funcion \code{correctGT}
+#' @param min_markers the minimum number of markers for a sample to be kept
+#' @param min_samples the minimum number of samples for a marker to be kept
+#'
+#' @details
+#' This function takes the \code{gt_matrix} and subset the matrix by
+#' the provided cut-offs.
+#' @return
+#'
+#' A filtered genotype matrix
+
+filterGT <- function(gt_matrix, min_markers = 5, min_samples = 3){
+  gt_counts <- countGT(gt_matrix)
+  keep_markers <-gt_counts$n_samples >= min_samples
+  keep_samples <- gt_counts$n_markers >= min_markers
+  message(paste0( "filter out ",sum(keep_markers==FALSE)," marker(s)"))
+  message(paste0( "filter out ",sum(keep_samples==FALSE)," sample(s)"))
+
+  return(gt_matrix[keep_markers, keep_samples])
+
+}
+
+#' findDupSamples
+#'
+#' Find the duplicated samples by look at the number of matching genotypes
+#' between all pairs of samples
+#' @param gt_matrix the corrected and filtered genotype matrix of markers by samples
+#' @param threshold the frequency cut-off of number of matching genotypes out of
+#' all geneotypes for determining whether the pair of samples
+#' are duplicated, defaults to \code{0.99}
+#' @param plot whether a frequency plot should be generated
+#'
+findDupSamples <- function(gt_matrix, threshold = 0.99, plot =TRUE){
+
+  # similarity.matrix<-apply(gt_matrix,2,function(x)colSums(identical(x,gt_matrix[,1])))
+  # diag(similarity.matrix)<-0
+  #
+  n <- seq_len( ncol(gt_matrix) )
+
+  #  Make combinations
+  id <- expand.grid( n , n )
+
+  #  Get result
+  out <- matrix( colSums( gt_matrix[ , id[,1] ] == gt_matrix[ , id[,2] ],
+                          na.rm =TRUE) , ncol = length(n) )
+  dimnames(out)[1] <- dimnames(gt_matrix)[2]
+  dimnames(out)[2] <- dimnames(gt_matrix)[2]
+
+  out_freq <- out / dim(gt_matrix)[1]
+
+
+
+  if(plot){
+    heatmap(out_freq,main ="Samples' frequencies of having same genotype across all markers")
+  }
+  out_freq[lower.tri(out_freq,diag=TRUE)] <- 0
+
+
+  dups_index <- which(out_freq > threshold, arr.ind = TRUE)
+  dups <- apply(dups_index,1,function(x)rownames(out_freq)[x])
+
+  return(dups)
+}
+
+
+#' findDupMarkers
+#'
+#' Find the duplicated markers by look at the number of matching genotypes across samples
+
+#' @param gt_matrix the corrected and filtered genotype matrix of markers by samples
+#' @param threshold the frequency cut-off of number of matching genotypes out of
+#' all geneotypes for determining whether the pair of samples
+#' are duplicated, defaults to \code{0.9}
+#' @param plot whether a frequency heatmap plot should be generated
+#'
+findDupMarkers <- function(gt_matrix, threshold = 0.9, plot =TRUE){
+
+  # similarity.matrix<-apply(gt_matrix,2,function(x)colSums(identical(x,gt_matrix[,1])))
+  # diag(similarity.matrix)<-0
+  #
+  n <- seq_len( nrow(gt_matrix) )
+
+  #  Make combinations
+  id <- expand.grid( n , n )
+
+  #  Get result
+  out <- matrix( rowSums( gt_matrix[  id[,1], ] == gt_matrix[ id[,2], ],
+                          na.rm =TRUE) , nrow = length(n) )
+  dimnames(out)[1] <- dimnames(gt_matrix)[1]
+  dimnames(out)[2] <- dimnames(gt_matrix)[1]
+
+  out_freq <- out / dim(gt_matrix)[1]
+
+
+
+  if(plot){
+    heatmap(out_freq,main ="Markers frequencies of having same genotype across all samples")
+  }
+
+  out_freq[lower.tri(out_freq,diag=TRUE)] <- 0
+
+
+  dups_index <- which(out_freq == threshold, arr.ind = TRUE)
+  dups <- apply(dups_index,1,function(x)rownames(out_freq)[x])
+
+  return(dups)
+}
+
+
+### Look for distorted segregation patterns
+
+### We expect the genotypes to appear with the frequenceis of 1:1 (homo_alt:hets)
+
+###
+
+#' getDisortationMarkers
+#'
+#' Marker disortation detection using chisq-test
+#' We expect the genotypes to appear with the frequenceis of 1:1 homo_alt:hets, we
+#' use chisq-test for finding markers that have genotypes significantly diffferent from
+#' the 1:1 ratio and report them
+#'
+
+getDisortatedMarkers <- function(gt_matrix){
+ geno.table <- sapply(rownames(gt_matrix), function(marker){
+   list(Het = ifelse(is.na(table(gt_matrix[marker,],useNA = "no")["Het"]),0,table(gt_matrix[marker,],useNA = "no")["Het"]),
+        Homo_alt = ifelse(is.na(table(gt_matrix[marker,],useNA = "no")["Homo_alt"]),0,table(gt_matrix[marker,],useNA = "no")["Homo_alt"]))
+ })
+ geno.table <- data.frame(Markers = colnames(geno.table),
+                          No.Hets =  as.character(unlist(geno.table["Het",])),
+                          No.Homo_alt = as.character(unlist(geno.table["Homo_alt",])),
+                          stringsAsFactors = FALSE)
+ pvals <- sapply(as.character(geno.table$Markers), function(marker){
+   ctest <- chisq.test(as.numeric(geno.table[geno.table$Markers==marker,2:3]),p = c(0.5,0.5))
+   ctest$p.value
+ })
+
+ #names(pvals) == geno.table$Markers
+ geno.table$Pvals <- pvals
+ geno.table$Adj.pvals <- p.adjust(pvals, method = "BH")
+
+ return(geno.table[order(geno.table$Adj.pvals),])
+}
+
+
+#' plotGTFreq
+#' @importFrom plotly plot_ly subplot
+#' @importFrom reshape2 melt
+#' Function to plot the genotypes for all samples faceted by genotype
+
+plotGTFreq <- function(gt_matrix, interactive = FALSE){
+  geno.table <- sapply(colnames(gt_matrix), function(sample){
+    list(Het = ifelse(is.na(table(gt_matrix[,sample],useNA = "no")["Het"]),0,table(gt_matrix[,sample],useNA = "no")["Het"]),
+         Homo_alt = ifelse(is.na(table(gt_matrix[,sample],useNA = "no")["Homo_alt"]),0,table(gt_matrix[,sample],useNA = "no")["Homo_alt"]))
+  })
+  geno.table <- data.frame(samples = colnames(geno.table),
+                           Freq.Hets =  as.numeric(unlist(geno.table["Het",]))/nrow(gt_matrix),
+                           Freq.Homo_alt = as.numeric(unlist(geno.table["Homo_alt",])/nrow(gt_matrix)),
+                           stringsAsFactors = FALSE)
+  pltdf <- melt(geno.table)
+
+  if(interactive){
+    ply1 <- plot_ly(pltdf, x=~samples,y=~value,type = "scatter",
+                    color =  ~variable)
+    return(ply1)
+  } else {
+
+    stplt1 <- ggplot(data = pltdf)+geom_point(mapping = aes(x = samples, y = value,
+                                                  color = variable))+theme_classic()+
+      ylab("Genotype Frequecies for each sample")
+    return(stplt1)
+
+  }
+
+}
+

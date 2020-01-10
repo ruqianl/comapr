@@ -1,0 +1,243 @@
+---
+title: "compare two groups"
+output: BiocStyle::html_document
+vignette: >
+  %\VignetteIndexEntry{compare_two_groups}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+author: Ruqian Lyu
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 8,
+  fig.height = 6
+)
+
+```
+
+```{r setup}
+devtools::load_all()
+
+suppressPackageStartupMessages({
+  library(readxl)
+  library(ggplot2)
+  library(dplyr)
+  library(UpSetR)
+  library(reshape2)
+  library(chromoMap)
+  library(UpSetR)
+  library(ggrepel)
+  library(comapr)
+  library(ggplot2)
+  library(reshape2)
+  library(dplyr)
+})
+```
+
+## Compare genetic maps of samples from two groups
+
+We get the final genetic lengths for each group as shown from the analysis [before ](comaprExamples.Rmd)
+
+```{r include=FALSE}
+
+
+```
+
+
+First group: 
+
+```{r}
+mutant_june_informative <- readRDS("../data/mutant_june_gt_final.rds")
+head(mutant_june_informative[,c(1,6:dim(mutant_june_informative)[2])])
+```
+```{r include=FALSE}
+## ---- include = FALSE----------------------------------------------------
+## ------------------------------------------------------------------------
+
+```
+
+Second group: 
+
+```{r}
+wildtype_may_informative <- readRDS("../data/wildtype_may_gt_final.rds")
+head(wildtype_may_informative[,c(1,6:dim(wildtype_may_informative)[2])])
+```
+
+First of all , the total genetic lengths for each group:
+
+Wildtype:
+```{r}
+sum(wildtype_may_informative$kosambi*100)
+
+```
+
+Mutant:
+
+```{r}
+sum(mutant_june_informative$kosambi*100)
+
+```
+
+Check the interval are the same or not 
+
+```{r}
+upset(fromList(list(wt = wildtype_may_informative$interval_ID,
+        mt = mutant_june_informative$interval_ID)),order.by = "freq")
+```
+
+223 intervals are shared by all samples from the two groups
+
+```{r}
+common_intervals <- intersect(wildtype_may_informative$interval_ID,mutant_june_informative$interval_ID)
+mt_final_clean  <- subset(mutant_june_informative,interval_ID %in% common_intervals)
+wt_final_clean  <- subset(wildtype_may_informative,interval_ID %in% common_intervals)
+dim(wt_final_clean)
+dim(mt_final_clean)
+
+
+```
+
+Use k.s test on the kosambi values for two groups
+
+```{r}
+wt <- wt_final_clean$kosambi
+mt <- mt_final_clean$kosambi
+
+# wt <- wildtype_may_informative$kosambi
+# mt <- mutant_june_informative$kosambi
+
+plot(ecdf(wt), col = "blue")
+plot(ecdf(mt), col = "red",add = TRUE)
+
+ks.test(x = wt, y = mt, alternative = "greater")
+
+t.test(wt, mt,var.equal = FALSE,alternative = "less")
+
+
+
+```
+
+```{r,fig.width=12}
+
+## Plots
+wildtype_may_informative$from <- "WT"
+mutant_june_informative$from <- "MT"
+
+plot_df <- rbind(wildtype_may_informative,mutant_june_informative)
+########
+## head(plot_df)
+
+plot_df <- plot_df[order(plot_df$CHR, rank(plot_df$POS,na.last = FALSE)), ]
+head(plot_df)
+ggplot(data = plot_df)+geom_point(mapping = aes(x = POS, y= cum_kosambi*100, colour = from))+facet_wrap(.~CHR,
+                                                                                                    scales = "free_y")+
+  ggtitle(label = paste0("total genetic length Mutant: \n",
+                         round(sum(plot_df$kosambi[plot_df$from == "MT"])*100,2)," vs WT",
+                         round(sum(plot_df$kosambi[plot_df$from == "WT"])*100 ,2)))+
+  theme_classic()+theme(axis.text.x  = element_text(angle = 90, hjust = 1))
+## Run for one job
+
+
+### whole chromosome
+
+
+df.tmp <- plot_df %>%
+
+  # Compute chromosome size
+  group_by(CHR) %>%
+  summarise(chr_len=max(POS,na.rm = TRUE)) %>%
+
+  # Calculate cumulative position of each chromosome
+  mutate(tot=cumsum(chr_len)-chr_len) %>%
+  select(-chr_len) %>%
+
+  # Add this info to the initial dataset
+  left_join(plot_df, ., by=c("CHR"="CHR")) %>%
+
+  # Add a cumulative position of each SNP
+  arrange(CHR, POS) %>%
+  mutate( BPcum=POS+tot)
+
+## head(df.tmp)
+# get chromosome center positions for x-axis
+axisdf <- df.tmp %>% group_by(CHR) %>% summarize(center=( max(BPcum) + min(BPcum) ) / 2 )
+df.tmp$wg_cum_kosambi <- 0
+
+
+df.tmp$wg_cum_kosambi[df.tmp$from == "WT"] <- cumsum(df.tmp$kosambi[df.tmp$from =="WT"])
+df.tmp$wg_cum_kosambi[df.tmp$from == "MT"] <- cumsum(df.tmp$kosambi[df.tmp$from =="MT"])
+
+ggplot(data = df.tmp)+geom_point(mapping = aes(x = BPcum, y= wg_cum_kosambi, colour = from))+
+  ggtitle(label = paste0("total genetic length Mutant: \n",
+                         round(sum(plot_df$kosambi[plot_df$from == "MT"])*100,2)," vs WT",
+                         round(sum(plot_df$kosambi[plot_df$from == "WT"])*100 ,2)))+
+  theme(axis.text.x  = element_text(angle = 90, hjust = 1))+
+  scale_x_continuous( label = axisdf$CHR, breaks= axisdf$center )+
+  theme_classic()
+
+```
+
+```{r,fig.width=12}
+
+## Plots
+wt_final_clean$from <- "WT"
+mt_final_clean$from <- "MT"
+
+plot_df <- rbind(wt_final_clean,mt_final_clean)
+########
+head(plot_df)
+
+plot_df <- plot_df[order(plot_df$CHR, rank(plot_df$POS,na.last = FALSE)), ]
+head(plot_df)
+ggplot(data = plot_df)+geom_point(mapping = aes(x = POS, y= cum_kosambi, colour = from))+facet_wrap(.~CHR,
+                                                                                                    scales = "free")+
+  ggtitle(label = paste0("total genetic length Mutant: \n",
+                         round(sum(plot_df$kosambi[plot_df$from == "MT"])*100,2)," vs WT",
+                         round(sum(plot_df$kosambi[plot_df$from == "WT"])*100 ,2)))+
+  theme_classic()+
+  theme(axis.text.x  = element_text(angle = 90, hjust = 1))
+## Run for one job
+
+
+### whole chromosome
+
+
+df.tmp <- plot_df %>%
+
+  # Compute chromosome size
+  group_by(CHR) %>%
+  summarise(chr_len=max(POS,na.rm = TRUE)) %>%
+
+  # Calculate cumulative position of each chromosome
+  mutate(tot=cumsum(chr_len)-chr_len) %>%
+  select(-chr_len) %>%
+
+  # Add this info to the initial dataset
+  left_join(plot_df, ., by=c("CHR"="CHR")) %>%
+
+  # Add a cumulative position of each SNP
+  arrange(CHR, POS) %>%
+  mutate( BPcum=POS+tot)
+
+head(df.tmp)
+# get chromosome center positions for x-axis
+axisdf <- df.tmp %>% group_by(CHR) %>% summarize(center=( max(BPcum) + min(BPcum) ) / 2 )
+df.tmp$wg_cum_kosambi <- 0
+
+
+df.tmp$wg_cum_kosambi[df.tmp$from == "WT"] <- cumsum(df.tmp$kosambi[df.tmp$from =="WT"])
+df.tmp$wg_cum_kosambi[df.tmp$from == "MT"] <- cumsum(df.tmp$kosambi[df.tmp$from =="MT"])
+
+ggplot(data = df.tmp)+geom_point(mapping = aes(x = BPcum, y= wg_cum_kosambi, colour = from))+
+  ggtitle(label = paste0("total genetic length Mutant: \n",
+                         round(sum(plot_df$kosambi[plot_df$from == "MT"])*100,2)," vs WT",
+                         round(sum(plot_df$kosambi[plot_df$from == "WT"])*100 ,2)))+
+  theme(axis.text.x  = element_text(angle = 90, hjust = 1))+scale_x_continuous( label = axisdf$CHR, breaks= axisdf$center )+
+  theme_classic()
+
+```
+

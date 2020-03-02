@@ -14,7 +14,7 @@ variables:
   CODECOV_TOKEN: "2329aed3-de38-468c-9a06-95564363211c"
 
 before_script:
-  - apt-get update
+  - which R
 
 buildbinary:
   stage: build

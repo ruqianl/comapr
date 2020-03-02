@@ -1,6 +1,57 @@
-image: r-base
+default:
+  image: bioconductor/bioconductor_docker
 
-test:
+stages:
+  - build
+  - document
+  - check
+  - test
+  - deploy
+
+variables:
+  _R_CHECK_CRAN_INCOMING_: "false"
+  _R_CHECK_FORCE_SUGGESTS_: "true"
+  CODECOV_TOKEN: "2329aed3-de38-468c-9a06-95564363211c"
+
+before_script:
+  - apt-get update
+
+buildbinary:
+  stage: build
   script:
-  - R -e 'print(datasets::mtcars)'
+    - r -e 'devtools::build(binary = TRUE)'
 
+documentation:
+  stage: document
+  script:
+    - r -e 'devtools::document()'
+
+checkerrors:
+  stage: check
+  script:
+    - r -e 'if (!identical(devtools::check(document = FALSE, args = "--no-tests")[["errors"]], character(0))) stop("Check with Errors")'
+
+checkwarnings:
+  stage: check
+  script:
+    - r -e 'if (!identical(devtools::check(document = FALSE, args = "--no-tests")[["warnings"]], character(0))) stop("Check with Warnings")'
+
+checknotes:
+  stage: check
+  script:
+    - r -e 'if (!identical(devtools::check(document = FALSE, args = "--no-tests")[["notes"]], character(0))) stop("Check with Notes")'
+
+unittests:
+  stage: test
+  script:
+    - r -e 'if (any(as.data.frame(devtools::test())[["failed"]] > 0)) stop("Some tests failed.")'
+
+codecov:
+  stage: test
+  script:
+    - r -e 'covr::codecov()'
+
+install:
+  stage: deploy
+  script:
+    - r -e 'devtools::install()'

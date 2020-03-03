@@ -16,7 +16,8 @@ variables:
 
 before_script:
   - R --version
-  - R CMD INSTALL "devtools"
+  - R -e ".libPaths()"
+  - R CMD INSTALL devtools
 buildbinary:
   stage: build
   script:

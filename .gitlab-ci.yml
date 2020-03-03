@@ -1,5 +1,5 @@
-image:
-  svirlyu/comapr_dev
+default:
+  image: svirlyu/comapr_dev
 
 stages:
   - build

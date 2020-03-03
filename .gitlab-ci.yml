@@ -1,4 +1,4 @@
-image: jozefhajnala/rdev:3.4.4
+image: rocker/tidyverse
 
 stages:
   - build

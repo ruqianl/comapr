@@ -14,7 +14,7 @@ variables:
   GIT_SSL_NO_VERIFY: "true"
 
 before_script:
-  - R -e 'BiocManager::install(c("chromoMap","plotly","Hmisc","gridExtra"))'
+  - R -e 'BiocManager::install(c("plotly","gridExtra"))'
 
 buildbinary:
   stage: build

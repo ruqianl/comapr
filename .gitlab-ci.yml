@@ -17,6 +17,7 @@ variables:
 before_script:
   - R --version
   - R -e ".libPaths()"
+
 buildbinary:
   stage: build
   script:

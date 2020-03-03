@@ -1,4 +1,4 @@
-image: rocker/tidyverse
+image: bioconductor/bioconductor_docker
 
 stages:
   - build
@@ -14,7 +14,7 @@ variables:
   GIT_SSL_NO_VERIFY: "true"
 
 before_script:
-  - R -e 'BiocManager::install(c("plotly","gridExtra"))'
+  - R -e 'install.packages(c("gridExtra"))'
 
 buildbinary:
   stage: build

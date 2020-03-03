@@ -434,7 +434,7 @@ detectCO <-function(gt_matrix, prefix = "Sample_",
 #'
 #' @param gt_matrix_co_by_marker
 #' data.frame, from \code{melt} the matrix returned by \code{detectCO}
-#' @importFrom Hmisc binconf
+
 #' @return data.frame
 #' data.frame for all markers with Haldane and Kosambi morgans calculated
 #' @export
@@ -463,9 +463,9 @@ calGeneticMap <- function(gt_matrix_co_by_marker, alpha = 0.05){
   gt_matrix_dst <-
     gt_matrix_dst %>%  group_by(interval_ID) %>%
     mutate(na_rate = total_na /total_samples,
-           pointEst = Hmisc::binconf(t_counts,total_calls,alpha = alpha)[,"PointEst"],
-           lower_ci = Hmisc::binconf(t_counts,total_calls,alpha = alpha)[,"Lower"],
-           upper_ci = Hmisc::binconf(t_counts,total_calls,alpha = alpha)[,"Upper"])
+           pointEst = t_counts / total_calls)
+           # lower_ci = Hmisc::binconf(t_counts,total_calls,alpha = alpha)[,"Lower"],
+           # upper_ci = Hmisc::binconf(t_counts,total_calls,alpha = alpha)[,"Upper"])
 
 #co_rate = t_counts / total_calls,
   if (any(gt_matrix_dst$pointEst >= 0.5)) {

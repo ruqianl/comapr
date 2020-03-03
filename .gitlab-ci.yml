@@ -1,5 +1,5 @@
 image:
-    bioconductor/bioconductor_docker
+  svirlyu/comapr_dev
 
 stages:
   - build

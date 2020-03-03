@@ -11,12 +11,12 @@ stages:
 variables:
   _R_CHECK_CRAN_INCOMING_: "false"
   _R_CHECK_FORCE_SUGGESTS_: "true"
-  R_LIBS_USER: "/mnt/mcfiles/rlyu/Software/R/3.6/Rlib/"
   CODECOV_TOKEN: "2329aed3-de38-468c-9a06-95564363211c"
 
 before_script:
   - R --version
   - R -e ".libPaths()"
+  - ls ~/
 
 buildbinary:
   stage: build

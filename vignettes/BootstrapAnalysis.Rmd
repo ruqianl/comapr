@@ -515,6 +515,7 @@ k_sum_clean_mt <- sum(mt_gt_matrix_final$kosambi*100)
 k_sum_clean_mt - k_sum_clean_wt
 
 ```
+
 Pool samples and randomnize
 
 ```{r}
@@ -581,6 +582,7 @@ return(k_sum_clean_mt - k_sum_clean_wt)
 
 getDiff(mt_gt_matrix_filtered_co_clean,wt_gt_matrix_filtered_co_clean)
 ```
+
 #### Permutation test
 
 ```{r, message=FALSE,warning=FALSE}

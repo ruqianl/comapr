@@ -262,7 +262,7 @@ plotGTFreq(gt_matrix_filtered)+facet_wrap(.~variable)+theme(axis.text.x = elemen
 
 ### Calculate genetic map
 
-Then we call `calGeneticMap` which generates the point estimates of crossover rate, upper_ci, lower_ci and the mapped kosambi/haldane genetic lengths for each interval.
+Then we call `calGeneticMap` which generates the point estimates of crossover rate, and the mapped kosambi/haldane genetic lengths for each interval.
 
 ```{r}
 #head(gt_matrix_co_by_marker)
@@ -321,15 +321,7 @@ ggplot(data = gt_matrix_final)+geom_point(mapping = aes(x = POS, y = cum_haldane
 #   geom_bar(data = tt[!duplicated(tt$CHR),],mapping = aes(y = CHR,x = sum_chr*100),
 #            width = .5,stat = "identity",alpha  = 0.2)
 ```
-```{r,fig.width=10}
-plotdf <- gt_matrix_final
-plotdf$interval_ID <- factor(plotdf$interval_ID, levels = plotdf$interval_ID[order(plotdf$pointEst)] )
-ggplot(data = plotdf)+geom_point(mapping = aes(x = interval_ID, y = pointEst))+geom_errorbar(
-  mapping = aes(ymax = upper_ci, ymin = lower_ci,x = interval_ID,
-                colour = CHR)
-)+theme_classic()+theme(axis.text.x = element_blank())+ylab("crossover rate point estimate and confidence interval")+facet_wrap(.~CHR,
-                                                                                                                                scales = "free")
-```
+
 
 Total genetic length
 

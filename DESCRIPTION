@@ -14,16 +14,18 @@ Depends: R (>= 3.1.0)
 Imports:
  methods,
  ggplot2,
- chromoMap,
  readxl,
  reshape2,
  dplyr,
  gridExtra,
- plotly,
- Hmisc
+ plotly
 License: What license it uses
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.0.2
 VignetteBuilder: knitr
-Suggests: BiocStyle, knitr, rmarkdown
+Suggests: 
+    BiocStyle,
+    knitr,
+    rmarkdown,
+    testthat

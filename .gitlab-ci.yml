@@ -19,39 +19,39 @@ before_script:
 buildbinary:
   stage: build
   script:
-    - r -e 'devtools::build(binary = TRUE)'
+    - R -e 'devtools::build(binary = TRUE)'
 
 documentation:
   stage: document
   script:
-    - r -e 'devtools::document()'
+    - R -e 'devtools::document()'
 
 checkerrors:
   stage: check
   script:
-    - r -e 'if (!identical(devtools::check(document = FALSE, args = "--no-tests")[["errors"]], character(0))) stop("Check with Errors")'
+    - R -e 'if (!identical(devtools::check(document = FALSE, args = "--no-tests")[["errors"]], character(0))) stop("Check with Errors")'
 
 checkwarnings:
   stage: check
   script:
-    - r -e 'if (!identical(devtools::check(document = FALSE, args = "--no-tests")[["warnings"]], character(0))) stop("Check with Warnings")'
+    - R -e 'if (!identical(devtools::check(document = FALSE, args = "--no-tests")[["warnings"]], character(0))) stop("Check with Warnings")'
 
 checknotes:
   stage: check
   script:
-    - r -e 'if (!identical(devtools::check(document = FALSE, args = "--no-tests")[["notes"]], character(0))) stop("Check with Notes")'
+    - R -e 'if (!identical(devtools::check(document = FALSE, args = "--no-tests")[["notes"]], character(0))) stop("Check with Notes")'
 
 unittests:
   stage: test
   script:
-    - r -e 'if (any(as.data.frame(devtools::test())[["failed"]] > 0)) stop("Some tests failed.")'
+    - R -e 'if (any(as.data.frame(devtools::test())[["failed"]] > 0)) stop("Some tests failed.")'
 
 codecov:
   stage: test
   script:
-    - r -e 'covr::codecov()'
+    - R -e 'covr::codecov()'
 
 install:
   stage: deploy
   script:
-    - r -e 'devtools::install()'
+    - R -e 'devtools::install()'

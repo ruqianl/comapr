@@ -2,29 +2,41 @@
 % Please edit documentation in R/cal_rb.R
 \name{label_gt}
 \alias{label_gt}
-\title{Function label_gt for changing genotypes to labels}
+\title{`label_gt` for changing genotypes in alleles to labels}
 \usage{
 label_gt(s_gt, ref, alt, fail = "Fail")
 }
 \arguments{
 \item{s_gt}{s_gt, a vector of genotypes for one sample across markers}
 
-\item{ref}{ref, a vector of genotypes for reference across markers}
+\item{ref}{ref, a vector of genotypes for reference strain across markers}
 
-\item{alt}{alt, a vector of genotypes for alternative across markers}
+\item{alt}{alt, a vector of genotypes for alternative starin across markers}
 }
 \value{
-a vector of labels indicating the progeny's genotypes across markers
-: Homo_ref, Homo_alt, Het
+a vector of labels \code{Homo_ref, Homo_alt, Het} indicating the progeny's
+genotypes across markers
 }
 \description{
-It turns a vector of Genotypes to Labels: Homo_ref, Homo_alt, Het
-given the known reference and alternative genotypes
+It turns a vector of Genotypes to a vector of Labels consist of
+`Homo_ref`, `Homo_alt`, and `Het` given the genotypes for reference
+and alternative strains.
 }
 \details{
-This function takes the a sample's genotype vector and checks for each SNP marker
-to see whether it matches with homogeneous reference, or homogeneous alternative
-or heterozygous genotypes.
+This function takes the a sample's genotype across each SNP marker in alleles
+and compare with genotypes of in-bred reference and alternative strains to. If the
+sample's genotype for a particular SNP marker is the same with the reference
+strain, it is labelled as Homo_ref \code{homogeneous reference} for a particular
+SNP marker; if the sample's genotype is the same with the alternative strain
+it is labelled as Homo_alt \code{homogeneous alternative} for a particular SNP
+marker; if the sample's genotype is heterozygous then it is labelled as
+Het \code{heterozygous} for this particular genotypes. If it does not fall in any
+of the three cases, it is labelled as Fail or user-provided label via param
+`fail`.
+}
+\examples{
+label_gt(snp_geno)
+
 }
 \author{
 Ruqian Lyu

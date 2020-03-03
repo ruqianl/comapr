@@ -7,34 +7,52 @@
 #' @import methods
 NULL
 
-#' Function label_gt for changing genotypes to labels
+#' `label_gt` for changing genotypes in alleles to labels
 #'
-#' It turns a vector of Genotypes to Labels: Homo_ref, Homo_alt, Het
-#' given the known reference and alternative genotypes
+#' It turns a vector of Genotypes to a vector of Labels consist of
+#' `Homo_ref`, `Homo_alt`, and `Het` given the genotypes for reference
+#' and alternative strains.
 #'
 #'
 #' @param s_gt
 #' s_gt, a vector of genotypes for one sample across markers
 #'
 #' @param ref
-#' ref, a vector of genotypes for reference across markers
+#' ref, a vector of genotypes for reference strain across markers
 #'
 #' @param alt
-#' alt, a vector of genotypes for alternative across markers
+#' alt, a vector of genotypes for alternative starin across markers
 #'
 #' @return
-#' a vector of labels indicating the progeny's genotypes across markers
-#' : Homo_ref, Homo_alt, Het
+#' a vector of labels \code{Homo_ref, Homo_alt, Het} indicating the progeny's
+#' genotypes across markers
+#'
 #'
 #' @details
+#' This function takes the a sample's genotype across each SNP marker in alleles
+#' and compare with genotypes of in-bred reference and alternative strains to. If the
+#' sample's genotype for a particular SNP marker is the same with the reference
+#' strain, it is labelled as Homo_ref \code{homogeneous reference} for a particular
+#' SNP marker; if the sample's genotype is the same with the alternative strain
+#' it is labelled as Homo_alt \code{homogeneous alternative} for a particular SNP
+#' marker; if the sample's genotype is heterozygous then it is labelled as
+#' Het \code{heterozygous} for this particular genotypes. If it does not fall in any
+#' of the three cases, it is labelled as `missing`.
 #'
-#' This function takes the a sample's genotype vector and checks for each SNP marker
-#' to see whether it matches with homogeneous reference, or homogeneous alternative
-#' or heterozygous genotypes.
+#' Note that the `Fail` genotype is still labelled as `Fail` after this function.
+#' If there is a different label for failed genotype, provide the label using
+#' the `fail` argument.
+#'
+#' @examples
+#' label_gt(snp_geno)
+#'
 #' @keywords internal
 #' @author Ruqian Lyu
 
 label_gt <- function(s_gt,ref,alt,fail ="Fail"){
+  stopifnot(length(s_gt) == length(ref))
+  stopifnot(length(ref) == length(alt))
+
   ## initialise the vector of GT with NAs
   tem <- rep("missing",length(s_gt))
   ## keep the Fail in
@@ -51,8 +69,8 @@ label_gt <- function(s_gt,ref,alt,fail ="Fail"){
   ## if the genotype is the same as het1 or het2:
   tem[s_gt == het1 | s_gt == het2] <- "Het"
 
-  ## the wrong GT will be NAs
-  ## the wrong GTs will be neither home_ref, home_alt, Het or Fail
+  ## the wrong GTs are GTs that are neither Home_ref, Home_alt, Het or Fail
+  ## the wrong GT will be converted to Missing
 
   return(tem)
 }
@@ -61,23 +79,27 @@ label_gt <- function(s_gt,ref,alt,fail ="Fail"){
 
 
 
-#' Function for correct Markers
+#' Function for correcting wrong genotypes
 #'
-#' If we see home ref markers in the samples, then something is wrong.
-#' We can change all home_ref to hets
+#' If we see home_ref markers in the samples, then something is wrong.
+#' We can change all home_ref genotypes to hets as a rough correction or
+#' just change it to Fail.
 #'
 #' @param s_gt
 #' a vector of genotype labels as returned by \code{label_gt}
 #'
 #' @param change_to
-#' by default, the Home_ref is changed to \code{Het}, but it can be changed to any labels
-#' such as \code{Fail} fi we want to exclude these wrong labels.
+#' By default, the Home_ref is changed to \code{Fail}, but it can be changed to
+#' any labels such as \code{Het} if we believe the correct genotype for homo_ref
+#' is Het.
+#'
 #' @keywords internal
+#'
 #' @return
-#' a vector of genotype labels with Home_ref corrected to \code{Het} or \code{Fail} as
-#' specified by the argument change_to.
+#' a vector of genotype labels with Home_ref corrected to \code{Het} or \code{Fail}
+#' as specified by the argument change_to.
 
-correct_ref <- function(s_gt, change_to = 'Het'){
+correct_ref <- function(s_gt, change_to = 'Fail'){
 
   if(! any(s_gt == "Homo_ref")){
     # if for this sample, there is no Homo_ref called across all marker,
@@ -86,7 +108,7 @@ correct_ref <- function(s_gt, change_to = 'Het'){
 
   } else {
     # otherwise, the home_ref is changed to Het or NA.
-    ref_index = grep("ref",s_gt)
+    ref_index <- grep("ref",s_gt)
     s_gt[ref_index] <- change_to
 
     return(s_gt)
@@ -96,10 +118,17 @@ correct_ref <- function(s_gt, change_to = 'Het'){
 
 
 
-#' change 'missing' labels to \code{NA}
+#' change SNPs with genotype 'missing' to \code{NA}
 #'
 #' @param s_gt, a column of labelled genotypes
 #' @param missing, the string used for encoding missing values default to \code{missing}
+#' @return
+#' a vector of genotypes with missing substituted by `NA`
+#' @details
+#' After changing genotypes in alleles to genotype labels and correct Homo_ref genotypes,
+#' the `missing` genotypes are changes to `NA` for downstream calculation.
+#'
+#' @keywords internal
 
 change_missing <- function(s_gt, missing = "missing"){
 
@@ -107,36 +136,38 @@ change_missing <- function(s_gt, missing = "missing"){
     return(s_gt)
   } else {
 
-    missing_index = grep(missing,s_gt)
+    missing_index  <-  grep(missing,s_gt)
 
-    s_gt[missing_index] = NA
+    s_gt[missing_index] <-  NA
   }
   return(s_gt)
 }
 
 
 
-#' Function fill in FAIL
+#' Infer the genotype of failed SNPs or substitute with `NA`
 
-#' If we have a \code{FAIL} in the genotype data and the \code{FAIL} in a block of either Home_alt,
+#' If we have a \code{Fail} in the genotype data and the \code{Fail} in a block of either Home_alt,
 #' or Het, we fill in the \code{FAIL} using values of the ones adjacent to it,
 #' otherwise we fill in "NA" as missing value.
 #'
 #' @param s_gt, a column of labelled genotypes
 #' @param fail, the string that is used for encoding failed genotype results, default to \code{Fail}
+#' @return
+#' a vector of genotypes with Failed genotype imputed or changed to NA if not imputable
 #' @keywords internal
 
 fill_fail <- function(s_gt,fail = "Fail"){
   if(! any(s_gt == fail)){
     return(s_gt)
   } else {
+    fail_index  <-  grep(fail,s_gt)
 
-    fail_index = grep(fail,s_gt)
     for (i in fail_index){
       if (s_gt[i-1] == s_gt[i+1] & s_gt[i-1] != fail){
-        s_gt[i] = s_gt[i-1]
+        s_gt[i] <- s_gt[i-1]
       } else {
-        s_gt[i] = "missing"
+        s_gt[i]  <- "missing"
       }
     }
     return(s_gt)
@@ -485,9 +516,9 @@ calGeneticMap <- function(gt_matrix_co_by_marker, alpha = 0.05){
   gt_matrix_dst <-
     gt_matrix_dst %>%  group_by(interval_ID) %>%
     mutate(haldane = -0.5 * log(1 - 2 * pointEst),
-           kosambi = 0.25 * log((1 + 2 * pointEst) / (1 - 2 * pointEst)),
-           kosambi_lower = 0.25 * log((1 + 2 * lower_ci) / (1 - 2 * lower_ci)),
-           kosambi_upper = 0.25 * log((1 + 2 * upper_ci) / (1 - 2 * upper_ci)))
+           kosambi = 0.25 * log((1 + 2 * pointEst) / (1 - 2 * pointEst)))
+           # kosambi_lower = 0.25 * log((1 + 2 * lower_ci) / (1 - 2 * lower_ci)),
+           # kosambi_upper = 0.25 * log((1 + 2 * upper_ci) / (1 - 2 * upper_ci)))
 
 
   return(gt_matrix_dst)

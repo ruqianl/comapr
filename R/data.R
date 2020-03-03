@@ -1,0 +1,17 @@
+#' Production and farm value of maple products in Canada
+#'
+#' @source Statistics Canada. Table 001-0008 - Production and farm value of
+#'  maple products, annual. \url{http://www5.statcan.gc.ca/cansim/}
+#' @format A data frame with columns:
+#' \describe{
+#'  \item{Year}{A value between 1924 and 2015.}
+#'  \item{Syrup}{Maple products expressed as syrup, total in thousands of gallons.}
+#'  \item{CAD}{Gross value of maple products in thousands of Canadian dollars.}
+#'  \item{Region}{Postal code abbreviation for territory or province.}
+#' }
+#' @examples
+#' \dontrun{
+#'  maple
+#' }
+#'
+"snp_geno"

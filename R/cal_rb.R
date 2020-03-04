@@ -118,19 +118,20 @@ correct_ref <- function(s_gt, change_to = 'Fail'){
 
 
 
-#' change SNPs with genotype 'missing' to \code{NA}
+#' change SNPs with genotype 'Fail' to \code{NA}
 #'
 #' @param s_gt, a column of labelled genotypes
 #' @param missing, the string used for encoding missing values default to \code{missing}
 #' @return
-#' a vector of genotypes with missing substituted by `NA`
+#' a vector of genotypes with Fail substituted by `NA`
 #' @details
 #' After changing genotypes in alleles to genotype labels and correct Homo_ref genotypes,
 #' the `missing` genotypes are changes to `NA` for downstream calculation.
 #'
 #' @keywords internal
+#' @author  Ruqian Lyu
 
-change_missing <- function(s_gt, missing = "missing"){
+change_missing <- function(s_gt, missing = "Fail"){
 
   if(! any(s_gt == missing)){
     return(s_gt)
@@ -145,32 +146,64 @@ change_missing <- function(s_gt, missing = "missing"){
 
 
 
-#' Infer the genotype of failed SNPs or substitute with `NA`
+#' Infer the genotype of failed SNPs
 
 #' If we have a \code{Fail} in the genotype data and the \code{Fail} in a block of either Home_alt,
 #' or Het, we fill in the \code{FAIL} using values of the ones adjacent to it,
-#' otherwise we fill in "NA" as missing value.
+#' otherwise they remain as "Fail" to indicate missing values.
 #'
 #' @param s_gt, a column of labelled genotypes
 #' @param fail, the string that is used for encoding failed genotype results, default to \code{Fail}
+#' @param chr, the factor vector indicating which chromosomes the markers are on, default to \code{NULL}
+#' which means the markers are all on the same chromosome.
+#'
 #' @return
 #' a vector of genotypes with Failed genotype imputed or changed to NA if not imputable
 #' @keywords internal
+#' @author  Ruqian Lyu
 
-fill_fail <- function(s_gt,fail = "Fail"){
+fill_fail <- function(s_gt,fail = "Fail",chr = NULL){
+  stopifnot(length(s_gt) >=3)
+
   if(! any(s_gt == fail)){
     return(s_gt)
-  } else {
+  } else if(is.null(chr)) {
     fail_index  <-  grep(fail,s_gt)
-
-    for (i in fail_index){
-      if (s_gt[i-1] == s_gt[i+1] & s_gt[i-1] != fail){
-        s_gt[i] <- s_gt[i-1]
-      } else {
-        s_gt[i]  <- "missing"
-      }
+    before_index <- fail_index -1
+    after_index <- fail_index +1
+    if(any(before_index <1)){
+      lo_i <- fail_index[which(before_index<1)]
+#      s_gt[lo_i] <- "missing"
+      fail_index <- fail_index[-which(before_index<1)]
+      before_index <- fail_index -1
+      after_index <- fail_index + 1
     }
+    if(any(after_index >= length(s_gt))){
+      lo_i <- fail_index[which(after_index > length(s_gt))]
+#      s_gt[lo_i] <- "missing"
+      fail_index <- fail_index[-which(after_index > length(s_gt))]
+      before_index <- fail_index -1
+      after_index <- fail_index + 1
+    }
+
+    able_infer_index <- fail_index[which(s_gt[before_index] == s_gt[after_index]
+                                         & s_gt[before_index] != fail)]
+    s_gt[able_infer_index] <- s_gt[able_infer_index-1]
+#    notable_infer_index <- fail_index[-which(s_gt[before_index] == s_gt[after_index] & s_gt[before_index] != fail)]
+#    s_gt[notable_infer_index] <- "missing"
     return(s_gt)
+
+  } else { # chr is not null, we should do this for each group of markers
+    stopifnot(length(chr) == length(s_gt))
+    chrs <- levels(chr)
+    names(s_gt) <- paste0("m",seq(1:length(s_gt)))
+    to_return <- lapply(chrs, function(s_gt_chr){
+      fill_fail(s_gt[chr==s_gt_chr],chr =NULL)
+    })
+    to_return <- unlist(to_return)
+    to_return <- to_return[ paste0("m",seq(1:length(s_gt)))]
+    names(to_return) <- NULL
+    return(to_return)
   }
 }
 

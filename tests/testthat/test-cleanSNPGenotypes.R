@@ -65,6 +65,33 @@ test_that("correct_ref successfully corrects Homo_ref to Het", {
   expect_equal(correct_ref(converted_gt,change_to = "Het")[4],"Het")
 })
 
+test_that("infer Failed genotype successfully", {
+  s_gt <- snp_geno[,5]
+  s_gt[9] <- "Fail"
+
+  converted_gt <- label_gt(s_gt = s_gt,
+                           ref = snp_geno$C57BL.6J,
+                           alt = snp_geno$FVB.NJ..i.)
+  infer_fail <- fill_fail(converted_gt)
+  expect_true(infer_fail[9]=="Homo_alt")
+})
+
+
+
+test_that("infer Failed genotype successfully to Fail", {
+  s_gt <- snp_geno[,5]
+  s_gt[length(s_gt)] <- "Fail"
+## the 10th marker is the end of chromosome 1.
+## thus we cannot infer the genotype of it
+
+  converted_gt <- label_gt(s_gt = s_gt,
+                           ref = snp_geno$C57BL.6J,
+                           alt = snp_geno$FVB.NJ..i.)
+  infer_fail <- fill_fail(converted_gt)
+  expect_false(infer_fail[length(s_gt)]=="Homo_alt")
+  expect_true(infer_fail[length(s_gt)]=="Fail")
+})
+
 
 
 test_that("infer Failed genotype successfully", {
@@ -74,7 +101,21 @@ test_that("infer Failed genotype successfully", {
                            ref = snp_geno$C57BL.6J,
                            alt = snp_geno$FVB.NJ..i.)
   infer_fail <- fill_fail(converted_gt)
-  expect_equal(correct_ref(converted_gt,change_to = "Het")[4],"Het")
+  expect_equal(infer_fail[4],"Homo_alt")
 })
 
+
+
+test_that("infer Failed genotype successfully by chrs", {
+  s_gt <- snp_geno[,5]
+  s_gt[c(10,11,23)] <- "Fail"
+  converted_gt <- label_gt(s_gt = s_gt,
+                           ref = snp_geno$C57BL.6J,
+                           alt = snp_geno$FVB.NJ..i.,)
+  infer_fail <- fill_fail(converted_gt,chr = as.factor(snp_geno$CHR))
+  expect_equal(infer_fail[10],"Fail")
+  expect_equal(infer_fail[11],"Fail")
+  expect_equal(infer_fail[23],"Fail")
+
+})
 

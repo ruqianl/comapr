@@ -2,22 +2,24 @@
 % Please edit documentation in R/cal_rb.R
 \name{correct_ref}
 \alias{correct_ref}
-\title{Function for correct Markers}
+\title{Function for correcting wrong genotypes}
 \usage{
-correct_ref(s_gt, change_to = "Het")
+correct_ref(s_gt, change_to = "Fail")
 }
 \arguments{
 \item{s_gt}{a vector of genotype labels as returned by \code{label_gt}}
 
-\item{change_to}{by default, the Home_ref is changed to \code{Het}, but it can be changed to any labels
-such as \code{Fail} fi we want to exclude these wrong labels.}
+\item{change_to}{By default, the Home_ref is changed to \code{Fail}, but it can be changed to
+any labels such as \code{Het} if we believe the correct genotype for homo_ref
+is Het.}
 }
 \value{
-a vector of genotype labels with Home_ref corrected to \code{Het} or \code{Fail} as
-specified by the argument change_to.
+a vector of genotype labels with Home_ref corrected to \code{Het} or \code{Fail}
+as specified by the argument change_to.
 }
 \description{
-If we see home ref markers in the samples, then something is wrong.
-We can change all home_ref to hets
+If we see home_ref markers in the samples, then something is wrong.
+We can change all home_ref genotypes to hets as a rough correction or
+just change it to Fail.
 }
 \keyword{internal}

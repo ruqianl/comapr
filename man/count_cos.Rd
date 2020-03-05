@@ -8,12 +8,18 @@ count the number of crossovers for each sample, per chromosome, cumulatively}
 count_cos(s_gt, interval_df, chrs, chrPos, type = "bool")
 }
 \arguments{
-\item{s_gt}{genotypes of a sample along markers on all chromosomes}
+\item{s_gt}{genotypes of a sample along markers across chromosomes}
+
+\item{chrs}{a vector of characters indicating the chromosome locations of these markers}
+
+\item{chrPos}{a vector of characters indicating the base pair position of these markers}
 
 \item{type}{"counts", or "bool" to specify whether this function should return
 vector of cumulative counts or vector of TRUE/FALSE}
-
-\item{chr}{a vector of characters indicating the chromosome locations of these markers}
+}
+\value{
+A vector of TRUE/FALSE indicating whether crossover happens between each marker
+interval
 }
 \description{
 Count crossovers
@@ -22,3 +28,4 @@ count the number of crossovers for each sample, per chromosome, cumulatively
 \author{
 Ruqian Lyu
 }
+\keyword{internal}

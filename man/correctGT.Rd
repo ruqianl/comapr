@@ -2,26 +2,49 @@
 % Please edit documentation in R/cal_rb.R
 \name{correctGT}
 \alias{correctGT}
-\title{correctGT}
+\title{correctGT, function for formatting and correction genotypes of markers}
 \usage{
-correctGT(gt_matrix, ref, alt)
+correctGT(
+  gt_matrix,
+  ref,
+  alt,
+  chr,
+  ref_change_to = "Het",
+  infer_fail = FALSE,
+  fail = "Fail"
+)
 }
 \arguments{
-\item{gt_matrix}{the input from excel with rownames as marker IDs and column names as sample IDs}
+\item{gt_matrix}{the input genotype matrix of markers by samples with rownames as marker IDs
+and column names as sample IDs}
 
-\item{ref}{is the reference genotype}
+\item{ref}{a vector of genotypes of reference strain}
 
-\item{alt}{is the alternative genotype.}
+\item{alt}{a vector of genotypes of alternative strain}
+
+\item{ref_change_to}{change homo_reference genotype calls to, default to "Het". The other option is
+"Fail".}
+
+\item{infer_fail}{whether the Failed genotype should be imputed. The ways of imputing Failed
+genotype is described in \code{\link{fill_fail}},default to FALSE.}
+
+\item{fail}{what was used for encoding failed genotype calling such as "Fail" in example
+data \code{snp_geno}}
+}
+\value{
+a genotype data.frame of sample dimension as the input gt_matrix with genotypes
+converted to labels and failed calls are changed to NA.
 }
 \description{
-map GT to genotype labels, change Homo_ref to Hets, infer missing data,
-and change "missing" to NA for counting crossover later
+This function changes genotype in alleles to genotype labels, change Homo_ref
+to Hets/Fail, infer Failed genotype, and change "Failed" to NA for
+counting crossover later
 }
 \details{
-This function changes genotype code to labels by calling \code{lable_gt}, corrects
-the Home reference geneotype calls to Hets by calling \code{correct_ref}, infer the
-failed genotype calls by calling \code{fill_fail} and change missing values to NA by
-calling \code{change_missing}.
+This function changes genotype in alleles to labels by calling \code{lable_gt},
+corrects the Homo_reference geneotype calls to Hets or Fail by calling
+\code{correct_ref}, infer the failed genotype calls by calling \code{fill_fail}
+and change missing values to NA by calling \code{change_missing}.
 }
 \author{
 Ruqian Lyu

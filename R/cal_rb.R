@@ -43,9 +43,6 @@ NULL
 #' If there is a different label for failed genotype, provide the label using
 #' the `fail` argument.
 #'
-#' @examples
-#' label_gt(snp_geno)
-#'
 #' @keywords internal
 #' @author Ruqian Lyu
 
@@ -114,7 +111,6 @@ correct_ref <- function(s_gt, change_to = 'Fail'){
     return(s_gt)
   }
 }
-
 
 
 
@@ -211,10 +207,15 @@ fill_fail <- function(s_gt,fail = "Fail",chr = NULL){
 #' Count crossovers
 #' count the number of crossovers for each sample, per chromosome, cumulatively
 #'
-#' @param s_gt genotypes of a sample along markers on all chromosomes
-#' @param chr a vector of characters indicating the chromosome locations of these markers
+#' @param s_gt genotypes of a sample along markers across chromosomes
+#' @param chrs a vector of characters indicating the chromosome locations of these markers
+#' @param chrPos a vector of characters indicating the base pair position of these markers
 #' @param type "counts", or "bool" to specify whether this function should return
 #' vector of cumulative counts or vector of TRUE/FALSE
+#' @keywords  internal
+#' @return
+#' A vector of TRUE/FALSE indicating whether crossover happens between each marker
+#' interval
 #'
 #' @author Ruqian Lyu
 
@@ -223,17 +224,7 @@ count_cos <- function(s_gt, interval_df, chrs, chrPos, type = "bool"){
   stopifnot(length(s_gt)==length(chrs))
   stopifnot(length(s_gt)==length(chrPos))
   stopifnot(type == "bool" | type == "counts")
-
   interval_df$gt <- s_gt
-
-#
-#   temp_df <- data.frame(marker_ID = paste0("ID_",seq(1:length(s_gt))),
-#                         gt = s_gt,
-#                         chrs = chrs,
-#                         interval_s = chrPos,
-#                         interval_e = chrEnd,
-#                         stringsAsFactors = FALSE)
-
 
   interval_df$gt_before <- interval_df$gt
   interval_df$chr_before <-  interval_df$chrs
@@ -247,180 +238,85 @@ count_cos <- function(s_gt, interval_df, chrs, chrPos, type = "bool"){
   # interval_df$is_rb_na_asF <- interval_df$is_rb
   # interval_df$is_rb_na_asF[is.na(interval_df$is_rb_na_asF)] <- FALSE
 
-  interval_df <- interval_df %>% group_by(chrs) %>% mutate(cum_rb = cumsum(is_rb))
+
   #  temp_df2$cum_rb <- cumsum(temp_df2$is_rb )
   interval_df <- data.frame(interval_df)
-  rownames(interval_df) <- paste0(interval_df$chrs,"_",interval_df$interval_s,"_",
-                                  interval_df$interval_e)
 
 
-  #
-  # co_counts_perchr <- sapply(unique(as.character(temp_df2$chrs)), function(chr){
-  #   s_gt_chr <- temp_df2$gt[chrs == chr]
-  #   co_counts_chr <- rep(0,length(s_gt_chr))
-  #
-  #   for (i in c(2:length(s_gt_chr))){
-  #     if(identical(s_gt_chr[i],s_gt_chr[i-1]) & !anyNA(c(s_gt_chr[i],s_gt_chr[i-1]))){
-  #       co_counts_chr[i] <-  co_counts_chr[i-1]
-  #     } else {
-  #       if(is.na(s_gt_chr[i-1])){
-  #         co_counts_chr[i]  <-  NA
-  #       } else if(is.na(s_gt_chr[i-1])){
-  #         co_counts_chr[i]  <- NA
-  #       } else {
-  #         co_counts_chr[i]  <-  co_counts_chr[i-1] +1
-  #       }
-  #
-  #     }
-  #
-  #   }
-  #   co_counts_chr
-  # })
-  # co_counts <- Reduce(append,co_counts_perchr)
-  #
   if(type == "bool")
   {
+    rownames(interval_df) <- paste0(interval_df$chrs,"_",interval_df$interval_s,"_",
+                                    interval_df$interval_e)
     return (interval_df[,"is_rb",drop =FALSE])
   } else {
+    interval_df <- interval_df %>% group_by(chrs) %>%
+      mutate(cum_rb = cumsum(!is.na(is_rb) & is_rb))
+    rownames(interval_df) <- paste0(interval_df$chrs,"_",interval_df$interval_s,"_",
+                                    interval_df$interval_e)
     return (interval_df[,"cum_rb",drop =FALSE])
   }
 }
 
-# count_cos <- function(s_gt, chrs, type = "status"){
-#
-#   stopifnot(length(s_gt)==length(chrs))
-#   temp_df <- data.frame(marker_ID = paste0("ID_",seq(1:length(s_gt))),
-#                         gt = s_gt,
-#                         chrs = chrs,stringsAsFactors = FALSE)
-#
-#   temp_df2 <- temp_df[!is.na(temp_df$gt),]
-#   temp_df2$gt_before <- temp_df2$gt
-#   temp_df2$chr_before <-  temp_df2$chrs
-#   temp_df2$gt_before[2:nrow(temp_df2)] <- temp_df2$gt[1:(nrow(temp_df2)-1)]
-#   temp_df2$chr_before[2:nrow(temp_df2)] <- temp_df2$chrs[1:(nrow(temp_df2)-1)]
-#   temp_df2$is_rb <- (temp_df2$gt !=temp_df2$gt_before & temp_df2$chrs == temp_df2$chr_before)
-#   temp_df2 <- temp_df2 %>% group_by(chrs) %>% mutate(cum_rb = cumsum(is_rb))
-#   #  temp_df2$cum_rb <- cumsum(temp_df2$is_rb )
-#   temp_df2 <- data.frame(temp_df2)
-#   rownames(temp_df2) <- temp_df2$marker_ID
-#   co_counts <- temp_df2[temp_df$marker_ID,]
-#   #
-#   # co_counts_perchr <- sapply(unique(as.character(temp_df2$chrs)), function(chr){
-#   #   s_gt_chr <- temp_df2$gt[chrs == chr]
-#   #   co_counts_chr <- rep(0,length(s_gt_chr))
-#   #
-#   #   for (i in c(2:length(s_gt_chr))){
-#   #     if(identical(s_gt_chr[i],s_gt_chr[i-1]) & !anyNA(c(s_gt_chr[i],s_gt_chr[i-1]))){
-#   #       co_counts_chr[i] <-  co_counts_chr[i-1]
-#   #     } else {
-#   #       if(is.na(s_gt_chr[i-1])){
-#   #         co_counts_chr[i]  <-  NA
-#   #       } else if(is.na(s_gt_chr[i-1])){
-#   #         co_counts_chr[i]  <- NA
-#   #       } else {
-#   #         co_counts_chr[i]  <-  co_counts_chr[i-1] +1
-#   #       }
-#   #
-#   #     }
-#   #
-#   #   }
-#   #   co_counts_chr
-#   # })
-#   # co_counts <- Reduce(append,co_counts_perchr)
-#   #
-#   if(type == "status")
-#   {
-#     return (co_counts$is_rb)
-#   } else {
-#     return (co_counts$cum_rb)
-#   }
-# }
-
-
-
-
-
-### Test crossovers
-
-# Test crossovers for each sample, per chromosome, whether a crossover happed for the marker
-
-
-## s_gt:: genotypes of a sample along markers on one chromosome
-## chr:: a vector of characters indicating the chromosome locations of these markers
-#
-# test_cos <- function(s_gt, chrs){
-#   stopifnot(length(s_gt)==length(chrs))
-#
-#   co_counts_perchr <- sapply(unique(chrs), function(chr){
-#     s_gt_chr <- s_gt[chrs == chr]
-#     co_counts_chr <- s_gt_chr
-#
-#     for (i in c(2:length(s_gt_chr))){
-#       if(identical(s_gt_chr[i],s_gt_chr[i-1]) & !anyNA(c(s_gt_chr[i],s_gt_chr[i-1]))){
-#         co_counts_chr[i] <-  FALSE
-#       } else {
-#         if(is.na(s_gt_chr[i-1])){
-#           co_counts_chr[i]  <-  NA
-#         } else if(is.na(s_gt_chr[i-1])){
-#           co_counts_chr[i]  <- NA
-#         } else {
-#           co_counts_chr[i]  <- TRUE
-#         }
-#
-#       }
-#
-#     }
-#     co_counts_chr
-#   })
-#   co_counts <- Reduce(append,co_counts_perchr)
-#
-#   return (co_counts)
-# }
-#
-
-
-
-#' correctGT
+#' correctGT, function for formatting and correction genotypes of markers
 #'
-#' map GT to genotype labels, change Homo_ref to Hets, infer missing data,
-#' and change "missing" to NA for counting crossover later
+#' This function changes genotype in alleles to genotype labels, change Homo_ref
+#' to Hets/Fail, infer Failed genotype, and change "Failed" to NA for
+#' counting crossover later
 #'
 #'
 #' @param gt_matrix
-#' the input from excel with rownames as marker IDs and column names as sample IDs
+#' the input genotype matrix of markers by samples with rownames as marker IDs
+#' and column names as sample IDs
 #'
 #' @param ref
-#'  is the reference genotype
+#'  a vector of genotypes of reference strain
 #' @param alt
-#' is the alternative genotype.
+#'  a vector of genotypes of alternative strain
+#' @param ref_change_to
+#' change homo_reference genotype calls to, default to "Het". The other option is
+#' "Fail".
+#' @param infer_fail
+#' whether the Failed genotype should be imputed. The ways of imputing Failed
+#' genotype is described in \code{\link{fill_fail}},default to FALSE.
+#' @param fail
+#' what was used for encoding failed genotype calling such as "Fail" in example
+#' data \code{snp_geno}
 #'
 #' @details
-#' This function changes genotype code to labels by calling \code{lable_gt}, corrects
-#' the Home reference geneotype calls to Hets by calling \code{correct_ref}, infer the
-#' failed genotype calls by calling \code{fill_fail} and change missing values to NA by
-#' calling \code{change_missing}.
+#' This function changes genotype in alleles to labels by calling \code{lable_gt},
+#' corrects the Homo_reference geneotype calls to Hets or Fail by calling
+#' \code{correct_ref}, infer the failed genotype calls by calling \code{fill_fail}
+#' and change missing values to NA by calling \code{change_missing}.
+#'
+#' @return
+#' a genotype data.frame of sample dimension as the input gt_matrix with genotypes
+#' converted to labels and failed calls are changed to NA.
 #'
 #' @export
 #'
 #' @author Ruqian Lyu
 
-correctGT <- function(gt_matrix, ref, alt)
+correctGT <- function(gt_matrix, ref, alt, chr, ref_change_to = "Het",
+                      infer_fail = FALSE, fail = 'Fail')
 {
+  stopifnot(ref_change_to %in% c('Het','Fail'))
+  stopifnot(length(ref)==length(alt))
+  stopifnot(length(ref)==dim(gt_matrix)[1])
 
   ### change  GT to labels
   row_names <- rownames(gt_matrix)
-
   gt_matrix <- apply(as.matrix(gt_matrix),2, label_gt,
                      ref = ref,
                      alt = alt)
-  gt_matrix <- apply(as.matrix(gt_matrix),2, correct_ref)
+  gt_matrix <- apply(as.matrix(gt_matrix),2, correct_ref, change_to = ref_change_to )
 
-
-
-  ### Fill in Fail or put NA in Fail
-  gt_matrix <- apply(as.matrix(gt_matrix),2, fill_fail)
-
-  gt_matrix <- apply(as.matrix(gt_matrix),2, change_missing)
+  ### infer and Fill in Fail or put NA in Fail
+  if(infer_fail){
+    gt_matrix <- apply(as.matrix(gt_matrix),2, fill_fail,
+                       fail = "Fail",chr = as.factor(chr))
+  }
+  gt_matrix <- apply(as.matrix(gt_matrix),2, change_missing,
+                     missing = fail)
 
   rownames(gt_matrix) <- row_names
 
@@ -429,34 +325,47 @@ correctGT <- function(gt_matrix, ref, alt)
 }
 
 
-#' detect crossovers
+#' detectCO
 #'
-#' detect crossovers between every two markers by examining change in genotype patterns
+#' detect crossovers between every two markers by detecting if there is a change
+#' of genotypes
+#' @importFrom dplyr group_by
+#' @importFrom dplyr %>%
+#' @importFrom dplyr mutate
 #'
 #' @param gt_matix
-#'
-#' correct genotype matrix returned by \code{correct_gt}
-#'
+#' corrected genotype matrix returned by \code{correct_gt}
 #' @param prefix
-#'
 #' what prefix to add to sample IDs
-#'
 #' @param type
+#' whether return boolean value indicating whether crossover happens between this
+#' marker and its preceding marker or returne (type=count) how many crossovers
+#' has been detected from all preceding intevals for each chromosome.
 #'
-#' whether return boolean value indicating whether crossover happens or integer value
-#' indicating how many crossovers happen from all preceding intevals
-#'
-#' @param chrs
-#'
-#' the chromosomes for markers on the rows
-#'
+#' @param chrs the chromosomes for markers
+#' @examples
+#'  or_geno <-snp_geno[,grep("X",colnames(snp_geno))]
+#' rownames(or_geno) <- paste0(snp_geno$CHR,"_",snp_geno$POS)
+#' cr_geno <- correctGT(or_geno,ref = snp_geno$C57BL.6J,
+#'                      alt = snp_geno$FVB.NJ..i.,
+#'                      chr = snp_geno$CHR)
+#' co_geno <- detectCO(cr_geno,
+#'                     chrs = snp_geno$CHR,
+#'                     chrPos = snp_geno$POS)
+#' count_geno <- detectCO(cr_geno,
+#'                        chrs = snp_geno$CHR,
+#'                        chrPos = snp_geno$POS,
+#'                        type="counts")
+
 #' @return
+#' a data.frame of marker intervals by samples with values indicating whether
+#' a crossover is detected
 #'
-#' a matrix of marker by samples with values indicating crossovers
 #' @export
+#' @author Ruqian Lyu
 #'
 detectCO <-function(gt_matrix, prefix = "Sample_",
-                     chrs, chrPos,type = "bool"){
+                     chrs, chrPos, type = "bool"){
   row_names <- rownames(gt_matrix)
   colnames(gt_matrix) <- paste0(prefix,colnames(gt_matrix))
   #
@@ -471,13 +380,14 @@ detectCO <-function(gt_matrix, prefix = "Sample_",
     mutate(interval_e = chrPos,
            interval_s = c("firstM",
                           chrPos[1:(length(chrPos)-1)]))
-  interval_df <- data.frame(interval_df,row.names = paste0(chrs,"_",chrPos))
 
+  interval_df <- data.frame(interval_df,row.names = paste0(chrs,"_",chrPos))
 
   gt_matrix_co <- apply(gt_matrix,2, count_cos,
                        chrs = chrs,
                        chrPos = chrPos,
                        interval_df = interval_df,type = type)
+
   cols_names <- names(gt_matrix_co)
 
   gt_matrix_co <-  Reduce(cbind,gt_matrix_co)
@@ -493,68 +403,92 @@ detectCO <-function(gt_matrix, prefix = "Sample_",
 
 #' Calculate genetic map length
 #'
-#' Given whether crossover happens in every two marker interval, calculate the
-#' recombination fraction and then derive the Haldane or Kosambi morgans.
+#' Given whether crossover happens in each marker interval, calculate the
+#' recombination fraction in samples and then derive the Haldane or Kosambi
+#' genetic distances via mapping functions
 #'
-#' @param gt_matrix_co_by_marker
-#' data.frame, from \code{melt} the matrix returned by \code{detectCO}
-
+#' @param co_geno
+#' data.frame, returned by \code{detectCO}
+#' @examples
+#'   or_geno <-snp_geno[,grep("X",colnames(snp_geno))]
+#' rownames(or_geno) <- paste0(snp_geno$CHR,"_",snp_geno$POS)
+#' cr_geno <- correctGT(or_geno,ref = snp_geno$C57BL.6J,
+#'                      alt = snp_geno$FVB.NJ..i.,
+#'                      chr = snp_geno$CHR)
+#' co_geno <- detectCO(cr_geno,
+#'                     chrs = snp_geno$CHR,
+#'                     chrPos = snp_geno$POS)
+#' co_geno[3,] <- rep(TRUE,dim(co_geno)[2])
+#'
+#'
+#' rb_rate <- calGeneticMap(co_geno)
+#' @importFrom plotly summarise
 #' @return data.frame
 #' data.frame for all markers with Haldane and Kosambi morgans calculated
 #' @export
 
-calGeneticMap <- function(gt_matrix_co_by_marker, alpha = 0.05){
+calGeneticMap <- function(co_geno){
+  stopifnot(!is.null(rownames(co_geno)))
+  stopifnot(!is.null(colnames(co_geno)))
 
   #gt_matrix_co
+  rb_geno <- co_geno %>% mutate(t_counts = rowSums(.,na.rm = TRUE),
+                     total_na = rowSums(is.na(.)),
+                     f_counts = rowSums(.==FALSE,na.rm = TRUE),
+                     total_calls = (f_counts + t_counts),
+                     total_samples = length(.))
+  rownames(rb_geno) <-rownames(co_geno)
+  # gt_matrix_dst <-
+  #   gt_matrix_co_by_marker %>%  group_by(interval_ID) %>% summarise(
+  #     t_counts = sum(Cross_over == TRUE, na.rm = TRUE),
+  #     f_counts = sum(Cross_over == FALSE, na.rm = TRUE),
+  #     total_calls = (f_counts +
+  #                      t_counts),
+  #     total_na = sum(is.na(Cross_over)),
+  #     total_samples = length(Cross_over)
+  #   )
 
-  gt_matrix_dst <-
-    gt_matrix_co_by_marker %>%  group_by(interval_ID) %>% summarise(
-      t_counts = sum(Cross_over == TRUE, na.rm = TRUE),
-      f_counts = sum(Cross_over == FALSE, na.rm = TRUE),
-      total_calls = (f_counts +
-                       t_counts),
-      total_na = sum(is.na(Cross_over)),
-      total_samples = length(Cross_over)
-    )
-  if (any(gt_matrix_dst$total_calls == 0)) {
+  if (any(rb_geno$total_calls == 0)) {
     message(paste0(
-      sum(gt_matrix_dst$total_calls == 0),
-      " marker(s) do not have calls across all samples, they will be removed"
+      sum(rb_geno$total_calls == 0),
+      " marker(s) do not have calls (failed) across all samples, they will be removed"
     ))
   }
 
-  gt_matrix_dst <- gt_matrix_dst[gt_matrix_dst$total_calls != 0, ]
-  gt_matrix_dst <-
-    gt_matrix_dst %>%  group_by(interval_ID) %>%
-    mutate(na_rate = total_na /total_samples,
+  rb_geno <- rb_geno[rb_geno$total_calls != 0, ]
+
+  rb_geno_f <- rb_geno %>%  mutate(na_rate = total_na /total_samples,
            pointEst = t_counts / total_calls)
+  rownames(rb_geno_f) <- rownames(rb_geno)
+
            # lower_ci = Hmisc::binconf(t_counts,total_calls,alpha = alpha)[,"Lower"],
            # upper_ci = Hmisc::binconf(t_counts,total_calls,alpha = alpha)[,"Upper"])
 
 #co_rate = t_counts / total_calls,
-  if (any(gt_matrix_dst$pointEst >= 0.5)) {
+
+  if (any(rb_geno_f$pointEst >= 0.5)) {
     warning(
       paste0(
-        sum(gt_matrix_dst$pointEst >= 0.5),
+        sum(rb_geno_f$pointEst >= 0.5),
         " markers have cross-over fraction larger or equal to 0.5,
-        please check whether they are informative: ",
-        paste0(gt_matrix_dst$interval_ID[gt_matrix_dst$pointEst >= 0.5], collapse = ",")
+        please check whether they are informative: (these markers are removed)",
+        paste0(rownames(rb_geno_f[rb_geno_f$pointEst >= 0.5,]), collapse = ",")
       )
     )
 
   }
 
-  gt_matrix_dst <- gt_matrix_dst[gt_matrix_dst$pointEst < 0.5, ]
+  rb_geno_f <- rb_geno_f[rb_geno_f$pointEst < 0.5, ]
 
-  gt_matrix_dst <-
-    gt_matrix_dst %>%  group_by(interval_ID) %>%
-    mutate(haldane = -0.5 * log(1 - 2 * pointEst),
+  rb_geno_e <-
+    rb_geno_f %>% mutate(haldane = -0.5 * log(1 - 2 * pointEst),
            kosambi = 0.25 * log((1 + 2 * pointEst) / (1 - 2 * pointEst)))
+  rownames(rb_geno_e) <- rownames(rb_geno_f)
            # kosambi_lower = 0.25 * log((1 + 2 * lower_ci) / (1 - 2 * lower_ci)),
            # kosambi_upper = 0.25 * log((1 + 2 * upper_ci) / (1 - 2 * upper_ci)))
 
 
-  return(gt_matrix_dst)
+  return(rb_geno_e)
 }
 
 #' Plot markers with missing genotypes

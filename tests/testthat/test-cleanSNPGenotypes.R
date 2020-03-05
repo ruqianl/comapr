@@ -119,3 +119,18 @@ test_that("infer Failed genotype successfully by chrs", {
 
 })
 
+
+test_that("change missing successfully change Fail to missing", {
+  s_gt <- snp_geno[,5]
+  s_gt[c(10,11,23)] <- "Fail"
+  converted_gt <- label_gt(s_gt = s_gt,
+                           ref = snp_geno$C57BL.6J,
+                           alt = snp_geno$FVB.NJ..i.,)
+  infer_fail <- fill_fail(converted_gt,chr = as.factor(snp_geno$CHR))
+  change_miss <- change_missing(infer_fail)
+  expect_true(is.na(change_miss[10]))
+  expect_true(is.na(change_miss[11]))
+  expect_true(is.na(change_miss[23]))
+
+})
+

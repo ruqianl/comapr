@@ -23,7 +23,7 @@ Production and farm value of maple products in Canada
 }
 \examples{
 \dontrun{
- maple
+ snp_geno
 }
 
 }

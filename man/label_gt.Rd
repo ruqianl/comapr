@@ -31,12 +31,11 @@ SNP marker; if the sample's genotype is the same with the alternative strain
 it is labelled as Homo_alt \code{homogeneous alternative} for a particular SNP
 marker; if the sample's genotype is heterozygous then it is labelled as
 Het \code{heterozygous} for this particular genotypes. If it does not fall in any
-of the three cases, it is labelled as Fail or user-provided label via param
-`fail`.
-}
-\examples{
-label_gt(snp_geno)
+of the three cases, it is labelled as `missing`.
 
+Note that the `Fail` genotype is still labelled as `Fail` after this function.
+If there is a different label for failed genotype, provide the label using
+the `fail` argument.
 }
 \author{
 Ruqian Lyu

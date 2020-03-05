@@ -2,15 +2,26 @@
 % Please edit documentation in R/cal_rb.R
 \name{change_missing}
 \alias{change_missing}
-\title{change 'missing' labels to \code{NA}}
+\title{change SNPs with genotype 'Fail' to \code{NA}}
 \usage{
-change_missing(s_gt, missing = "missing")
+change_missing(s_gt, missing = "Fail")
 }
 \arguments{
 \item{s_gt, }{a column of labelled genotypes}
 
 \item{missing, }{the string used for encoding missing values default to \code{missing}}
 }
-\description{
-change 'missing' labels to \code{NA}
+\value{
+a vector of genotypes with Fail substituted by `NA`
 }
+\description{
+change SNPs with genotype 'Fail' to \code{NA}
+}
+\details{
+After changing genotypes in alleles to genotype labels and correct Homo_ref genotypes,
+the `missing` genotypes are changes to `NA` for downstream calculation.
+}
+\author{
+Ruqian Lyu
+}
+\keyword{internal}

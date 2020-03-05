@@ -11,7 +11,7 @@
 #' }
 #' @examples
 #' \dontrun{
-#'  maple
+#'  snp_geno
 #' }
 #'
 "snp_geno"

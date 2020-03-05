@@ -4,18 +4,35 @@
 \alias{findDupSamples}
 \title{findDupSamples}
 \usage{
-findDupSamples(gt_matrix, threshold = 0.99, plot = TRUE)
+findDupSamples(geno, threshold = 0.99, plot = TRUE, in_text = TRUE)
 }
 \arguments{
-\item{gt_matrix}{the corrected and filtered genotype matrix of markers by samples}
+\item{geno}{the genotype data.frame of markers by samples from output of
+function \code{correctGT}}
 
 \item{threshold}{the frequency cut-off of number of matching genotypes out of
 all geneotypes for determining whether the pair of samples
-are duplicated, defaults to \code{0.99}}
+are duplicated, defaults to \code{0.99}. NAs are regarded as same genotypes for
+two samples if they both have NA for a marker.}
 
-\item{plot}{whether a frequency plot should be generated}
+\item{plot}{whether a frequency plot should be generated for paired-samples}
+}
+\value{
+The paris of duplicated samples.
 }
 \description{
 Find the duplicated samples by look at the number of matching genotypes
-between all pairs of samples
+in all pair-wise samples
+}
+\examples{
+  or_geno <- snp_geno[,grep("X",colnames(snp_geno))]
+rownames(or_geno) <- paste0(snp_geno$CHR,"_",snp_geno$POS)
+or_geno[,1] <- or_geno[,5]
+cr_geno <- correctGT(or_geno,ref = snp_geno$C57BL.6J,
+                    alt = snp_geno$FVB.NJ..i.,
+                    chr = snp_geno$CHR)
+dups <- findDupSamples(cr_geno,plot = TRUE)
+}
+\author{
+Ruqian Lyu
 }

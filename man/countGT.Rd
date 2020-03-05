@@ -3,24 +3,26 @@
 \name{countGT}
 \alias{countGT}
 \title{countGT
-count how many samples have genotypes calls across all markers
-and count how many markers that each individual have genotypes}
+count how many samples have genotypes calls across  markers
+and count how many markers that each individual has called genotypes for}
 \usage{
-countGT(gt_matrix, plot = TRUE, interactive = FALSE)
+countGT(geno, plot = TRUE, interactive = FALSE)
 }
 \arguments{
-\item{gt_matrix, }{the genotype matrix of marker by samples after correction by
-funcion \code{correctGT}}
+\item{geno}{the genotype data.frame of markers by samples from output of
+function \code{correctGT}}
 
-\item{plot, }{it determines whether a plot will be generated.}
+\item{plot, }{it determines whether a plot will be generated, defaults to TRUE}
+
+\item{interactive, }{it determines whether an interactive plot will be generated}
 }
 \value{
 A list of two elements including \code{n_markers} and \code{n_samples}
 }
 \description{
 countGT
-count how many samples have genotypes calls across all markers
-and count how many markers that each individual have genotypes
+count how many samples have genotypes calls across  markers
+and count how many markers that each individual has called genotypes for
 }
 \author{
 Ruqian Lyu

@@ -4,16 +4,19 @@
 \alias{findDupMarkers}
 \title{findDupMarkers}
 \usage{
-findDupMarkers(gt_matrix, threshold = 0.99, plot = TRUE)
+findDupMarkers(geno, threshold = 0.99, plot = TRUE, in_text = TRUE, ...)
 }
 \arguments{
-\item{gt_matrix}{the corrected and filtered genotype matrix of markers by samples}
+\item{geno}{the genotype data.frame of markers by samples from output of
+function \code{correctGT}}
 
-\item{threshold}{the frequency cut-off of number of matching genotypes out of
-all geneotypes for determining whether the pair of samples
+\item{threshold}{the frequency cut-off for determining whether the pair of markers
 are duplicated, defaults to \code{0.9}}
 
 \item{plot}{whether a frequency heatmap plot should be generated}
+}
+\value{
+The paris of duplicated markers.
 }
 \description{
 Find the duplicated markers by look at the number of matching genotypes across samples

@@ -4,20 +4,34 @@
 \alias{plotMissingGT}
 \title{Plot markers with missing genotypes}
 \usage{
-plotMissingGT(gt_matrix, missing = "Fail", plot_wg = TRUE)
+plotMissingGT(geno, missing = "Fail", plot_wg = FALSE, plot_type = "dot")
 }
 \arguments{
-\item{gt_matrix}{the genotype matrix of markers by samples}
+\item{geno}{the genotype data.frame of markers by samples}
 
 \item{missing}{the label in the matrix that is used for encoding the missing or failed data}
 
-\item{plot_wg}{whether to plot all markers across whole genome or just the missing markers}
+\item{plot_wg}{whether to plot all markers across whole genome or just the markers that are
+ever missing across all samples}
+
+\item{plot_type}{whether a 'dot' plot or a 'bar' plot should be drawn}
 }
 \value{
-a plot for markers with missing genotype across samples
+a ggplot2 object for markers with missing genotype across samples
 }
 \description{
 Plot markers with missing genotypes
+}
+\details{
+This functions plots the missing markers in a 'dot' plot or 'bar' plot.
+}
+\examples{
+or_geno <-snp_geno[,grep("X",colnames(snp_geno))]
+rownames(or_geno) <- paste0(snp_geno$CHR,"_",snp_geno$POS)
+cr_geno <- correctGT(or_geno,ref = snp_geno$C57BL.6J,
+                    alt = snp_geno$FVB.NJ..i.,
+                    chr = snp_geno$CHR)
+plotMissingGT(cr_geno)
 }
 \author{
 Ruqian Lyu

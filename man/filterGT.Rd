@@ -4,23 +4,26 @@
 \alias{filterGT}
 \title{filterGT}
 \usage{
-filterGT(gt_matrix, min_markers = 5, min_samples = 3)
+filterGT(geno, min_markers = 5, min_samples = 3)
 }
 \arguments{
+\item{geno}{the genotype data.frame of markers by samples from output of
+function \code{correctGT}}
+
 \item{min_markers}{the minimum number of markers for a sample to be kept}
 
 \item{min_samples}{the minimum number of samples for a marker to be kept}
-
-\item{gt_matrx}{the genotype matrix of marker by samples after correction by
-funcion \code{correctGT}}
 }
 \value{
 A filtered genotype matrix
 }
 \description{
-Filter markers or samples that have too many missing values.
+Filter markers or samples that have too many missing values
 }
 \details{
 This function takes the \code{gt_matrix} and subset the matrix by
 the provided cut-offs.
+}
+\author{
+Ruqian Lyu
 }

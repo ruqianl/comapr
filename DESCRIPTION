@@ -1,5 +1,5 @@
 Package: comapr
-Title: This package converts genotyping test reports of genotypes for SNP markers in excel spreadsheets to quantified genetic lengths. 
+Title: Converts genotype reports for SNP markers to quantified genetic lengths
 Version: 0.0.0.9000
 Authors@R: 
     person(given = "Lyu",
@@ -28,4 +28,7 @@ Suggests:
     BiocStyle,
     knitr,
     rmarkdown,
-    testthat (>= 2.1.0)
+    testthat (>= 2.1.0),
+    UpSetR,
+    chromoMap,
+    ggrepel

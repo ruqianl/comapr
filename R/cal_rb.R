@@ -224,6 +224,7 @@ count_cos <- function(s_gt, interval_df, chrs, chrPos, type = "bool"){
   stopifnot(length(s_gt)==length(chrs))
   stopifnot(length(s_gt)==length(chrPos))
   stopifnot(type == "bool" | type == "counts")
+  is_rb <- NULL
   interval_df$gt <- s_gt
 
   interval_df$gt_before <- interval_df$gt
@@ -267,7 +268,8 @@ count_cos <- function(s_gt, interval_df, chrs, chrPos, type = "bool"){
 #' @param gt_matrix
 #' the input genotype matrix of markers by samples with rownames as marker IDs
 #' and column names as sample IDs
-#'
+#' @param chr
+#' the vector of chromosomes that the markers are from
 #' @param ref
 #'  a vector of genotypes of reference strain
 #' @param alt
@@ -333,10 +335,12 @@ correctGT <- function(gt_matrix, ref, alt, chr, ref_change_to = "Het",
 #' @importFrom dplyr %>%
 #' @importFrom dplyr mutate
 #'
-#' @param gt_matix
+#' @param geno
 #' corrected genotype matrix returned by \code{correct_gt}
 #' @param prefix
 #' what prefix to add to sample IDs
+#' @param chrPos
+#' the base-pair positions of SNP markers
 #' @param type
 #' whether return boolean value indicating whether crossover happens between this
 #' marker and its preceding marker or returne (type=count) how many crossovers
@@ -364,10 +368,10 @@ correctGT <- function(gt_matrix, ref, alt, chr, ref_change_to = "Het",
 #' @export
 #' @author Ruqian Lyu
 #'
-detectCO <-function(gt_matrix, prefix = "Sample_",
+detectCO <-function(geno, prefix = "Sample_",
                      chrs, chrPos, type = "bool"){
-  row_names <- rownames(gt_matrix)
-  colnames(gt_matrix) <- paste0(prefix,colnames(gt_matrix))
+  row_names <- rownames(geno)
+  colnames(geno) <- paste0(prefix,colnames(geno))
   #
   #   gt_matrix_co_counts <- apply(gt_matrix,2, count_cos,
   #                                chrs = chrs,
@@ -383,7 +387,7 @@ detectCO <-function(gt_matrix, prefix = "Sample_",
 
   interval_df <- data.frame(interval_df,row.names = paste0(chrs,"_",chrPos))
 
-  gt_matrix_co <- apply(gt_matrix,2, count_cos,
+  gt_matrix_co <- apply(geno,2, count_cos,
                        chrs = chrs,
                        chrPos = chrPos,
                        interval_df = interval_df,type = type)
@@ -393,7 +397,7 @@ detectCO <-function(gt_matrix, prefix = "Sample_",
   gt_matrix_co <-  Reduce(cbind,gt_matrix_co)
   colnames(gt_matrix_co) <- cols_names
 
-  stopifnot(nrow(gt_matrix) == nrow(gt_matrix_co))
+  stopifnot(nrow(geno) == nrow(gt_matrix_co))
 
   # rownames(gt_matrix_co) <- row_names
 
@@ -430,7 +434,14 @@ detectCO <-function(gt_matrix, prefix = "Sample_",
 calGeneticMap <- function(co_geno){
   stopifnot(!is.null(rownames(co_geno)))
   stopifnot(!is.null(colnames(co_geno)))
-
+  t_counts <- NULL
+  f_counts <- NULL
+  total_calls <- NULL
+  total_samples <- NULL
+  na_rate <- NULL
+  pointEst <- NULL
+  "." <- NULL
+  total_na <- NULL
   #gt_matrix_co
   rb_geno <- co_geno %>% mutate(t_counts = rowSums(.,na.rm = TRUE),
                      total_na = rowSums(is.na(.)),
@@ -527,7 +538,13 @@ calGeneticMap <- function(co_geno){
 
 plotMissingGT <- function(geno, missing = "Fail", plot_wg = FALSE,
                           plot_type = "dot"){
+
   stopifnot(plot_type == "dot" | plot_type == "bar")
+  Var1 <- NULL
+  value <- NULL
+  Var2 <- NULL
+  "." <- NULL
+  no_missing <- NULL
 
   mis_matrix <- apply(geno, 2, function(es){
     is.na(es) | es == missing
@@ -638,11 +655,7 @@ countGT <- function(geno, plot =TRUE,interactive=FALSE){
                   n_markers = colSums(!is.na(geno))))
 
     } else {
-      # par(mfrow=c(1,2))
-      # plot(rowSums(!is.na(gt_matrix)),ylab = "Number of samples",xlab="markers index",
-      #      main = "No. samples by marker")
-      # plot(colSums(!is.na(gt_matrix)),ylab = "Number of markers",xlab="samples index",
-      #      main = "No. markers by sample")
+
       p1 <- ggplot()+geom_point(mapping = aes(x = seq(1:length(rowSums(!is.na(geno)))),
                                               y = rowSums(!is.na(geno))))+theme_classic()+
         ylab("Number of samples")+xlab("markers index")+ggtitle("No. samples by marker")
@@ -657,8 +670,8 @@ countGT <- function(geno, plot =TRUE,interactive=FALSE){
                 n_markers = colSums(!is.na(geno))))
   }
 
-  return(list(n_samples = rowSums(!is.na(gt_matrix)),
-              n_markers = colSums(!is.na(gt_matrix))))
+  return(list(n_samples = rowSums(!is.na(geno)),
+              n_markers = colSums(!is.na(geno))))
 }
 
 #' filterGT
@@ -671,8 +684,9 @@ countGT <- function(geno, plot =TRUE,interactive=FALSE){
 #' @param min_samples the minimum number of samples for a marker to be kept
 #'
 #' @details
-#' This function takes the \code{gt_matrix} and subset the matrix by
+#' This function takes the \code{geno} data.frame and filter the data.frame by
 #' the provided cut-offs.
+#'
 #' @author Ruqian Lyu
 #'
 #' @return
@@ -707,13 +721,15 @@ filterGT <- function(geno, min_markers = 5, min_samples = 3){
 #' two samples if they both have NA for a marker.
 #'
 #' @param plot whether a frequency plot should be generated for paired-samples
+#' @param in_text whether text of frequencies should be displayed in the
+#' heatmap cells
 #' @export
 #' @author Ruqian Lyu
 #' @return
 #' The paris of duplicated samples.
 #'
 #' @examples
-#'   or_geno <- snp_geno[,grep("X",colnames(snp_geno))]
+#' or_geno <- snp_geno[,grep("X",colnames(snp_geno))]
 #' rownames(or_geno) <- paste0(snp_geno$CHR,"_",snp_geno$POS)
 #' or_geno[,1] <- or_geno[,5]
 #' cr_geno <- correctGT(or_geno,ref = snp_geno$C57BL.6J,
@@ -752,12 +768,15 @@ findDupSamples <- function(geno, threshold = 0.99, plot =TRUE,
                 grid.rect(x = x, y = y, width = width, height = height,
                           gp = gpar(col = "grey", fill = NA))
                 if(i == j) {
-                  grid.text(sprintf("%.1f", out_freq[i, j]), x, y, gp = gpar(fontsize = 10))
+                  grid.text(sprintf("%.1f", out_freq[i, j]), x, y,
+                            gp = gpar(fontsize = 10))
                 } else if(i > j) {
                   grid.rect(x = x, y = y,  width = width, height = height,
-                              gp = gpar(col = "grey",fill = col_fun(out_freq[i, j])))
+                              gp = gpar(col = "grey",
+                                        fill = col_fun(out_freq[i, j])))
                 } else {
-                  grid.text(sprintf("%.1f", out_freq[i, j]), x, y, gp = gpar(fontsize = 10))
+                  grid.text(sprintf("%.1f", out_freq[i, j]), x, y,
+                            gp = gpar(fontsize = 10))
                 }
               }, cluster_rows = FALSE, cluster_columns = FALSE,
             name = "Sample pair-wise\ncorrelation")
@@ -794,14 +813,27 @@ findDupSamples <- function(geno, threshold = 0.99, plot =TRUE,
 #' @inheritParams countGT
 #' @param threshold the frequency cut-off for determining whether the pair of markers
 #' are duplicated, defaults to \code{0.9}
-#'
+#' @param in_text whether text of frequencies should be displayed in the
+#' heatmap cells
 #' @param plot whether a frequency heatmap plot should be generated
 #' @return
 #' The paris of duplicated markers.
 #'
 #' @export
+#' @author Ruqian Lyu
+#'
+#' @examples
+#'   or_geno <- snp_geno[,grep("X",colnames(snp_geno))]
+#' rownames(or_geno) <- paste0(snp_geno$CHR,"_",snp_geno$POS)
+#' or_geno[,1] <- or_geno[,5]
+#' cr_geno <- correctGT(or_geno,ref = snp_geno$C57BL.6J,
+#'                      alt = snp_geno$FVB.NJ..i.,
+#'                     chr = snp_geno$CHR)
+#' dups <- findDupMarkers(cr_geno,plot = TRUE)
+
+
 findDupMarkers <- function(geno, threshold = 0.99, plot =TRUE,
-                           in_text = TRUE,...){
+                           in_text = TRUE){
 
   n <- seq_len( nrow(geno) )
 
@@ -831,12 +863,15 @@ findDupMarkers <- function(geno, threshold = 0.99, plot =TRUE,
                          grid.rect(x = x, y = y, width = width, height = height,
                                    gp = gpar(col = "grey", fill = NA))
                          if(i == j) {
-                           grid.text(sprintf("%.1f", out_freq[i, j]), x, y, gp = gpar(fontsize = 10))
+                           grid.text(sprintf("%.1f", out_freq[i, j]), x, y,
+                                     gp = gpar(fontsize = 10))
                          } else if(i > j) {
                            grid.rect(x = x, y = y,  width = width, height = height,
-                                     gp = gpar(col = "grey",fill = col_fun(out_freq[i, j])))
+                                     gp = gpar(col = "grey",
+                                               fill = col_fun(out_freq[i, j])))
                          } else {
-                           grid.text(sprintf("%.1f", out_freq[i, j]), x, y, gp = gpar(fontsize = 10))
+                           grid.text(sprintf("%.1f", out_freq[i, j]), x, y,
+                                     gp = gpar(fontsize = 10))
                          }
                        }, cluster_rows = FALSE, cluster_columns = FALSE,
                        name = "Marker pair-wise\ncorrelation",
@@ -867,37 +902,39 @@ findDupMarkers <- function(geno, threshold = 0.99, plot =TRUE,
 
 }
 
-
-### Look for distorted segregation patterns
-
-### We expect the genotypes to appear with the frequenceis of 1:1 (homo_alt:hets)
-
-
 #' getDistortedMarkers
 #'
 #' Marker disortation detection using chisq-test
-#' We expect the genotypes to appear with the frequenceis of 1:1 homo_alt:hets, we
-#' use chisq-test for finding markers that have genotypes significantly diffferent from
-#' the 1:1 ratio and report them
 #'
-#' @param gt_matrix the corrected and filtered genotype matrix of markers by samples
+#' @details
+#' We expect the genotypes to appear with the frequenceis of 1:1 homo_alt:hets.
+#' We use chisq-test for finding markers that have genotypes among samples that
+#' are significantly diffferent from the 1:1 ratio and report them
+#'
+#' @param p the expected geneotype ratio in a numeric vector, defauls to c(0.5,0.5)
+#' @importFrom stats chisq.test p.adjust
+#' @inheritParams countGT
+#' @author Ruqian Lyu
+#'
 #' @export
 
-getDistortedMarkers <- function(gt_matrix){
- geno.table <- sapply(rownames(gt_matrix), function(marker){
-   list(Het = ifelse(is.na(table(gt_matrix[marker,],useNA = "no")["Het"]),
+getDistortedMarkers <- function(geno, p = c(0.5,0.5)){
+ geno.table <- sapply(rownames(geno), function(marker){
+   list(Het = ifelse(is.na(table(geno[marker,],useNA = "no")["Het"]),
                      0,
-                     table(gt_matrix[marker,],useNA = "no")["Het"]),
-        Homo_alt = ifelse(is.na(table(gt_matrix[marker,],useNA = "no")["Homo_alt"]),
+                     table(geno[marker,],useNA = "no")["Het"]),
+        Homo_alt = ifelse(is.na(table(geno[marker,],useNA = "no")["Homo_alt"]),
                           0,
-                          table(gt_matrix[marker,],useNA = "no")["Homo_alt"]))
+                          table(geno[marker,],useNA = "no")["Homo_alt"]))
  })
  geno.table <- data.frame(Markers = colnames(geno.table),
                           No.Hets =  as.character(unlist(geno.table["Het",])),
                           No.Homo_alt = as.character(unlist(geno.table["Homo_alt",])),
                           stringsAsFactors = FALSE)
+
  pvals <- sapply(as.character(geno.table$Markers), function(marker){
-   ctest <- chisq.test(as.numeric(geno.table[geno.table$Markers==marker,2:3]),p = c(0.5,0.5))
+   ctest <- chisq.test(as.numeric(geno.table[geno.table$Markers==marker,2:3]),
+                       p = p)
    ctest$p.value
  })
 
@@ -915,25 +952,36 @@ getDistortedMarkers <- function(gt_matrix){
 
 #' @importFrom plotly plot_ly subplot
 #' @importFrom reshape2 melt
-
+#' @inheritParams countGT
 #' @author Ruqian Lyu
-#' @param gt_matrix, the genotype matrix of marker by samples after correction by
-#' funcion \code{correctGT}
-#' @param plot, it determines whether a plot will be generated.
+#' @param interactive, it determines whether an interactive
+#' plot will be generated.
 #' @export
+#' @examples
+#' or_geno <- snp_geno[,grep("X",colnames(snp_geno))]
+#' rownames(or_geno) <- paste0(snp_geno$CHR,"_",snp_geno$POS)
+#' or_geno[1,] <- rep("Fail",dim(or_geno)[2])
+#' cr_geno <- correctGT(or_geno,ref = snp_geno$C57BL.6J,
+#'                     alt = snp_geno$FVB.NJ..i.,
+#'                     chr = snp_geno$CHR)
+#' ft_gt <- filterGT(cr_geno)
+#' plotGTFreq(ft_gt)
 
-plotGTFreq <- function(gt_matrix, interactive = FALSE){
-  geno.table <- sapply(colnames(gt_matrix), function(sample){
-    list(Het = ifelse(is.na(table(gt_matrix[,sample],useNA = "no")["Het"]),
+plotGTFreq <- function(geno, interactive = FALSE){
+  samples <- NULL
+  value <- NULL
+  variable <- NULL
+  geno.table <- sapply(colnames(geno), function(sample){
+    list(Het = ifelse(is.na(table(geno[,sample],useNA = "no")["Het"]),
                       0,
-                      table(gt_matrix[,sample],useNA = "no")["Het"]),
-         Homo_alt = ifelse(is.na(table(gt_matrix[,sample],useNA = "no")["Homo_alt"])
+                      table(geno[,sample],useNA = "no")["Het"]),
+         Homo_alt = ifelse(is.na(table(geno[,sample],useNA = "no")["Homo_alt"])
                            ,0,
-                           table(gt_matrix[,sample],useNA = "no")["Homo_alt"]))
+                           table(geno[,sample],useNA = "no")["Homo_alt"]))
   })
   geno.table <- data.frame(samples = colnames(geno.table),
-                           Freq.Hets =  as.numeric(unlist(geno.table["Het",]))/nrow(gt_matrix),
-                           Freq.Homo_alt = as.numeric(unlist(geno.table["Homo_alt",])/nrow(gt_matrix)),
+                           Freq.Hets =  as.numeric(unlist(geno.table["Het",]))/nrow(geno),
+                           Freq.Homo_alt = as.numeric(unlist(geno.table["Homo_alt",])/nrow(geno)),
                            stringsAsFactors = FALSE)
   pltdf <- melt(geno.table)
 
@@ -943,9 +991,12 @@ plotGTFreq <- function(gt_matrix, interactive = FALSE){
     return(ply1)
   } else {
 
-    stplt1 <- ggplot(data = pltdf)+geom_point(mapping = aes(x = samples, y = value,
-                                                  color = variable))+theme_classic()+
-      ylab("Genotype Frequecies for each sample")
+    stplt1 <- ggplot(data = pltdf)+
+      geom_point(mapping = aes(x = samples, y = value,
+                               color = variable))+
+      theme_classic()+
+      ylab("Genotype Frequecies for each sample")+labs(color ="Genotype")+
+      theme(axis.text.x = element_text(angle =-90))
     return(stplt1)
 
   }

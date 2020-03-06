@@ -17,16 +17,19 @@ variables:
 before_script:
 
 buildbinary:
+  image: svirlyu/comapr_dev
   stage: build
   script:
     - R -e 'devtools::build(binary = TRUE)'
 
 documentation:
+  image: svirlyu/comapr_dev
   stage: document
   script:
     - R -e 'devtools::document()'
 
 checkerrors:
+  image: svirlyu/comapr_dev  
   stage: check
   script:
     - R -e 'if (!identical(devtools::check(document = FALSE, args = "--no-tests")[["errors"]], character(0))) stop("Check with Errors")'

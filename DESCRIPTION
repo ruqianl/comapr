@@ -18,8 +18,10 @@ Imports:
  reshape2,
  dplyr,
  gridExtra,
- plotly
-License: What license it uses
+ plotly,
+ ComplexHeatmap,
+ circlize
+License: MIT
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.0.2

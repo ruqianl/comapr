@@ -21,13 +21,9 @@ knitr::opts_chunk$set(
 ```{r setup}
 
 suppressPackageStartupMessages({
-  library(readxl)
   library(ggplot2)
   library(dplyr)
   library(reshape2)
-  library(chromoMap)
-  library(UpSetR)
-  library(ggrepel)
   library(comapr)
   library(ggplot2)
   library(reshape2)

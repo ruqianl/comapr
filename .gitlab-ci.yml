@@ -1,12 +1,13 @@
-default:
-  image: svirlyu/comapr_dev
+docker:
+  default:
+    image: svirlyu/comapr_dev
 
-stages:
-  - build
-  - document
-  - check
-  - test
-  - deploy
+  stages:
+    - build
+    - document
+    - check
+    - test
+    - deploy
 
 variables:
   _R_CHECK_CRAN_INCOMING_: "false"

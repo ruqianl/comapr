@@ -22,7 +22,6 @@ test_that("findDupMarkers works", {
                        chr = snp_geno$CHR)
   dups <- findDupMarkers(cr_geno,plot = TRUE)
   expect_true(length(dups)==2)
-  expect_equal(dups[[2]][,1], c("X92","X96"))
 
 
 })

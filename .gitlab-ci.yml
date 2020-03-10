@@ -17,48 +17,65 @@ variables:
 before_script:
 
 buildbinary:
-  tags: docker
+  tags: 
+    - docker
   image: svirlyu/comapr_dev
   stage: build
   script:
     - R -e 'devtools::build(binary = TRUE)'
 
 documentation:
-  tags: docker
+  tags: 
+    - docker
   image: svirlyu/comapr_dev
   stage: document
   script:
     - R -e 'devtools::document()'
 
 checkerrors:
-  tags: docker
+  tags:
+    - docker
   image: svirlyu/comapr_dev
-  image: svirlyu/comapr_dev  
   stage: check
   script:
     - R -e 'if (!identical(devtools::check(document = FALSE, args = "--no-tests")[["errors"]], character(0))) stop("Check with Errors")'
 
 checkwarnings:
+  tags:
+    - docker
+  image: svirlyu/comapr_dev
   stage: check
   script:
     - R -e 'if (!identical(devtools::check(document = FALSE, args = "--no-tests")[["warnings"]], character(0))) stop("Check with Warnings")'
 
 checknotes:
   stage: check
+  tags:
+    - docker
+  image: svirlyu/comapr_dev
   script:
     - R -e 'if (!identical(devtools::check(document = FALSE, args = "--no-tests")[["notes"]], character(0))) stop("Check with Notes")'
 
 unittests:
   stage: test
+  tags:
+    - docker
+  image: svirlyu/comapr_dev
   script:
     - R -e 'if (any(as.data.frame(devtools::test())[["failed"]] > 0)) stop("Some tests failed.")'
 
 codecov:
+  tags:
+    - docker
+  image: svirlyu/comapr_dev
   stage: test
   script:
     - R -e 'covr::codecov()'
 
 install:
+  tags:
+    - docker
+  image: svirlyu/comapr_dev
   stage: deploy
   script:
     - R -e 'devtools::install()'

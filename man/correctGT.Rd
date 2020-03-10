@@ -22,6 +22,8 @@ and column names as sample IDs}
 
 \item{alt}{a vector of genotypes of alternative strain}
 
+\item{chr}{the vector of chromosomes that the markers are from}
+
 \item{ref_change_to}{change homo_reference genotype calls to, default to "Het". The other option is
 "Fail".}
 

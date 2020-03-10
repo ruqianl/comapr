@@ -16,6 +16,9 @@ are duplicated, defaults to \code{0.99}. NAs are regarded as same genotypes for
 two samples if they both have NA for a marker.}
 
 \item{plot}{whether a frequency plot should be generated for paired-samples}
+
+\item{in_text}{whether text of frequencies should be displayed in the
+heatmap cells}
 }
 \value{
 The paris of duplicated samples.
@@ -25,7 +28,7 @@ Find the duplicated samples by look at the number of matching genotypes
 in all pair-wise samples
 }
 \examples{
-  or_geno <- snp_geno[,grep("X",colnames(snp_geno))]
+or_geno <- snp_geno[,grep("X",colnames(snp_geno))]
 rownames(or_geno) <- paste0(snp_geno$CHR,"_",snp_geno$POS)
 or_geno[,1] <- or_geno[,5]
 cr_geno <- correctGT(or_geno,ref = snp_geno$C57BL.6J,

@@ -4,18 +4,20 @@
 \alias{detectCO}
 \title{detectCO}
 \usage{
-detectCO(gt_matrix, prefix = "Sample_", chrs, chrPos, type = "bool")
+detectCO(geno, prefix = "Sample_", chrs, chrPos, type = "bool")
 }
 \arguments{
+\item{geno}{corrected genotype matrix returned by \code{correct_gt}}
+
 \item{prefix}{what prefix to add to sample IDs}
 
 \item{chrs}{the chromosomes for markers}
 
+\item{chrPos}{the base-pair positions of SNP markers}
+
 \item{type}{whether return boolean value indicating whether crossover happens between this
 marker and its preceding marker or returne (type=count) how many crossovers
 has been detected from all preceding intevals for each chromosome.}
-
-\item{gt_matix}{corrected genotype matrix returned by \code{correct_gt}}
 }
 \value{
 a data.frame of marker intervals by samples with values indicating whether

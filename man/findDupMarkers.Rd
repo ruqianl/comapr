@@ -4,7 +4,7 @@
 \alias{findDupMarkers}
 \title{findDupMarkers}
 \usage{
-findDupMarkers(geno, threshold = 0.99, plot = TRUE, in_text = TRUE, ...)
+findDupMarkers(geno, threshold = 0.99, plot = TRUE, in_text = TRUE)
 }
 \arguments{
 \item{geno}{the genotype data.frame of markers by samples from output of
@@ -14,10 +14,25 @@ function \code{correctGT}}
 are duplicated, defaults to \code{0.9}}
 
 \item{plot}{whether a frequency heatmap plot should be generated}
+
+\item{in_text}{whether text of frequencies should be displayed in the
+heatmap cells}
 }
 \value{
 The paris of duplicated markers.
 }
 \description{
 Find the duplicated markers by look at the number of matching genotypes across samples
+}
+\examples{
+  or_geno <- snp_geno[,grep("X",colnames(snp_geno))]
+rownames(or_geno) <- paste0(snp_geno$CHR,"_",snp_geno$POS)
+or_geno[,1] <- or_geno[,5]
+cr_geno <- correctGT(or_geno,ref = snp_geno$C57BL.6J,
+                     alt = snp_geno$FVB.NJ..i.,
+                    chr = snp_geno$CHR)
+dups <- findDupMarkers(cr_geno,plot = TRUE)
+}
+\author{
+Ruqian Lyu
 }

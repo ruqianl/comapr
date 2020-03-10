@@ -4,14 +4,22 @@
 \alias{getDistortedMarkers}
 \title{getDistortedMarkers}
 \usage{
-getDistortedMarkers(gt_matrix)
+getDistortedMarkers(geno, p = c(0.5, 0.5))
 }
 \arguments{
-\item{gt_matrix}{the corrected and filtered genotype matrix of markers by samples}
+\item{geno}{the genotype data.frame of markers by samples from output of
+function \code{correctGT}}
+
+\item{p}{the expected geneotype ratio in a numeric vector, defauls to c(0.5,0.5)}
 }
 \description{
 Marker disortation detection using chisq-test
-We expect the genotypes to appear with the frequenceis of 1:1 homo_alt:hets, we
-use chisq-test for finding markers that have genotypes significantly diffferent from
-the 1:1 ratio and report them
+}
+\details{
+We expect the genotypes to appear with the frequenceis of 1:1 homo_alt:hets.
+We use chisq-test for finding markers that have genotypes among samples that
+are significantly diffferent from the 1:1 ratio and report them
+}
+\author{
+Ruqian Lyu
 }

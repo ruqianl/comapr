@@ -4,16 +4,27 @@
 \alias{plotGTFreq}
 \title{plotGTFreq}
 \usage{
-plotGTFreq(gt_matrix, interactive = FALSE)
+plotGTFreq(geno, interactive = FALSE)
 }
 \arguments{
-\item{gt_matrix, }{the genotype matrix of marker by samples after correction by
-funcion \code{correctGT}}
+\item{geno}{the genotype data.frame of markers by samples from output of
+function \code{correctGT}}
 
-\item{plot, }{it determines whether a plot will be generated.}
+\item{interactive, }{it determines whether an interactive
+plot will be generated.}
 }
 \description{
 Function to plot the genotypes for all samples faceted by genotype
+}
+\examples{
+or_geno <- snp_geno[,grep("X",colnames(snp_geno))]
+rownames(or_geno) <- paste0(snp_geno$CHR,"_",snp_geno$POS)
+or_geno[1,] <- rep("Fail",dim(or_geno)[2])
+cr_geno <- correctGT(or_geno,ref = snp_geno$C57BL.6J,
+                    alt = snp_geno$FVB.NJ..i.,
+                    chr = snp_geno$CHR)
+ft_gt <- filterGT(cr_geno)
+plotGTFreq(ft_gt)
 }
 \author{
 Ruqian Lyu

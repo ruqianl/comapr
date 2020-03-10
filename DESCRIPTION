@@ -10,7 +10,7 @@ Authors@R:
 Maintainer: Ruqian Lyu <rlyu@svi.edu.au>
 Author: Ruqian Lyu <rlyu@svi.edu.au>
 Description: This package converts genotyping test reports of genotypes for SNP markers in excel spreadsheets to quantified genetic lengths. 
-Depends: R (>= 3.1.0)
+Depends: R (>= 3.5.0)
 Imports:
  methods,
  ggplot2,

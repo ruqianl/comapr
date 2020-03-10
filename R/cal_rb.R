@@ -252,6 +252,8 @@ count_cos <- function(s_gt, interval_df, chrs, chrPos, type = "bool"){
   } else {
     interval_df <- interval_df %>% group_by(chrs) %>%
       mutate(cum_rb = cumsum(!is.na(is_rb) & is_rb))
+    interval_df <- data.frame(interval_df)
+
     rownames(interval_df) <- paste0(interval_df$chrs,"_",interval_df$interval_s,"_",
                                     interval_df$interval_e)
     return (interval_df[,"cum_rb",drop =FALSE])
@@ -414,7 +416,7 @@ detectCO <-function(geno, prefix = "Sample_",
 #' @param co_geno
 #' data.frame, returned by \code{detectCO}
 #' @examples
-#'   or_geno <-snp_geno[,grep("X",colnames(snp_geno))]
+#' or_geno <-snp_geno[,grep("X",colnames(snp_geno))]
 #' rownames(or_geno) <- paste0(snp_geno$CHR,"_",snp_geno$POS)
 #' cr_geno <- correctGT(or_geno,ref = snp_geno$C57BL.6J,
 #'                      alt = snp_geno$FVB.NJ..i.,
@@ -448,7 +450,8 @@ calGeneticMap <- function(co_geno){
                      f_counts = rowSums(.==FALSE,na.rm = TRUE),
                      total_calls = (f_counts + t_counts),
                      total_samples = length(.))
-  rownames(rb_geno) <-rownames(co_geno)
+  rb_geno <- data.frame(rb_geno)
+  rownames(rb_geno) <- rownames(co_geno)
   # gt_matrix_dst <-
   #   gt_matrix_co_by_marker %>%  group_by(interval_ID) %>% summarise(
   #     t_counts = sum(Cross_over == TRUE, na.rm = TRUE),
@@ -470,6 +473,7 @@ calGeneticMap <- function(co_geno){
 
   rb_geno_f <- rb_geno %>%  mutate(na_rate = total_na /total_samples,
            pointEst = t_counts / total_calls)
+  rb_geno_f <- data.frame(rb_geno_f)
   rownames(rb_geno_f) <- rownames(rb_geno)
 
            # lower_ci = Hmisc::binconf(t_counts,total_calls,alpha = alpha)[,"Lower"],
@@ -494,6 +498,7 @@ calGeneticMap <- function(co_geno){
   rb_geno_e <-
     rb_geno_f %>% mutate(haldane = -0.5 * log(1 - 2 * pointEst),
            kosambi = 0.25 * log((1 + 2 * pointEst) / (1 - 2 * pointEst)))
+  rb_geno_e <- data.frame(rb_geno_e)
   rownames(rb_geno_e) <- rownames(rb_geno_f)
            # kosambi_lower = 0.25 * log((1 + 2 * lower_ci) / (1 - 2 * lower_ci)),
            # kosambi_upper = 0.25 * log((1 + 2 * upper_ci) / (1 - 2 * upper_ci)))

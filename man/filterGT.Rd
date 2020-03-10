@@ -21,7 +21,7 @@ A filtered genotype matrix
 Filter markers or samples that have too many missing values
 }
 \details{
-This function takes the \code{gt_matrix} and subset the matrix by
+This function takes the \code{geno} data.frame and filter the data.frame by
 the provided cut-offs.
 }
 \author{

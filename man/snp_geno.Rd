@@ -6,10 +6,33 @@
 \title{Production and farm value of maple products in Canada}
 \format{A data frame with columns:
 \describe{
- \item{Year}{A value between 1924 and 2015.}
- \item{Syrup}{Maple products expressed as syrup, total in thousands of gallons.}
- \item{CAD}{Gross value of maple products in thousands of Canadian dollars.}
- \item{Region}{Postal code abbreviation for territory or province.}
+ \item{C57BL.6J}{genotype of reference mouse train across markers}
+ \item{FVB.NJ..i.}{genotype of alternative mouse train across markers}
+ \item{POS}{SNP marker base-pair location }
+ \item{CHR}{SNP marker chromosome location}
+ \item{X100}{a mouse sample }
+ \item{X101}{a mouse sample }
+ \item{X102}{a mouse sample }
+ \item{X103}{a mouse sample }
+ \item{X104}{a mouse sample }
+ \item{X105}{a mouse sample }
+ \item{X106}{a mouse sample }
+ \item{X107}{a mouse sample }
+ \item{X108}{a mouse sample }
+ \item{X109}{a mouse sample }
+ \item{X110}{a mouse sample }
+ \item{X111}{a mouse sample }
+ \item{X112}{a mouse sample }
+ \item{X113}{a mouse sample }
+ \item{X92}{a mouse sample }
+ \item{X93}{a mouse sample }
+ \item{X94}{a mouse sample }
+ \item{X95}{a mouse sample }
+ \item{X96}{a mouse sample }
+ \item{X97}{a mouse sample }
+ \item{X98}{a mouse sample }
+ \item{X99}{a mouse sample }
+ \item{rsID}{the SNP ID}
 }}
 \source{
 Statistics Canada. Table 001-0008 - Production and farm value of

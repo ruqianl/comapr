@@ -19,7 +19,7 @@ recombination fraction in samples and then derive the Haldane or Kosambi
 genetic distances via mapping functions
 }
 \examples{
-  or_geno <-snp_geno[,grep("X",colnames(snp_geno))]
+or_geno <-snp_geno[,grep("X",colnames(snp_geno))]
 rownames(or_geno) <- paste0(snp_geno$CHR,"_",snp_geno$POS)
 cr_geno <- correctGT(or_geno,ref = snp_geno$C57BL.6J,
                      alt = snp_geno$FVB.NJ..i.,

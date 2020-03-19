@@ -556,7 +556,7 @@ plotMissingGT <- function(geno, missing = "Fail", plot_wg = FALSE,
     switch (plot_type,
       dot = ggplot(data = plot_df)+
         geom_point(mapping =
-                     aes(x = Var1, colour = value, y = Var2))+
+                     aes_string(x = "Var1", colour = "value", y = "Var2"))+
       xlab("markers")+ylab("samples")+
     labs(colour = "is_missing")+
       scale_color_manual(values = c("TRUE" = "red",
@@ -564,7 +564,7 @@ plotMissingGT <- function(geno, missing = "Fail", plot_wg = FALSE,
       theme_classic()+theme(axis.text.x = element_text(angle = -90)),
 
       bar =  ggplot(data = plot_df)+
-      geom_bar(mapping = aes( fill = value, x = Var1))+
+      geom_bar(mapping = aes_string( fill = "value", x = "Var1"))+
       xlab("markers")+ylab("samples")+
       labs(fill = "is_missing")+
       scale_fill_manual(values = c("TRUE" = "red",
@@ -575,13 +575,14 @@ plotMissingGT <- function(geno, missing = "Fail", plot_wg = FALSE,
 
 
       } else {
-      remain_m <- plot_df %>% group_by(Var1) %>%
-        summarise(no_missing = sum(value)) %>% filter(.data$no_missing >0)
+      remain_m <- plot_df %>% group_by(.data$Var1) %>%
+        summarise(no_missing = sum(.data$value)) %>% filter(.data$no_missing >0)
 
       plot_df <- plot_df[plot_df$Var1 %in% remain_m$Var1,]
       switch (plot_type,
               dot = ggplot(data = plot_df)+
-                geom_point(mapping =  aes(x = Var1, colour = value, y = Var2))+
+                geom_point(mapping =  aes_string(x = "Var1", colour = "value", 
+                                                 y = "Var2"))+
                 xlab("markers")+ylab("samples")+
                 labs(colour = "is_missing")+
                 scale_color_manual(values = c("TRUE" = "red",
@@ -589,7 +590,7 @@ plotMissingGT <- function(geno, missing = "Fail", plot_wg = FALSE,
                 theme_classic()+theme(axis.text.x = element_text(angle = -90)),
 
               bar =  ggplot(data = plot_df)+
-                geom_bar(mapping = aes( fill = value, x = Var1))+
+                geom_bar(mapping = aes_string( fill = "value", x = "Var1"))+
                 xlab("markers")+ylab("samples")+
                 labs(fill = "is_missing")+
                 scale_fill_manual(values = c("TRUE" = "red",
@@ -957,6 +958,7 @@ getDistortedMarkers <- function(geno, p = c(0.5,0.5)){
 #' @author Ruqian Lyu
 #' @param interactive, it determines whether an interactive
 #' plot will be generated.
+#' @param color_set, the RColorBrewer::brewer.pal color set names 
 #' @export
 #' @examples
 #' or_geno <- snp_geno[,grep("X",colnames(snp_geno))]
@@ -968,10 +970,8 @@ getDistortedMarkers <- function(geno, p = c(0.5,0.5)){
 #' ft_gt <- filterGT(cr_geno)
 #' plotGTFreq(ft_gt)
 
-plotGTFreq <- function(geno, interactive = FALSE){
-  samples <- NULL
-  value <- NULL
-  variable <- NULL
+plotGTFreq <- function(geno, interactive = FALSE,color_set="Set1"){
+
   geno.table <- sapply(colnames(geno), function(sample){
     list(Het = ifelse(is.na(table(geno[,sample],useNA = "no")["Het"]),
                       0,
@@ -987,14 +987,14 @@ plotGTFreq <- function(geno, interactive = FALSE){
   pltdf <- melt(geno.table)
 
   if(interactive){
-    ply1 <- plot_ly(pltdf, x=~samples,y=~value,type = "scatter",
-                    color =  ~variable)
+    ply1 <- plot_ly(pltdf, x=~.data$samples,y=~.data$value,type = "scatter",
+                    color = ~.data$variable,mode = "markers",colors = color_set)
     return(ply1)
   } else {
 
     stplt1 <- ggplot(data = pltdf)+
-      geom_point(mapping = aes(x = samples, y = value,
-                               color = variable))+
+      geom_point(mapping = aes_string(x = "samples", y = "value",
+                               color = "variable"))+
       theme_classic()+
       ylab("Genotype Frequecies for each sample")+labs(color ="Genotype")+
       theme(axis.text.x = element_text(angle =-90))

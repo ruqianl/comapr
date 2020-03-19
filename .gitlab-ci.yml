@@ -72,7 +72,7 @@ codecov:
   image: svirlyu/comapr_dev
   stage: test
   script:
-    - R -e 'covr::codecov()'
+    - R -e 'covr::package_coverage(type = c("tests","examples"))'
 
 install:
   tags:

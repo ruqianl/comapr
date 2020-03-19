@@ -7,8 +7,6 @@ stages:
   - check
   - test
   - deploy
-  - checknotes
-  - checkwarnings
 
 variables:
   _R_CHECK_CRAN_INCOMING_: "false"
@@ -50,13 +48,13 @@ checkwarnings:
   script:
     - R -e 'devtools::check(error_on = c("warning"),document = FALSE, args = "--no-tests")'
 
-checknotes:
-  stage: checknotes
-  tags:
-    - docker
-  image: svirlyu/comapr_dev
-  script:
-    - R -e 'devtools::check(error_on = c("note"),document = FALSE, args = "--no-tests")'
+#checknotes:
+#  stage: checknotes
+#  tags:
+#    - docker
+#  image: svirlyu/comapr_dev
+#  script:
+#    - R -e 'devtools::check(error_on = c("note"),document = FALSE, args = "--no-tests")'
 
 unittests:
   stage: test
@@ -72,7 +70,7 @@ codecov:
   image: svirlyu/comapr_dev
   stage: test
   script:
-    - R -e 'covr::package_coverage(type = c("tests","examples"))'
+    - R -e 'covr::gitlab()'
 
 install:
   tags:
@@ -81,3 +79,16 @@ install:
   stage: deploy
   script:
     - R -e 'devtools::install()'
+    
+pages:
+  stage: deploy
+  tags: 
+    - pages
+  script:
+    - echo 'Nothing to do...'
+  artifacts:
+    paths:
+      - public
+  only:
+    - master
+

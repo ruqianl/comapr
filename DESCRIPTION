@@ -20,7 +20,8 @@ Imports:
  gridExtra,
  plotly,
  ComplexHeatmap,
- circlize
+ circlize,
+ rlang
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -30,7 +31,5 @@ Suggests:
     BiocStyle,
     knitr,
     rmarkdown,
-    testthat (>= 2.1.0),
-    UpSetR,
-    chromoMap,
-    ggrepel
+    testthat (>= 2.1.0)
+    

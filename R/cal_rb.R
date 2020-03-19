@@ -1,8 +1,4 @@
 
-#title: "YELN_2019_09_04_Genetic-mapsTest"
-#author: "Ruqian Lyu"
-#date: "9/4/2019"
-
 
 #' @import methods
 NULL
@@ -224,7 +220,7 @@ count_cos <- function(s_gt, interval_df, chrs, chrPos, type = "bool"){
   stopifnot(length(s_gt)==length(chrs))
   stopifnot(length(s_gt)==length(chrPos))
   stopifnot(type == "bool" | type == "counts")
-  is_rb <- NULL
+#  is_rb <- NULL
   interval_df$gt <- s_gt
 
   interval_df$gt_before <- interval_df$gt
@@ -236,11 +232,6 @@ count_cos <- function(s_gt, interval_df, chrs, chrPos, type = "bool"){
   interval_df$is_rb <- (interval_df$gt != interval_df$gt_before &
                           interval_df$chrs == interval_df$chr_before)
 
-  # interval_df$is_rb_na_asF <- interval_df$is_rb
-  # interval_df$is_rb_na_asF[is.na(interval_df$is_rb_na_asF)] <- FALSE
-
-
-  #  temp_df2$cum_rb <- cumsum(temp_df2$is_rb )
   interval_df <- data.frame(interval_df)
 
 
@@ -249,9 +240,11 @@ count_cos <- function(s_gt, interval_df, chrs, chrPos, type = "bool"){
     rownames(interval_df) <- paste0(interval_df$chrs,"_",interval_df$interval_s,"_",
                                     interval_df$interval_e)
     return (interval_df[,"is_rb",drop =FALSE])
+
   } else {
     interval_df <- interval_df %>% group_by(chrs) %>%
-      mutate(cum_rb = cumsum(!is.na(is_rb) & is_rb))
+      mutate(cum_rb = cumsum(!is.na(.data$is_rb) & .data$is_rb))
+
     interval_df <- data.frame(interval_df)
 
     rownames(interval_df) <- paste0(interval_df$chrs,"_",interval_df$interval_s,"_",
@@ -350,7 +343,7 @@ correctGT <- function(gt_matrix, ref, alt, chr, ref_change_to = "Het",
 #'
 #' @param chrs the chromosomes for markers
 #' @examples
-#'  or_geno <-snp_geno[,grep("X",colnames(snp_geno))]
+#' or_geno <-snp_geno[,grep("X",colnames(snp_geno))]
 #' rownames(or_geno) <- paste0(snp_geno$CHR,"_",snp_geno$POS)
 #' cr_geno <- correctGT(or_geno,ref = snp_geno$C57BL.6J,
 #'                      alt = snp_geno$FVB.NJ..i.,
@@ -429,6 +422,7 @@ detectCO <-function(geno, prefix = "Sample_",
 #'
 #' rb_rate <- calGeneticMap(co_geno)
 #' @importFrom plotly summarise
+#' @importFrom rlang .data
 #' @return data.frame
 #' data.frame for all markers with Haldane and Kosambi morgans calculated
 #' @export
@@ -436,22 +430,33 @@ detectCO <-function(geno, prefix = "Sample_",
 calGeneticMap <- function(co_geno){
   stopifnot(!is.null(rownames(co_geno)))
   stopifnot(!is.null(colnames(co_geno)))
-  t_counts <- NULL
-  f_counts <- NULL
-  total_calls <- NULL
-  total_samples <- NULL
-  na_rate <- NULL
-  pointEst <- NULL
-  "." <- NULL
-  total_na <- NULL
+
   #gt_matrix_co
-  rb_geno <- co_geno %>% mutate(t_counts = rowSums(.,na.rm = TRUE),
-                     total_na = rowSums(is.na(.)),
-                     f_counts = rowSums(.==FALSE,na.rm = TRUE),
-                     total_calls = (f_counts + t_counts),
-                     total_samples = length(.))
-  rb_geno <- data.frame(rb_geno)
+  # rb_geno <- co_geno %>% mutate(t_counts = rowSums(co_geno,na.rm = TRUE),
+  #                    total_na = rowSums(is.na(co_geno)),
+  #                    f_counts = rowSums(co_geno==FALSE,na.rm = TRUE),
+  #                    total_calls = (f_counts + t_counts),
+  #                    total_samples = length(co_geno))
+
+  rb_geno <- data.frame("t_counts" = rowSums(co_geno,na.rm = TRUE),
+                        "total_na" = rowSums(is.na(co_geno)),
+                        "f_counts" = rowSums(co_geno==FALSE,
+                                             na.rm = TRUE))
+
+  rb_geno_add <- data.frame( total_calls = (rb_geno$f_counts +
+                                              rb_geno$t_counts),
+
+                             total_samples = dim(co_geno)[2])
+  rb_geno <- cbind(rb_geno,rb_geno_add)
+
   rownames(rb_geno) <- rownames(co_geno)
+
+  #stopifnot(rownames(co_geno)==rownames(rb_geno))
+
+  # rb_geno <- cbind(co_geno,rb_geno)
+  # rb_geno <- data.frame(rb_geno)
+  # rownames(rb_geno) <- rownames(co_geno)
+
   # gt_matrix_dst <-
   #   gt_matrix_co_by_marker %>%  group_by(interval_ID) %>% summarise(
   #     t_counts = sum(Cross_over == TRUE, na.rm = TRUE),
@@ -470,16 +475,15 @@ calGeneticMap <- function(co_geno){
   }
 
   rb_geno <- rb_geno[rb_geno$total_calls != 0, ]
+#
+#   rb_geno_f <- rb_geno %>%  mutate(na_rate = .data$total_na / .data$total_samples,
+#            pointEst = .data$t_counts / .data$total_calls)
 
-  rb_geno_f <- rb_geno %>%  mutate(na_rate = total_na /total_samples,
-           pointEst = t_counts / total_calls)
-  rb_geno_f <- data.frame(rb_geno_f)
+  rb_geno_f <- data.frame(na_rate = rb_geno$total_na / rb_geno$total_samples,
+                          pointEst = rb_geno$t_counts / rb_geno$total_calls)
+
   rownames(rb_geno_f) <- rownames(rb_geno)
-
-           # lower_ci = Hmisc::binconf(t_counts,total_calls,alpha = alpha)[,"Lower"],
-           # upper_ci = Hmisc::binconf(t_counts,total_calls,alpha = alpha)[,"Upper"])
-
-#co_rate = t_counts / total_calls,
+  rb_geno_f <- cbind(rb_geno, rb_geno_f)
 
   if (any(rb_geno_f$pointEst >= 0.5)) {
     warning(
@@ -495,14 +499,9 @@ calGeneticMap <- function(co_geno){
 
   rb_geno_f <- rb_geno_f[rb_geno_f$pointEst < 0.5, ]
 
-  rb_geno_e <-
-    rb_geno_f %>% mutate(haldane = -0.5 * log(1 - 2 * pointEst),
-           kosambi = 0.25 * log((1 + 2 * pointEst) / (1 - 2 * pointEst)))
-  rb_geno_e <- data.frame(rb_geno_e)
-  rownames(rb_geno_e) <- rownames(rb_geno_f)
-           # kosambi_lower = 0.25 * log((1 + 2 * lower_ci) / (1 - 2 * lower_ci)),
-           # kosambi_upper = 0.25 * log((1 + 2 * upper_ci) / (1 - 2 * upper_ci)))
-
+  rb_geno_e <- data.frame(haldane = -0.5 * log(1 - 2 * rb_geno_f$pointEst),
+           kosambi = 0.25 * log((1 + 2 * rb_geno_f$pointEst) / (1 - 2 * rb_geno_f$pointEst)))
+  rb_geno_e <- cbind(rb_geno_f,rb_geno_e)
 
   return(rb_geno_e)
 }
@@ -545,26 +544,13 @@ plotMissingGT <- function(geno, missing = "Fail", plot_wg = FALSE,
                           plot_type = "dot"){
 
   stopifnot(plot_type == "dot" | plot_type == "bar")
-  Var1 <- NULL
-  value <- NULL
-  Var2 <- NULL
-  "." <- NULL
-  no_missing <- NULL
+
 
   mis_matrix <- apply(geno, 2, function(es){
     is.na(es) | es == missing
     })
 
   plot_df <- melt(mis_matrix)
-
-  # plot_df$CHR <- sapply(strsplit(as.character(plot_df$Var1),"_"),`[[`,1)
-  # plot_df$POS <- as.numeric(sapply(strsplit(as.character(plot_df$Var1),"_"),
-  #                                  `[[`,2))
-  # plot_df$CHR <- factor(plot_df$CHR,levels = c(seq(1:22),"X","Y"))
-
-  #plot_df <- plot_df[order(plot_df$CHR, xtfrm(plot_df$POS)), ]
-  #plot_df$Var1 <- factor(plot_df$Var1,levels = unique(plot_df$Var1))
-  #plot_df <- plot_df[plot_df$value,]
 
   if(plot_wg){
     switch (plot_type,
@@ -590,7 +576,7 @@ plotMissingGT <- function(geno, missing = "Fail", plot_wg = FALSE,
 
       } else {
       remain_m <- plot_df %>% group_by(Var1) %>%
-        summarise(no_missing = sum(value)) %>% filter(.,no_missing >0)
+        summarise(no_missing = sum(value)) %>% filter(.data$no_missing >0)
 
       plot_df <- plot_df[plot_df$Var1 %in% remain_m$Var1,]
       switch (plot_type,
@@ -648,11 +634,14 @@ countGT <- function(geno, plot =TRUE,interactive=FALSE){
               mode = "markers",
               type = "scatter")
 
-      ply2 <- plotly::plot_ly(data = data.frame(sample_index = seq(1:length(colSums(!is.na(geno)))),
+      ply2 <- plotly::plot_ly(data = 
+                                data.frame(sample_index = 
+                                             seq(1:length(colSums(!is.na(geno)))),
                                 No.Markers =  colSums(!is.na(geno)),
                                 sample_ID = colnames(geno)),hoverinfo="text",
               x = ~sample_index, y = ~No.Markers,
-              text = ~paste('</br> Sample ID: ',sample_ID), name = "No. markers by sample",type = "scatter",
+              text = ~paste('</br> Sample ID: ',sample_ID), 
+              name = "No. markers by sample",type = "scatter",
               mode = "markers")
 
       p <- subplot(ply1,ply2)
@@ -661,13 +650,20 @@ countGT <- function(geno, plot =TRUE,interactive=FALSE){
 
     } else {
 
-      p1 <- ggplot()+geom_point(mapping = aes(x = seq(1:length(rowSums(!is.na(geno)))),
-                                              y = rowSums(!is.na(geno))))+theme_classic()+
-        ylab("Number of samples")+xlab("markers index")+ggtitle("No. samples by marker")
+      p1 <- ggplot()+
+        geom_point(mapping = aes(x = seq(1:length(rowSums(!is.na(geno)))),
+                                 y = rowSums(!is.na(geno))))+
+        theme_classic()+
+        ylab("Number of samples")+xlab("markers index")+
+        ggtitle("No. samples by marker")
 
-      p2 <- ggplot()+geom_point(mapping = aes(x = seq(1:length(colSums(!is.na(geno)))),
-                                              y = colSums(!is.na(geno))))+theme_classic()+
-        ylab("Number of markers")+xlab("samples index")+ggtitle("No. markers by sample")
+      p2 <- ggplot()+
+        geom_point(mapping = aes(x = seq(1:length(colSums(!is.na(geno)))),
+                                 y = colSums(!is.na(geno))))+
+        theme_classic()+
+        ylab("Number of markers")+
+        xlab("samples index")+
+        ggtitle("No. markers by sample")
       p <- grid.arrange(p1, p2, nrow = 1)
     }
     return(list(plot = p,

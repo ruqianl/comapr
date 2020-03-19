@@ -7,6 +7,7 @@ stages:
   - check
   - test
   - deploy
+  - checkwarnings
 
 variables:
   _R_CHECK_CRAN_INCOMING_: "false"
@@ -14,6 +15,7 @@ variables:
   CODECOV_TOKEN: "2329aed3-de38-468c-9a06-95564363211c"
   GIT_SSL_NO_VERIFY: "true"
 
+before_script:
 
 buildbinary:
   tags: 
@@ -47,6 +49,7 @@ checkwarnings:
   script:
     - R -e 'devtools::check(error_on = c("warning"),document = FALSE, args = "--no-tests")'
 
+
 unittests:
   stage: test
   tags:
@@ -61,7 +64,7 @@ codecov:
   image: svirlyu/comapr_dev
   stage: test
   script:
-    - R -e 'covr::package_coverage()'
+    - R -e 'covr::gitlab()'
 
 install:
   tags:
@@ -70,5 +73,3 @@ install:
   stage: deploy
   script:
     - R -e 'devtools::install()'
-    
-

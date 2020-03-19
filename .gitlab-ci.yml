@@ -38,7 +38,7 @@ checkerrors:
   image: svirlyu/comapr_dev
   stage: check
   script:
-    - R -e 'if (!identical(devtools::check(document = FALSE, args = "--no-tests")[["errors"]], character(0))) stop("Check with Errors")'
+    - R -e 'devtools::check(error_on = c("error"),document = FALSE, args = "--no-tests")'
 
 checkwarnings:
   tags:
@@ -46,7 +46,7 @@ checkwarnings:
   image: svirlyu/comapr_dev
   stage: check
   script:
-    - R -e 'if (!identical(devtools::check(document = FALSE, args = "--no-tests")[["warnings"]], character(0))) stop("Check with Warnings")'
+    - R -e 'devtools::check(error_on = c("warning"),document = FALSE, args = "--no-tests")'
 
 checknotes:
   stage: check
@@ -54,7 +54,7 @@ checknotes:
     - docker
   image: svirlyu/comapr_dev
   script:
-    - R -e 'if (!identical(devtools::check(document = FALSE, args = "--no-tests")[["notes"]], character(0))) stop("Check with Notes")'
+    - R -e 'devtools::check(error_on = c("note"),document = FALSE, args = "--no-tests")'
 
 unittests:
   stage: test

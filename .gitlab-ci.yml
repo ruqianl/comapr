@@ -7,6 +7,8 @@ stages:
   - check
   - test
   - deploy
+  - checknotes
+  - checkwarnings
 
 variables:
   _R_CHECK_CRAN_INCOMING_: "false"
@@ -44,12 +46,12 @@ checkwarnings:
   tags:
     - docker
   image: svirlyu/comapr_dev
-  stage: check
+  stage: checkwarnings
   script:
     - R -e 'devtools::check(error_on = c("warning"),document = FALSE, args = "--no-tests")'
 
 checknotes:
-  stage: check
+  stage: checknotes
   tags:
     - docker
   image: svirlyu/comapr_dev

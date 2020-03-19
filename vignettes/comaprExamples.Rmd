@@ -14,7 +14,8 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.width = 8,
-  fig.height = 8
+  fig.height = 8,
+  dpi = 72
 )
 ```
 
@@ -38,13 +39,14 @@ We load the SNP genotyping data from excel spreadsheet, here we are using a exam
 
 ```{r}
 
-snp_geno
+head(snp_geno[,1:8])
 
 ```
 
 Check if we have any duplicated markers names by checking any duplicate `CHR_POS`:
 
 Then we name the markers using the combination of CHR and POS.
+
 ```{r}
 snp_geno[duplicated(paste0(snp_geno$CHR,"_",snp_geno$POS)),]
 snp_geno$CHR_POS <- paste0(snp_geno$CHR,"_",snp_geno$POS)
@@ -65,7 +67,7 @@ The genotype matrix is a matrix of markers (rows) by samples(columns):
 ```{r}
 gt_matrix <- snp_geno[,grep("[0-9].*[0-9]$",colnames(snp_geno))]
 
-head(gt_matrix)
+head(gt_matrix[,1:5])
 ```
 
 `plotMissingGT` generates dot plots plot of markers by samples indicating which markers are missing from which samples.

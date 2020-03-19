@@ -48,14 +48,6 @@ checkwarnings:
   script:
     - R -e 'devtools::check(error_on = c("warning"),document = FALSE, args = "--no-tests")'
 
-#checknotes:
-#  stage: checknotes
-#  tags:
-#    - docker
-#  image: svirlyu/comapr_dev
-#  script:
-#    - R -e 'devtools::check(error_on = c("note"),document = FALSE, args = "--no-tests")'
-
 unittests:
   stage: test
   tags:
@@ -81,9 +73,9 @@ install:
     - R -e 'devtools::install()'
     
 pages:
-  stage: deploy
   tags: 
     - pages
+  stage: deploy
   script:
     - echo 'Nothing to do...'
   artifacts:

@@ -3,10 +3,10 @@
 #' @import methods
 NULL
 
-#' `label_gt` for changing genotypes in alleles to labels
+#' `label_gt` for changing genotypes in alleles format to labels
 #'
 #' It turns a vector of Genotypes to a vector of Labels consist of
-#' `Homo_ref`, `Homo_alt`, and `Het` given the genotypes for reference
+#' `Homo_ref`, `Homo_alt`, and `Het` given the known genotypes for reference
 #' and alternative strains.
 #'
 #'
@@ -26,31 +26,35 @@ NULL
 #'
 #' @details
 #' This function takes the a sample's genotype across each SNP marker in alleles
-#' and compare with genotypes of in-bred reference and alternative strains to. If the
-#' sample's genotype for a particular SNP marker is the same with the reference
-#' strain, it is labelled as Homo_ref \code{homogeneous reference} for a particular
-#' SNP marker; if the sample's genotype is the same with the alternative strain
-#' it is labelled as Homo_alt \code{homogeneous alternative} for a particular SNP
-#' marker; if the sample's genotype is heterozygous then it is labelled as
-#' Het \code{heterozygous} for this particular genotypes. If it does not fall in any
-#' of the three cases, it is labelled as `missing`.
+#' and compare with genotypes of in-bred reference and alternative strains to. 
+#' If the sample's genotype for a particular SNP marker is the same with the 
+#' reference strain, it is labelled as Homo_ref \code{homogeneous reference} for
+#' a particular SNP marker; if the sample's genotype is the same with the 
+#' alternative strain it is labelled as Homo_alt \code{homogeneous alternative} 
+#' for a particular SNP marker; if the sample's genotype is heterozygous then it
+#' is labeled as Het \code{heterozygous} for this particular genotypes. If it 
+#' does not fall in any of the three cases, it is labelled as the string specified
+#' by the argument `missing`.
 #'
-#' Note that the `Fail` genotype is still labelled as `Fail` after this function.
+#' Note that the wrong/failed genotype is labelled as the string in `missing` 
+#' after this function.
 #' If there is a different label for failed genotype, provide the label using
-#' the `fail` argument.
+#' the `missing` argument.
 #'
 #' @keywords internal
 #' @author Ruqian Lyu
 
-label_gt <- function(s_gt,ref,alt,fail ="Fail"){
+label_gt <- function(s_gt,ref,alt,missing ="Fail"){
   stopifnot(length(s_gt) == length(ref))
   stopifnot(length(ref) == length(alt))
 
-  ## initialise the vector of GT with NAs
-  tem <- rep("missing",length(s_gt))
+  ## initialise the vector of GT with `missing`
+  tem <- rep(missing,length(s_gt))
+  
+  #tem <- rep("missing",length(s_gt))
   ## keep the Fail in
-  tem[s_gt == fail] <- fail
-  ## if the genotype is the same as referece:
+  ## tem[s_gt == missing] <- missing
+  ## if the genotype is the same as reference:
   tem[s_gt == ref] <- "Homo_ref"
   ## if the genotype is the same as alternative:
   tem[s_gt == alt] <- "Homo_alt"
@@ -63,12 +67,10 @@ label_gt <- function(s_gt,ref,alt,fail ="Fail"){
   tem[s_gt == het1 | s_gt == het2] <- "Het"
 
   ## the wrong GTs are GTs that are neither Home_ref, Home_alt, Het or Fail
-  ## the wrong GT will be converted to Missing
+  ## the wrong GT will be converted to `fail`
 
   return(tem)
 }
-
-
 
 
 
@@ -89,8 +91,8 @@ label_gt <- function(s_gt,ref,alt,fail ="Fail"){
 #' @keywords internal
 #'
 #' @return
-#' a vector of genotype labels with Home_ref corrected to \code{Het} or \code{Fail}
-#' as specified by the argument change_to.
+#' a vector of genotype labels with Home_ref corrected to \code{Het} or 
+#' \code{Fail} as specified by the argument change_to.
 
 correct_ref <- function(s_gt, change_to = 'Fail'){
 
@@ -293,25 +295,28 @@ count_cos <- function(s_gt, interval_df, chrs, chrPos, type = "bool"){
 #'
 #' @author Ruqian Lyu
 
-correctGT <- function(gt_matrix, ref, alt, chr, ref_change_to = "Het",
+correctGT <- function(gt_matrix, ref, alt, chr, ref_change_to = "Fail",
                       infer_fail = FALSE, fail = 'Fail')
 {
   stopifnot(ref_change_to %in% c('Het','Fail'))
-  stopifnot(length(ref)==length(alt))
-  stopifnot(length(ref)==dim(gt_matrix)[1])
+  stopifnot(length(ref) == length(alt))
+  stopifnot(length(ref) == dim(gt_matrix)[1])
 
   ### change  GT to labels
   row_names <- rownames(gt_matrix)
   gt_matrix <- apply(as.matrix(gt_matrix),2, label_gt,
                      ref = ref,
                      alt = alt)
-  gt_matrix <- apply(as.matrix(gt_matrix),2, correct_ref, change_to = ref_change_to )
+  gt_matrix <- apply(as.matrix(gt_matrix),2, correct_ref, 
+                     change_to = ref_change_to )
 
   ### infer and Fill in Fail or put NA in Fail
   if(infer_fail){
     gt_matrix <- apply(as.matrix(gt_matrix),2, fill_fail,
                        fail = "Fail",chr = as.factor(chr))
   }
+  
+  ## change SNPs with genotype `fail` to NA
   gt_matrix <- apply(as.matrix(gt_matrix),2, change_missing,
                      missing = fail)
 
@@ -604,7 +609,7 @@ plotMissingGT <- function(geno, missing = "Fail", plot_wg = FALSE,
 }
 
 #' countGT
-#' count how many samples have genotypes calls across  markers
+#' count how many samples have genotypes calls across markers
 #' and count how many markers that each individual has called genotypes for
 #'
 #' @importFrom plotly plot_ly subplot
@@ -750,7 +755,8 @@ findDupSamples <- function(geno, threshold = 0.99, plot =TRUE,
   id <- expand.grid( n , n )
 
   #  Get result
-  out <- matrix( colSums( (is.na(geno[ , id[,1] ]) & is.na(geno[ , id[,2] ])) | (geno[ , id[,1] ] == geno[ , id[,2] ]),
+  out <- matrix( colSums( (is.na(geno[ , id[,1] ]) & is.na(geno[ , id[,2] ])) | 
+                            (geno[ , id[,1] ] == geno[ , id[,2] ]),
                           na.rm =TRUE) , ncol = length(n) )
   dimnames(out)[1] <- dimnames(geno)[2]
   dimnames(out)[2] <- dimnames(geno)[2]

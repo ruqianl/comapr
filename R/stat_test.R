@@ -1,2 +1,4 @@
-#Permuation functions and statistic function
+#' permuteTest
+#' 
+
 

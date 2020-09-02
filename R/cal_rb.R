@@ -302,15 +302,17 @@ correctGT <- function(gt_matrix, ref, alt, chr, ref_change_to = "Fail",
   stopifnot(length(ref) == length(alt))
   stopifnot(length(ref) == dim(gt_matrix)[1])
 
-  ### change  GT to labels
+  ### change  GT to labels, non matched GTs are changed to Fail
   row_names <- rownames(gt_matrix)
   gt_matrix <- apply(as.matrix(gt_matrix),2, label_gt,
                      ref = ref,
                      alt = alt)
+  ## Homo_ref calls are changed to Fail since it is not likely 
   gt_matrix <- apply(as.matrix(gt_matrix),2, correct_ref, 
                      change_to = ref_change_to )
 
-  ### infer and Fill in Fail or put NA in Fail
+  ### infer and fill in Fail or put NA in Fail
+  ## NOT USE THIS 
   if(infer_fail){
     gt_matrix <- apply(as.matrix(gt_matrix),2, fill_fail,
                        fail = "Fail",chr = as.factor(chr))
@@ -404,6 +406,88 @@ detectCO <-function(geno, prefix = "Sample_",
   return(gt_matrix_co)
 }
 
+#' countCOs
+#' 
+#' Count number of COs within each marker iterval
+#' COs identified overlapping missing markers are distributed according 
+#' to marker interval sizes
+#' @importFrom dplyr group_by
+#' @importFrom dplyr %>%
+#' @importFrom dplyr mutate
+#' @importFrom foreach foreach
+#' @importFrom foreach %dopar%
+#' @importFrom GenomicRanges GRanges
+#' @importFrom IRanges mergeByOverlaps
+#' @importFrom IRanges IRanges
+#' 
+#' @param geno corrected genotype matrix returned by \code{correctGT}
+#' @return 
+#' data.frame with markers as rows and samples in columns, values as the
+#' number of COs estimated for each marker interval
+
+#' @author Ruqian Lyu
+countCOs <- function(geno ){
+  snp_wg_gr <-  GenomicRanges::GRanges(
+    seqnames = sapply(strsplit(rownames(geno),"_"),`[[`,1),
+    ranges = IRanges::IRanges(start = 
+                               as.numeric(sapply(strsplit(rownames(geno),"_"),`[[`,2)),
+                             width = 1)
+  )
+  foreach(sid = colnames(geno),.combine = "cbind",
+          .packages = c("GenomicRanges","dplyr")) %dopar% {
+            
+            marker_names <- rownames(geno)
+            gts <- geno[,sid]
+            #gts <- na.omit(gts)
+            re_df <- data.frame(chr=sapply(strsplit(marker_names,"_"),`[[`,1),
+                                Pos=as.numeric(sapply(strsplit(marker_names,"_"),`[[`,2)),
+                                GT = gts,
+                                stringsAsFactors = F)
+            to_re <- re_df %>% filter(!is.na(GT)) %>% dplyr::group_by(chr) %>%
+              dplyr::mutate(CO = GT!= dplyr::lag(GT),
+                     Prev = dplyr::lag(Pos)) %>% 
+              filter(CO) %>% dplyr::mutate(coid = cumsum(CO))
+        
+            if(nrow(to_re)==0){
+              re_df <- data.frame(chr=re_df$chr,pos = re_df$pos,
+                                  crossovers = 0)
+              colnames(re_df) <- c(colnames(re_df)[1:2],sid)
+              
+            } else {
+              co_gr <- GenomicRanges::GRanges(
+                seqnames = to_re$chr,
+                ranges = IRanges(start = to_re$Prev,
+                                 end = to_re$Pos),
+                coid = to_re$coid
+              )
+              mapped_marker_state <- mergeByOverlaps(snp_wg_gr,co_gr)
+              mapped_marker_state <- as.data.frame(mapped_marker_state)
+              
+              mapped_marker_state <- mapped_marker_state %>%  
+                group_by(snp_wg_gr.seqnames,coid) %>% 
+                mutate(snp_wg_gr.prev = dplyr::lag(snp_wg_gr.start,
+                                            default = dplyr::first(snp_wg_gr.start))) %>%
+                mutate(len_prop = (snp_wg_gr.start-snp_wg_gr.prev)/(unique(co_gr.width)-1))
+              
+              re_df <- data.frame(chr=re_df$chr,pos = re_df$Pos,
+                                  crossovers = 0)
+              ## keep non zero counts (TEST)
+              ## Finds the first matched row with the same Pos. In case this Pos is
+              ## the start SNP for the next interval
+              mapped_marker_state <- 
+                mapped_marker_state[mapped_marker_state$snp_wg_gr.start != 
+                                      mapped_marker_state$snp_wg_gr.prev,]
+              re_df$crossovers[match(mapped_marker_state$snp_wg_gr.start,
+                                     re_df$pos)] <- mapped_marker_state$len_prop
+              colnames(re_df) <- c(colnames(re_df)[1:2],sid)
+              
+              
+            }
+            #   message(sid)
+            rownames(re_df) <- paste0(re_df$chr,"_",re_df$pos)
+            re_df[,3,drop =F]
+          }
+}
 
 #' Calculate genetic map length
 #'
@@ -816,14 +900,16 @@ findDupSamples <- function(geno, threshold = 0.99, plot =TRUE,
 
 #' findDupMarkers
 #'
-#' Find the duplicated markers by look at the number of matching genotypes across samples
-#'
+#' Find the duplicated markers by look at the number of matching genotypes across 
+#' samples
+#' 
 #' @inheritParams countGT
-#' @param threshold the frequency cut-off for determining whether the pair of markers
-#' are duplicated, defaults to \code{0.9}
+#' @param threshold the frequency cut-off for determining whether the pair of 
+#' markers are duplicated, defaults to \code{0.9}
 #' @param in_text whether text of frequencies should be displayed in the
 #' heatmap cells
-#' @param plot whether a frequency heatmap plot should be generated
+#' @param plot whether a frequency heatmap plot should be generated. If the 
+#' number of markers is large, do not plot.
 #' @return
 #' The paris of duplicated markers.
 #'
@@ -840,7 +926,7 @@ findDupSamples <- function(geno, threshold = 0.99, plot =TRUE,
 #' dups <- findDupMarkers(cr_geno,plot = TRUE)
 
 
-findDupMarkers <- function(geno, threshold = 0.99, plot =TRUE,
+findDupMarkers <- function(geno, threshold = 0.99, plot =FALSE,
                            in_text = TRUE){
 
   n <- seq_len( nrow(geno) )

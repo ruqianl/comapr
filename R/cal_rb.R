@@ -77,7 +77,7 @@ label_gt <- function(s_gt,ref,alt,missing ="Fail"){
 #' Function for correcting wrong genotypes
 #'
 #' If we see home_ref markers in the samples, then something is wrong.
-#' We can change all home_ref genotypes to hets as a rough correction or
+#' We can change all home_ref genotypes to Hets count as a rough correction or
 #' just change it to Fail.
 #'
 #' @param s_gt

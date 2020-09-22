@@ -17,7 +17,7 @@ NULL
 #' ref, a vector of genotypes for reference strain across markers
 #'
 #' @param alt
-#' alt, a vector of genotypes for alternative starin across markers
+#' alt, a vector of genotypes for alternative strain across markers
 #'
 #' @return
 #' a vector of labels \code{Homo_ref, Homo_alt, Het} indicating the progeny's
@@ -115,7 +115,7 @@ correct_ref <- function(s_gt, change_to = 'Fail'){
 #' change SNPs with genotype 'Fail' to \code{NA}
 #'
 #' @param s_gt, a column of labelled genotypes
-#' @param missing, the string used for encoding missing values default to \code{missing}
+#' @param missing, the string used for encoding missing values default to \code{Fail}
 #' @return
 #' a vector of genotypes with Fail substituted by `NA`
 #' @details
@@ -202,7 +202,7 @@ fill_fail <- function(s_gt,fail = "Fail",chr = NULL){
 }
 
 
-#' Count crossovers
+#' Count crossovers - deprecated 
 #' count the number of crossovers for each sample, per chromosome, cumulatively
 #'
 #' @param s_gt genotypes of a sample along markers across chromosomes
@@ -255,7 +255,9 @@ count_cos <- function(s_gt, interval_df, chrs, chrPos, type = "bool"){
   }
 }
 
-#' correctGT, function for formatting and correction genotypes of markers
+#' correctGT
+#' 
+#' function for formatting and correction genotypes of markers
 #'
 #' This function changes genotype in alleles to genotype labels, change Homo_ref
 #' to Hets/Fail, infer Failed genotype, and change "Failed" to NA for
@@ -329,7 +331,7 @@ correctGT <- function(gt_matrix, ref, alt, chr, ref_change_to = "Fail",
 }
 
 
-#' detectCO
+#' detectCO, deprecated
 #'
 #' detect crossovers between every two markers by detecting if there is a change
 #' of genotypes
@@ -408,9 +410,10 @@ detectCO <-function(geno, prefix = "Sample_",
 
 #' countCOs
 #' 
-#' Count number of COs within each marker iterval
-#' COs identified overlapping missing markers are distributed according 
-#' to marker interval sizes
+#' Count number of COs within each marker interval
+#' COs identified in the interval overlapping missing markers are distributed
+#' according to marker interval base-pair sizes
+#' 
 #' @importFrom dplyr group_by
 #' @importFrom dplyr %>%
 #' @importFrom dplyr mutate

@@ -20,14 +20,14 @@
 #' co_geno[3,] <- rep(TRUE,dim(co_geno)[2])
 #'
 #'
-#' rb_rate <- calGeneticMap(co_geno)
+#' rb_rate <- calGeneticDist(co_geno)
 #' @importFrom plotly summarise
 #' @importFrom rlang .data
 #' @return data.frame
 #' data.frame for all markers with Haldane and Kosambi morgans calculated
 #' @export
 
-calGeneticDist <- function(co_geno){
+calGeneticDist <- function(co_geno,bin_size=1000000){
   stopifnot(!is.null(rownames(co_geno)))
   stopifnot(!is.null(colnames(co_geno)))
   ## NEED TO UPDATE To accommadate the new countCOs function **##

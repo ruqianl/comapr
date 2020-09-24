@@ -272,3 +272,5 @@ correctGT <- function(gt_matrix, ref, alt, chr, ref_change_to = "Fail",
   gt_matrix
   
 }
+
+#setMethod(correctGT, signature = c("matrix","charactor","cha"))

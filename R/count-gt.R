@@ -22,49 +22,41 @@
 #' A list of two elements including \code{n_markers} and \code{n_samples}
 
 countGT <- function(geno, plot =TRUE,interactive=FALSE){
+  n_samples <- rowSums(!is.na(geno))
+  n_markers <- colSums(!is.na(geno))
+  
+  pl_df <- data.frame(counts=c(n_samples,n_markers),
+                      type = c(rep("by_marker", each = length(n_samples)),
+                               rep("by_sample", each= length(n_markers))))
+                      # name = c(names(n_samples),
+                      #          names(n_markers)))
+  type_colors <- c("by_marker"="#003f5c",
+                   "by_sample"="#ffa600")
   if(plot){
     if(interactive){
-      ply1 <- plot_ly(data = data.frame(marker_index =
-                                          seq(1:length(rowSums(!is.na(geno)))),
-                                        No.Samples =  rowSums(!is.na(geno)),
-                                        marker_ID = rownames(geno)),
-                      x = ~marker_index, y = ~No.Samples, hoverinfo="text",
-                      text = ~paste('</br> Marker ID: ',marker_ID),
-                      name = "No. samples by marker",
-                      mode = "markers",
-                      type = "scatter")
-      
-      ply2 <- plotly::plot_ly(data = 
-                                data.frame(sample_index = 
-                                             seq(1:length(colSums(!is.na(geno)))),
-                                           No.Markers =  colSums(!is.na(geno)),
-                                           sample_ID = colnames(geno)),hoverinfo="text",
-                              x = ~sample_index, y = ~No.Markers,
-                              text = ~paste('</br> Sample ID: ',sample_ID), 
-                              name = "No. markers by sample",type = "scatter",
-                              mode = "markers")
-      
-      p <- subplot(ply1,ply2)
+      p <- plot_ly(data =pl_df,
+                   x = ~type,y = ~counts, hoverinfo="text", jitter = 0.3,
+                   boxpoints = "outliers",color = ~type,
+                   text = ~paste('</br> counts ID: ',counts),
+                      type = c("box"))
+
+    #
+      # name = c("by_sample"="No. samples by marker",
+      #          "by_marker"="No. markers by sample")
       return(list(ply = p,n_samples = rowSums(!is.na(geno)),
                   n_markers = colSums(!is.na(geno))))
       
     } else {
       
-      p1 <- ggplot()+
-        geom_point(mapping = aes(x = seq(1:length(rowSums(!is.na(geno)))),
-                                 y = rowSums(!is.na(geno))))+
-        theme_classic()+
-        ylab("Number of samples")+xlab("markers index")+
-        ggtitle("No. samples by marker")
-      
-      p2 <- ggplot()+
-        geom_point(mapping = aes(x = seq(1:length(colSums(!is.na(geno)))),
-                                 y = colSums(!is.na(geno))))+
-        theme_classic()+
-        ylab("Number of markers")+
-        xlab("samples index")+
-        ggtitle("No. markers by sample")
-      p <- grid.arrange(p1, p2, nrow = 1)
+      p <- ggplot(data = pl_df,mapping = aes(y = counts,x = type))+
+        geom_boxplot(size=1.5,aes(fill=type),alpha = 0.5)+
+        geom_jitter(position = "jitter",aes(color=type),size=2,alpha=.8 )+
+        theme_classic(base_size=22)+facet_wrap(.~type,scales = "free")+
+        ylab("Number of samples/markers")+
+#        ggtitle("Genotype counts\nfor markers/samples")+
+        scale_color_manual(values=type_colors)+
+        scale_fill_manual(values=type_colors)
+    
     }
     return(list(plot = p,
                 n_samples = rowSums(!is.na(geno)),
@@ -91,7 +83,7 @@ countGT <- function(geno, plot =TRUE,interactive=FALSE){
 #' @author Ruqian Lyu
 #'
 #' @return
-#' A filtered genotype matrix
+#' The filtered genotype matrix
 #' @export
 #'
 filterGT <- function(geno, min_markers = 5, min_samples = 3){
@@ -106,6 +98,33 @@ filterGT <- function(geno, min_markers = 5, min_samples = 3){
   return(geno[keep_markers, keep_samples])
   
 }
+setGeneric("filterGT")
+setMethod("filterGT",signature = c(geno ="matrix",min_markers = "numeric",
+                                   min_samples = "numeric"),
+          function(geno ,min_markers,
+                   min_samples){
+            filterGT(geno ,min_markers,
+                     min_samples)
+  
+})
+
+setMethod("filterGT",signature = c(geno ="GRanges",min_markers = "numeric",
+                                   min_samples = "numeric"),
+          function(geno ,min_markers,
+                   min_samples){
+            
+            gt_counts <- countGT(mcols(geno),plot = FALSE)
+            keep_markers <- gt_counts$n_samples >= min_samples
+            keep_samples <- gt_counts$n_markers >= min_markers
+            geno <- geno[keep_markers,]
+            
+            mcols(geno) <- mcols(geno)[,keep_samples]
+            message(paste0( "filter out ",sum(keep_markers==FALSE)," marker(s)"))
+            message(paste0( "filter out ",sum(keep_samples==FALSE)," sample(s)"))
+            
+            return(geno)
+            
+          })
 
 #' Plot markers with missing genotypes, deprecate
 #'

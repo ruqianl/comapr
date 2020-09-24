@@ -10,75 +10,96 @@
 #' @importFrom dplyr mutate
 #' @importFrom foreach foreach
 #' @importFrom foreach %dopar%
-#' @importFrom GenomicRanges GRanges
+#' @importFrom BiocParallel bplapply
+#' @importFrom GenomicRanges GRanges seqnames mcols
 #' @importFrom IRanges mergeByOverlaps
-#' @importFrom IRanges IRanges
+#' @importFrom IRanges IRanges ranges
 #' 
-#' @param geno corrected genotype matrix returned by \code{correctGT}
+#' @param geno GRanges object with SNP positions and genotypes across samples
+
 #' @return 
 #' data.frame with markers as rows and samples in columns, values as the
 #' number of COs estimated for each marker interval
 
 #' @author Ruqian Lyu
-countCOs <- function(geno ){
-  snp_wg_gr <-  GenomicRanges::GRanges(
-    seqnames = sapply(strsplit(rownames(geno),"_"),`[[`,1),
-    ranges = IRanges::IRanges(start = 
-                                as.numeric(sapply(strsplit(rownames(geno),"_"),`[[`,2)),
-                              width = 1)
-  )
-  foreach(sid = colnames(geno),.combine = "cbind",
-          .packages = c("GenomicRanges","dplyr")) %dopar% {
-            
-            marker_names <- rownames(geno)
-            gts <- geno[,sid]
-            #gts <- na.omit(gts)
-            re_df <- data.frame(chr=sapply(strsplit(marker_names,"_"),`[[`,1),
-                                Pos=as.numeric(sapply(strsplit(marker_names,"_"),`[[`,2)),
-                                GT = gts,
-                                stringsAsFactors = F)
-            to_re <- re_df %>% filter(!is.na(GT)) %>% dplyr::group_by(chr) %>%
-              dplyr::mutate(CO = GT!= dplyr::lag(GT),
-                            Prev = dplyr::lag(Pos)) %>% 
-              filter(CO) %>% dplyr::mutate(coid = cumsum(CO))
-            
-            if(nrow(to_re)==0){
-              re_df <- data.frame(chr=re_df$chr,pos = re_df$pos,
-                                  crossovers = 0)
-              colnames(re_df) <- c(colnames(re_df)[1:2],sid)
-              
-            } else {
-              co_gr <- GenomicRanges::GRanges(
-                seqnames = to_re$chr,
-                ranges = IRanges(start = to_re$Prev,
-                                 end = to_re$Pos),
-                coid = to_re$coid
-              )
-              mapped_marker_state <- mergeByOverlaps(snp_wg_gr,co_gr)
-              mapped_marker_state <- as.data.frame(mapped_marker_state)
-              
-              mapped_marker_state <- mapped_marker_state %>%  
-                group_by(snp_wg_gr.seqnames,coid) %>% 
-                mutate(snp_wg_gr.prev = dplyr::lag(snp_wg_gr.start,
-                                                   default = dplyr::first(snp_wg_gr.start))) %>%
-                mutate(len_prop = (snp_wg_gr.start-snp_wg_gr.prev)/(unique(co_gr.width)-1))
-              
-              re_df <- data.frame(chr=re_df$chr,pos = re_df$Pos,
-                                  crossovers = 0)
-              ## keep non zero counts (TEST)
-              ## Finds the first matched row with the same Pos. In case this Pos is
-              ## the start SNP for the next interval
-              mapped_marker_state <- 
-                mapped_marker_state[mapped_marker_state$snp_wg_gr.start != 
-                                      mapped_marker_state$snp_wg_gr.prev,]
-              re_df$crossovers[match(mapped_marker_state$snp_wg_gr.start,
-                                     re_df$pos)] <- mapped_marker_state$len_prop
-              colnames(re_df) <- c(colnames(re_df)[1:2],sid)
-              
-              
-            }
-            #   message(sid)
-            rownames(re_df) <- paste0(re_df$chr,"_",re_df$pos)
-            re_df[,3,drop =F]
-          }
+countCOs <- function(geno,BPPARAM=BiocParallel::bpparam()){
+  stopifnot(!is.null(seqnames(geno)))
+
+    
+    #   snp_wg_gr <-  GenomicRanges::GRanges(
+    # seqnames = sapply(strsplit(rownames(geno),"_"),`[[`,1),
+    # ranges = IRanges::IRanges(start = 
+    #                             as.numeric(sapply(strsplit(rownames(geno),"_"),`[[`,2)),
+    #                           width = 1))
+    crossover_counts <- bplapply(mcols(corrected_geno),
+                          FUN=function(sid_geno,snp_gr){
+
+              re_df <- data.frame(chr= seqnames(snp_gr),
+                                  Pos= start(ranges(snp_gr)),
+                                  GT = as.character(sid_geno),
+                                  stringsAsFactors = F)
+              to_re <- re_df %>% dplyr::filter(!is.na(GT)) %>%
+                dplyr::group_by(chr) %>%
+                dplyr::mutate(CO = (GT!= dplyr::lag(GT)),
+                              Prev = dplyr::lag(Pos)) %>%
+                dplyr::filter(CO) %>% dplyr::mutate(coid = cumsum(CO))
+
+              if(nrow(to_re)==0){
+                re_df <- data.frame(chr=re_df$chr,Pos = re_df$Pos,
+                                    crossovers = 0)
+                colnames(re_df) <- c(colnames(re_df)[1:2],names(sid_geno))
+                
+
+              } else {
+                co_gr <- GenomicRanges::GRanges(
+                  seqnames = to_re$chr,
+                  ranges = IRanges(start = to_re$Prev,
+                                   end = to_re$Pos),
+                  coid = to_re$coid
+                )
+                mapped_marker_state <- IRanges::mergeByOverlaps(snp_gr,co_gr)
+                mapped_marker_state <- as.data.frame(mapped_marker_state)
+
+                mapped_marker_state <- mapped_marker_state %>%
+                  dplyr::group_by(snp_gr.seqnames,coid) %>%
+                  mutate(snp_gr.prev = dplyr::lag(snp_gr.start,
+                                                  default = dplyr::first(snp_gr.start))) %>%
+                  mutate(len_prop = (snp_gr.start-snp_gr.prev)/(unique(co_gr.width)-1))
+#                message(paste0("\t sec \t",re_df$Pos))
+                
+                re_df <- data.frame(chr=re_df$chr,Pos = re_df$Pos,
+                                    crossovers = 0)
+                ## keep non zero counts (TEST)
+                ## Finds the first matched row with the same Pos. In case this Pos is
+                ## the start SNP for the next interval
+                mapped_marker_state <-
+                  mapped_marker_state[mapped_marker_state$snp_gr.start !=
+                                        mapped_marker_state$snp_gr.prev,]
+                re_df$crossovers[match(mapped_marker_state$snp_gr.start,
+                                       re_df$Pos)] <- mapped_marker_state$len_prop
+                
+               colnames(re_df) <- c(colnames(re_df)[1:2],names(sid_geno))
+
+              }
+#              message(paste0("\t third \t",as.character(re_df$chr),"_",re_df$Pos))
+#              message(paste0("\t fourth \t",start(ranges(snp_gr))))
+              rownames(re_df) <- paste0(as.character(re_df$chr),"_",re_df$Pos)
+              re_df[,3,drop =F]
+  },corrected_geno[,0],BPPARAM = BPPARAM)
+        final_df <- do.call(cbind,crossover_counts)
+        colnames(final_df) <- names(crossover_counts)
+        
+        gr <- data.frame(seqnames = sapply( strsplit(rownames(final_df),"_"), `[[`,1),
+                  end = as.numeric(sapply(strsplit(rownames(final_df),"_"), `[[`,2))) %>% 
+          dplyr::group_by(seqnames) %>%
+          mutate(start = dplyr::lag(end,default = dplyr::first(end)))
+        
+        co_gr <- GenomicRanges::GRanges(
+          seqnames = gr$seqnames,
+          ranges = IRanges(start =gr$start,
+                           end = gr$end-1))
+        mcols(co_gr) <- final_df
+        
+        co_gr[width(ranges(co_gr))!=0,]
+
 }

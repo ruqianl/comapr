@@ -99,6 +99,8 @@ filterGT <- function(geno, min_markers = 5, min_samples = 3){
   
 }
 setGeneric("filterGT")
+
+#' @rdname filterGT
 setMethod("filterGT",signature = c(geno ="matrix",min_markers = "numeric",
                                    min_samples = "numeric"),
           function(geno ,min_markers,
@@ -108,6 +110,7 @@ setMethod("filterGT",signature = c(geno ="matrix",min_markers = "numeric",
   
 })
 
+#' @rdname filterGT
 setMethod("filterGT",signature = c(geno ="GRanges",min_markers = "numeric",
                                    min_samples = "numeric"),
           function(geno ,min_markers,
@@ -148,9 +151,9 @@ setMethod("filterGT",signature = c(geno ="GRanges",min_markers = "numeric",
 #' @importFrom dplyr summarise
 #'
 #' @keywords internal
+#' @noRd
 #' @return
 #' a ggplot2 object for markers with missing genotype across samples
-#' @export
 #'
 #' @examples
 #' or_geno <-snp_geno[,grep("X",colnames(snp_geno))]

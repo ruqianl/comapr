@@ -9,6 +9,5 @@ test_that("plotGTFreq works",{
   ft_gt <- filterGT(cr_geno)
   p <- plotGTFreq(ft_gt)
   expect_true(class(p)[2]=="ggplot")
-  p <- plotGTFreq(ft_gt,interactive = TRUE)
   
 })

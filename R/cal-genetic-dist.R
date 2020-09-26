@@ -1,100 +1,137 @@
+#' cal_marker_dist
+#' @importFrom GenomicRanges mcols
+#' @noRd
+cal_marker_dist <- function(co_geno_gr,mapping_fun="k",by_group = NULL){
+  
+
+  ## just covert the recombination rate to cM by mapping functions
+
+  new_gr <- co_geno_gr[,0]
+  
+  if(is.null(by_group)){ 
+    co_rate <- rowMeans(as.matrix(GenomicRanges::mcols(co_geno_gr)))
+    stopifnot(sum(co_rate>=0.5)==0)
+    if(mapping_fun=="k"){
+    kosambi_cm <- 25*log((1+2*co_rate)/(1-2*co_rate))
+    GenomicRanges::mcols(new_gr)$kosambi_cm <- kosambi_cm
+    }
+    if(mapping_fun=="h"){
+      haldane_cm <- -50 * log(1 - 2 * co_rate)
+      GenomicRanges::mcols(new_gr)$haldane_cm <- haldane_cm
+    }
+  } else {
+    ## by_group has the character of prefix of groups
+     groups_rb <- bplapply(by_group,function(group_prefix,mapping_fun){
+       sids <- grep(group_prefix,colnames(GenomicRanges::mcols(co_geno_gr)))
+       co_rate <- rowMeans(as.matrix(GenomicRanges::mcols(co_geno_gr)[,sids]))
+       
+      if(mapping_fun=="k"){
+        x <- 25*log((1+2*co_rate)/(1-2*co_rate))
+      }
+      if(mapping_fun=="h"){
+       x <-  -50 * log(1 - 2 * co_rate)
+      }
+       x
+    },mapping_fun=mapping_fun)
+     
+     GenomicRanges::mcols(new_gr) <- do.call(cbind,groups_rb)
+      colnames(GenomicRanges::mcols(new_gr)) <- paste0(by_group,"_",mapping_fun)
+      
+  }
+  new_gr
+}
+
 #' calGeneticDist
 #' 
-#' Calculate genetic map length, 
+#' Calculate genetic distances of marker intervals or bins 
 #'
 #' Given whether crossover happens in each marker interval, calculate the
 #' recombination fraction in samples and then derive the Haldane or Kosambi
 #' genetic distances via mapping functions
 #'
-#' @param co_geno
-#' data.frame, returned by \code{detectCO}
-#' @examples
-#' or_geno <-snp_geno[,grep("X",colnames(snp_geno))]
-#' rownames(or_geno) <- paste0(snp_geno$CHR,"_",snp_geno$POS)
-#' cr_geno <- correctGT(or_geno,ref = snp_geno$C57BL.6J,
-#'                      alt = snp_geno$FVB.NJ..i.,
-#'                      chr = snp_geno$CHR)
-#' co_geno <- detectCO(cr_geno,
-#'                     chrs = snp_geno$CHR,
-#'                     chrPos = snp_geno$POS)
-#' co_geno[3,] <- rep(TRUE,dim(co_geno)[2])
-#'
-#'
-#' rb_rate <- calGeneticDist(co_geno)
-#' @importFrom plotly summarise
+#' @param co_geno_gr
+#' GRange object, returned by \code{countCO}
+#' @param bin_size
+#' The binning size for grouping marker intervals into bins. If not supplied,the
+#' orginial marker intervals are returned with converted genetic distancens
+#' based on recombination rate
+#' @param mapping_fun
+#' The mapping function to use, can be one of "k" or "h" (kosambi or haldane)
+#' @param ref_genome
+#' The reference genome name. It is used to fetch the chromosome Information
+#' from UCSC database.
+#' @param by_group, the unique prefix of sample names that are used for defining
+#' different sample groups. If NULL all samples are assumed to be from one group
+#' @param BPPARAM, the back-end of type bpparamClass
 #' @importFrom rlang .data
-#' @return data.frame
-#' data.frame for all markers with Haldane and Kosambi morgans calculated
+#' @importFrom GenomeInfoDb fetchExtendedChromInfoFromUCSC
+#' @importFrom GenomicRanges GRanges mcolAsRleList sort width 
+#' @importFrom GenomicRanges tileGenome binnedAverage 
+#' @importFrom GenomeInfoDb sortSeqlevels seqlevels
+#' @return GRanges object
+#' GRanges for marker intervals or binned intervals with Haldane or Kosambi 
+#' centiMorgans
 #' @export
-
-calGeneticDist <- function(co_geno,bin_size=1000000){
-  stopifnot(!is.null(rownames(co_geno)))
-  stopifnot(!is.null(colnames(co_geno)))
-  ## NEED TO UPDATE To accommadate the new countCOs function **##
-  rb_geno <- data.frame("t_counts" = rowSums(co_geno,na.rm = TRUE),
-                        "total_na" = rowSums(is.na(co_geno)),
-                        "f_counts" = rowSums(co_geno==FALSE,
-                                             na.rm = TRUE))
-  
-  rb_geno_add <- data.frame( total_calls = (rb_geno$f_counts +
-                                              rb_geno$t_counts),
-                             
-                             total_samples = dim(co_geno)[2])
-  rb_geno <- cbind(rb_geno,rb_geno_add)
-  
-  rownames(rb_geno) <- rownames(co_geno)
-  
-  #stopifnot(rownames(co_geno)==rownames(rb_geno))
-  
-  # rb_geno <- cbind(co_geno,rb_geno)
-  # rb_geno <- data.frame(rb_geno)
-  # rownames(rb_geno) <- rownames(co_geno)
-  
-  # gt_matrix_dst <-
-  #   gt_matrix_co_by_marker %>%  group_by(interval_ID) %>% summarise(
-  #     t_counts = sum(Cross_over == TRUE, na.rm = TRUE),
-  #     f_counts = sum(Cross_over == FALSE, na.rm = TRUE),
-  #     total_calls = (f_counts +
-  #                      t_counts),
-  #     total_na = sum(is.na(Cross_over)),
-  #     total_samples = length(Cross_over)
-  #   )
-  
-  if (any(rb_geno$total_calls == 0)) {
-    message(paste0(
-      sum(rb_geno$total_calls == 0),
-      " marker(s) do not have calls (failed) across all samples, they will be removed"
-    ))
-  }
-  
-  rb_geno <- rb_geno[rb_geno$total_calls != 0, ]
-  #
-  #   rb_geno_f <- rb_geno %>%  mutate(na_rate = .data$total_na / .data$total_samples,
-  #            pointEst = .data$t_counts / .data$total_calls)
-  
-  rb_geno_f <- data.frame(na_rate = rb_geno$total_na / rb_geno$total_samples,
-                          pointEst = rb_geno$t_counts / rb_geno$total_calls)
-  
-  rownames(rb_geno_f) <- rownames(rb_geno)
-  rb_geno_f <- cbind(rb_geno, rb_geno_f)
-  
-  if (any(rb_geno_f$pointEst >= 0.5)) {
-    warning(
-      paste0(
-        sum(rb_geno_f$pointEst >= 0.5),
-        " markers have cross-over fraction larger or equal to 0.5,
-        please check whether they are informative: (these markers are removed)",
-        paste0(rownames(rb_geno_f[rb_geno_f$pointEst >= 0.5,]), collapse = ",")
-      )
-    )
+calGeneticDist <- function(co_geno_gr,bin_size=NULL,mapping_fun="k",
+                           ref_genome="mm10",by_group = NULL,
+                           BPPARAM=BiocParallel::bpparam()){
+  stopifnot(is.null(bin_size) | is.numeric(bin_size))
+  stopifnot(mapping_fun %in% c("k","h"))
+  new_gr <- cal_marker_dist(co_geno_gr = co_geno_gr,
+                          mapping_fun = mapping_fun,
+                          by_group = by_group)
+  if(is.null(bin_size)){
+    return(new_gr)
+  } else {
+    ## bin_size supplied then.
+    ## fetch the chromoInfo from GenomeInfoDb. 
+    ## This is only for getting the basepair lengths of the genome
     
+    chrom_info <- GenomeInfoDb::fetchExtendedChromInfoFromUCSC(ref_genome)
+    ## only for chr1-M
+    chrom_info <- chrom_info[grep("_",chrom_info$UCSC_seqlevel,invert = TRUE),]
+
+    ## Check what seqnames is in new_gr and make it consistent
+    if(!grepl("chr",as.character(seqnames(new_gr)[1]))){
+      chrom_info$UCSC_seqlevel <- gsub("chr","",chrom_info$UCSC_seqlevel)
+    }
+    chrom_info <- chrom_info[chrom_info$UCSC_seqlevel %in% GenomeInfoDb::seqlevels(new_gr),]
+    ## create Granges object for chromosomes
+    seq_length <- chrom_info$UCSC_seqlength
+    names(seq_length) <- chrom_info$UCSC_seqlevel
+
+    dna_mm10_gr <- GenomicRanges::GRanges(
+      seqnames = Rle(names(seq_length)),
+      ranges = IRanges(1, end = seq_length, names = names(seq_length)),
+      seqlengths = seq_length)
+    genome(dna_mm10_gr) <- ref_genome
+    #dna_mm10_gr
+    
+    
+    ## per bp distances
+    GenomicRanges::mcols(new_gr) <- apply(GenomicRanges::mcols(new_gr),2,
+                                          function(x) x/GenomicRanges::width(new_gr))
+    
+    tilewidth <- bin_size
+    tiles <- GenomicRanges::tileGenome(seqinfo(dna_mm10_gr),tilewidth = tilewidth)
+    binned_dna_mm10_gr <- unlist(tiles)
+   # binned_dna_mm10_gr
+    new_gr <- GenomicRanges::sort(GenomeInfoDb::sortSeqlevels(new_gr))
+    
+    bin_dist <-  bplapply(colnames(mcols(new_gr)), function(group_col){
+      dist_rle <- GenomicRanges::mcolAsRleList(new_gr,group_col)
+      runValue(dist_rle)[is.na(runValue(dist_rle))] <- 0
+      dist_bined <- binnedAverage(binned_dna_mm10_gr,dist_rle,
+                                             "dist_bin_ave")
+
+      return(dist_bined$dist_bin_ave*width(dist_bined))
+      
+    })
+   
+    mcols(binned_dna_mm10_gr) <- do.call(cbind,bin_dist)
+    colnames(mcols(binned_dna_mm10_gr)) <- colnames(mcols(new_gr))
+    return(binned_dna_mm10_gr)
   }
   
-  rb_geno_f <- rb_geno_f[rb_geno_f$pointEst < 0.5, ]
-  
-  rb_geno_e <- data.frame(haldane = -0.5 * log(1 - 2 * rb_geno_f$pointEst),
-                          kosambi = 0.25 * log((1 + 2 * rb_geno_f$pointEst) / (1 - 2 * rb_geno_f$pointEst)))
-  rb_geno_e <- cbind(rb_geno_f,rb_geno_e)
-  
-  return(rb_geno_e)
 }
+

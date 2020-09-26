@@ -16,9 +16,10 @@ test_that("label gt successfully coverts unknow GT to missinng", {
   s_gt[2] <- "KK"
   converted_gt <- label_gt(s_gt = s_gt,
                            ref = snp_geno$C57BL.6J,
-                           alt = snp_geno$FVB.NJ..i.)
+                           alt = snp_geno$FVB.NJ..i.,
+                           missing = "Fail")
 
-  expect_equal(converted_gt[2],"missing")
+  expect_equal(converted_gt[2],"Fail")
 })
 
 

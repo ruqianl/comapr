@@ -40,7 +40,7 @@
 #'
 #' @export
 #' @author Ruqian Lyu
-#'
+#' @noRd
 detectCO <-function(geno, prefix = "Sample_",
                     chrs, chrPos, type = "bool"){
   row_names <- rownames(geno)

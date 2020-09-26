@@ -1,6 +1,6 @@
 Package: comapr
 Title: Converts genotype reports for SNP markers to quantified genetic lengths
-Version: 0.0.0.9000
+Version: 0.0.1.0001
 Authors@R: 
     person(given = "Lyu",
            family = "Ruqian",
@@ -24,7 +24,12 @@ Imports:
  rlang,
  GenomicRanges,
  IRanges,
- foreach
+ foreach,
+ BiocParallel,
+ GenomeInfoDb,
+ scales,
+ RColorBrewer,
+ tidyr
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

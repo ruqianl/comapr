@@ -11,11 +11,12 @@
 #' @importFrom foreach foreach
 #' @importFrom foreach %dopar%
 #' @importFrom BiocParallel bplapply
-#' @importFrom GenomicRanges GRanges seqnames mcols
+#' @importFrom GenomicRanges GRanges seqnames mcols ranges
 #' @importFrom IRanges mergeByOverlaps
-#' @importFrom IRanges IRanges ranges
-#' 
-#' @param geno GRanges object with SNP positions and genotypes across samples
+#' @importFrom IRanges IRanges ranges start width
+#' @export
+#' @param geno GRanges object with SNP positions and genotypes codes
+#' across samples
 
 #' @return 
 #' data.frame with markers as rows and samples in columns, values as the
@@ -31,25 +32,25 @@ countCOs <- function(geno,BPPARAM=BiocParallel::bpparam()){
     # ranges = IRanges::IRanges(start = 
     #                             as.numeric(sapply(strsplit(rownames(geno),"_"),`[[`,2)),
     #                           width = 1))
-    crossover_counts <- bplapply(mcols(corrected_geno),
-                          FUN=function(sid_geno,snp_gr){
+  
+    crossover_counts <- bplapply(GenomicRanges::mcols(geno),
+                          FUN=function(sid_geno,snp_gr=geno[,0]){
 
-              re_df <- data.frame(chr= seqnames(snp_gr),
-                                  Pos= start(ranges(snp_gr)),
+              temp_df <- data.frame(chr= as.character(GenomicRanges::seqnames(snp_gr)),
+                                  Pos= IRanges::start(GenomicRanges::ranges(snp_gr)),
                                   GT = as.character(sid_geno),
                                   stringsAsFactors = F)
-              to_re <- re_df %>% dplyr::filter(!is.na(GT)) %>%
+              to_re <- temp_df %>% dplyr::filter(!is.na(GT)) %>%
                 dplyr::group_by(chr) %>%
                 dplyr::mutate(CO = (GT!= dplyr::lag(GT)),
                               Prev = dplyr::lag(Pos)) %>%
                 dplyr::filter(CO) %>% dplyr::mutate(coid = cumsum(CO))
 
               if(nrow(to_re)==0){
-                re_df <- data.frame(chr=re_df$chr,Pos = re_df$Pos,
+                re_df <- data.frame(chr=temp_df$chr,Pos = temp_df$Pos,
                                     crossovers = 0)
-                colnames(re_df) <- c(colnames(re_df)[1:2],names(sid_geno))
-                
-
+                colnames(re_df) <- c(colnames(temp_df)[1:2],
+                                     names(sid_geno))
               } else {
                 co_gr <- GenomicRanges::GRanges(
                   seqnames = to_re$chr,
@@ -67,7 +68,7 @@ countCOs <- function(geno,BPPARAM=BiocParallel::bpparam()){
                   mutate(len_prop = (snp_gr.start-snp_gr.prev)/(unique(co_gr.width)-1))
 #                message(paste0("\t sec \t",re_df$Pos))
                 
-                re_df <- data.frame(chr=re_df$chr,Pos = re_df$Pos,
+                re_df <- data.frame(chr=temp_df$chr,Pos = temp_df$Pos,
                                     crossovers = 0)
                 ## keep non zero counts (TEST)
                 ## Finds the first matched row with the same Pos. In case this Pos is
@@ -85,7 +86,8 @@ countCOs <- function(geno,BPPARAM=BiocParallel::bpparam()){
 #              message(paste0("\t fourth \t",start(ranges(snp_gr))))
               rownames(re_df) <- paste0(as.character(re_df$chr),"_",re_df$Pos)
               re_df[,3,drop =F]
-  },corrected_geno[,0],BPPARAM = BPPARAM)
+    },BPPARAM = BPPARAM)
+    
         final_df <- do.call(cbind,crossover_counts)
         colnames(final_df) <- names(crossover_counts)
         
@@ -98,8 +100,11 @@ countCOs <- function(geno,BPPARAM=BiocParallel::bpparam()){
           seqnames = gr$seqnames,
           ranges = IRanges(start =gr$start,
                            end = gr$end-1))
-        mcols(co_gr) <- final_df
+        GenomicRanges::mcols(co_gr) <- final_df
         
-        co_gr[width(ranges(co_gr))!=0,]
+       
+        co_gr <- GenomeInfoDb::sortSeqlevels(co_gr)
+        sort(co_gr)
+        co_gr[IRanges::width(ranges(co_gr))!=0,]
 
 }

@@ -43,7 +43,7 @@ bootstrapDist <- function(co_gr,B=100,mapping_fun="k",chr=NULL,group_prefix,
         h = -50 * log(1 - 2 * rb_rate))
       sum(dist)
       #rs
-    },BPPARAM=BPPARAM)
+    })
     
   })
   do.call(rbind,boots_result)

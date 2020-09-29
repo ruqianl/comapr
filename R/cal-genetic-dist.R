@@ -119,8 +119,9 @@ calGeneticDist <- function(co_geno_gr,bin_size=NULL,mapping_fun="k",
     new_gr <- GenomicRanges::sort(GenomeInfoDb::sortSeqlevels(new_gr))
     
     bin_dist <-  bplapply(colnames(mcols(new_gr)), function(group_col){
-      dist_rle <- GenomicRanges::mcolAsRleList(new_gr,group_col)
-      runValue(dist_rle)[is.na(runValue(dist_rle))] <- 0
+      # dist_rle <- GenomicRanges::mcolAsRleList(new_gr,group_col)
+      # runValue(dist_rle)[is.na(runValue(dist_rle))] <- 0
+      dist_rle <- GenomicRanges::coverage(new_gr,weight = mcols(new_gr)[,group_col])
       dist_bined <- binnedAverage(binned_dna_mm10_gr,dist_rle,
                                              "dist_bin_ave")
 

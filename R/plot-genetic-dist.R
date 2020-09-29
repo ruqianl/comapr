@@ -34,11 +34,15 @@ plotGeneticDist <- function(gr,bin=TRUE,chr=NULL,cumulative=FALSE){
   if(cumulative){
    
     mcols(gr) <- apply(mcols(gr),2 ,function(x,seq = as.character(seqnames(gr))) {
-      temp_df <- data.frame(x=x,seq=seq) %>% dplyr::group_by(seq) %>% dplyr::mutate(cum = cumsum(x))
+      temp_df <- data.frame(x=x,seq=seq) %>% dplyr::group_by(seq) %>% 
+        dplyr::mutate(cum = cumsum(x))
       temp_df$cum
       })
   } 
   plot_df <- data.frame(gr)
+  ## in case colnames for groups (| -> .) was escaped 
+  colnames(plot_df)[(ncol(plot_df)-length(col_to_plot)+1):ncol(plot_df)] <- col_to_plot
+  
   plot_df <- plot_df %>% dplyr::mutate(x_tick = 0.5*(start+end))
 #                                       bin_dist = mcols(gr)[,1]) 
   

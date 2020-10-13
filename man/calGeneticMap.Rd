@@ -4,16 +4,31 @@
 \alias{calGeneticMap}
 \title{Calculate genetic map length}
 \usage{
-calGeneticMap(gt_matrix_co_by_marker, alpha = 0.05)
+calGeneticMap(co_geno)
 }
 \arguments{
-\item{gt_matrix_co_by_marker}{data.frame, from \code{melt} the matrix returned by \code{detectCO}}
+\item{co_geno}{data.frame, returned by \code{detectCO}}
 }
 \value{
 data.frame
 data.frame for all markers with Haldane and Kosambi morgans calculated
 }
 \description{
-Given whether crossover happens in every two marker interval, calculate the
-recombination fraction and then derive the Haldane or Kosambi morgans.
+Given whether crossover happens in each marker interval, calculate the
+recombination fraction in samples and then derive the Haldane or Kosambi
+genetic distances via mapping functions
+}
+\examples{
+or_geno <-snp_geno[,grep("X",colnames(snp_geno))]
+rownames(or_geno) <- paste0(snp_geno$CHR,"_",snp_geno$POS)
+cr_geno <- correctGT(or_geno,ref = snp_geno$C57BL.6J,
+                     alt = snp_geno$FVB.NJ..i.,
+                     chr = snp_geno$CHR)
+co_geno <- detectCO(cr_geno,
+                    chrs = snp_geno$CHR,
+                    chrPos = snp_geno$POS)
+co_geno[3,] <- rep(TRUE,dim(co_geno)[2])
+
+
+rb_rate <- calGeneticMap(co_geno)
 }

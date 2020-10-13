@@ -2,23 +2,45 @@
 % Please edit documentation in R/cal_rb.R
 \name{detectCO}
 \alias{detectCO}
-\title{detect crossovers}
+\title{detectCO}
 \usage{
-detectCO(gt_matrix, prefix = "Sample_", chrs, chrPos, type = "bool")
+detectCO(geno, prefix = "Sample_", chrs, chrPos, type = "bool")
 }
 \arguments{
+\item{geno}{corrected genotype matrix returned by \code{correct_gt}}
+
 \item{prefix}{what prefix to add to sample IDs}
 
-\item{chrs}{the chromosomes for markers on the rows}
+\item{chrs}{the chromosomes for markers}
 
-\item{type}{whether return boolean value indicating whether crossover happens or integer value
-indicating how many crossovers happen from all preceding intevals}
+\item{chrPos}{the base-pair positions of SNP markers}
 
-\item{gt_matix}{correct genotype matrix returned by \code{correct_gt}}
+\item{type}{whether return boolean value indicating whether crossover happens between this
+marker and its preceding marker or returne (type=count) how many crossovers
+has been detected from all preceding intevals for each chromosome.}
 }
 \value{
-a matrix of marker by samples with values indicating crossovers
+a data.frame of marker intervals by samples with values indicating whether
+a crossover is detected
 }
 \description{
-detect crossovers between every two markers by examining change in genotype patterns
+detect crossovers between every two markers by detecting if there is a change
+of genotypes
+}
+\examples{
+or_geno <-snp_geno[,grep("X",colnames(snp_geno))]
+rownames(or_geno) <- paste0(snp_geno$CHR,"_",snp_geno$POS)
+cr_geno <- correctGT(or_geno,ref = snp_geno$C57BL.6J,
+                     alt = snp_geno$FVB.NJ..i.,
+                     chr = snp_geno$CHR)
+co_geno <- detectCO(cr_geno,
+                    chrs = snp_geno$CHR,
+                    chrPos = snp_geno$POS)
+count_geno <- detectCO(cr_geno,
+                       chrs = snp_geno$CHR,
+                       chrPos = snp_geno$POS,
+                       type="counts")
+}
+\author{
+Ruqian Lyu
 }

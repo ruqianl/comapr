@@ -1,0 +1,75 @@
+default:
+  image: svirlyu/comapr_dev
+
+stages:
+  - build
+  - document
+  - check
+  - test
+  - deploy
+  - checkwarnings
+
+variables:
+  _R_CHECK_CRAN_INCOMING_: "false"
+  _R_CHECK_FORCE_SUGGESTS_: "true"
+  CODECOV_TOKEN: "2329aed3-de38-468c-9a06-95564363211c"
+  GIT_SSL_NO_VERIFY: "true"
+
+before_script:
+
+buildbinary:
+  tags: 
+    - docker
+  image: svirlyu/comapr_dev
+  stage: build
+  script:
+    - R -e 'devtools::build(binary = TRUE)'
+
+documentation:
+  tags: 
+    - docker
+  image: svirlyu/comapr_dev
+  stage: document
+  script:
+    - R -e 'devtools::document()'
+
+checkerrors:
+  tags:
+    - docker
+  image: svirlyu/comapr_dev
+  stage: check
+  script:
+    - R -e 'devtools::check(error_on = c("error"),document = FALSE, args = "--no-tests")'
+
+checkwarnings:
+  tags:
+    - docker
+  image: svirlyu/comapr_dev
+  stage: checkwarnings
+  script:
+    - R -e 'devtools::check(error_on = c("warning"),document = FALSE, args = "--no-tests")'
+
+
+unittests:
+  stage: test
+  tags:
+    - docker
+  image: svirlyu/comapr_dev
+  script:
+    - R -e 'if (any(as.data.frame(devtools::test())[["failed"]] > 0)) stop("Some tests failed.")'
+
+codecov:
+  tags:
+    - docker
+  image: svirlyu/comapr_dev
+  stage: test
+  script:
+    - R -e 'covr::gitlab()'
+
+install:
+  tags:
+    - docker
+  image: svirlyu/comapr_dev
+  stage: deploy
+  script:
+    - R -e 'devtools::install()'

@@ -1,0 +1,7 @@
+^comapr\.Rproj$
+^\.Rproj\.user$
+^doc$
+^Meta$
+^data-raw$
+.gitlab-ci.yml
+^LICENSE\.md$

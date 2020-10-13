@@ -1,6 +1,6 @@
 Package: comapr
-Title: This package converts genotyping test reports of genotypes for SNP markers in excel spreadsheets to quantified genetic lengths. 
-Version: 0.0.0.9000
+Title: Converts genotype reports for SNP markers to quantified genetic lengths
+Version: 0.0.1.0003
 Authors@R: 
     person(given = "Lyu",
            family = "Ruqian",
@@ -10,20 +10,35 @@ Authors@R:
 Maintainer: Ruqian Lyu <rlyu@svi.edu.au>
 Author: Ruqian Lyu <rlyu@svi.edu.au>
 Description: This package converts genotyping test reports of genotypes for SNP markers in excel spreadsheets to quantified genetic lengths. 
-Depends: R (>= 3.1.0)
+Depends: R (>= 3.5.0)
 Imports:
  methods,
  ggplot2,
- chromoMap,
  readxl,
  reshape2,
  dplyr,
  gridExtra,
  plotly,
- Hmisc
-License: What license it uses
+ ComplexHeatmap,
+ circlize,
+ rlang,
+ GenomicRanges,
+ IRanges,
+ foreach,
+ BiocParallel,
+ GenomeInfoDb,
+ scales,
+ RColorBrewer,
+ tidyr,
+ S4Vectors,
+ utils
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.1
 VignetteBuilder: knitr
-Suggests: BiocStyle, knitr, rmarkdown
+Suggests: 
+    BiocStyle,
+    knitr,
+    rmarkdown,
+    testthat (>= 2.1.0)

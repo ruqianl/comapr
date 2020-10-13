@@ -1,0 +1,255 @@
+---
+title: "Get-Started-With-comapr"
+output: rmarkdown::html_document
+vignette: >
+  %\VignetteIndexEntry{Get-Started-With-comapr}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+  
+author: Ruqian Lyu
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(comapr)
+#devtools::load_all()
+library(GenomicRanges)
+library(BiocParallel)
+#library(Gviz)
+```
+
+
+# Introduction
+
+`compar` lets you manipulate the genotyping results for a sequence of ordered 
+markers across the genome. It integrates with modern bioconductor packages and
+provide various visualisation function. A BIT MORE INTRO HERE
+
+# Step 1 Import genotype results 
+
+## Scenario 1, the small demo data set
+
+The package includes a small data object that contains 70 markers and 22 samples.
+The 22 samples are F1 progenies from crossing a C57BL.6J mouse and a FVB.NJ 
+mouse whose genotypes are also included in this `snp_geno` data object.
+
+```{r}
+BiocParallel::register(SerialParam())
+BiocParallel::bpparam()
+```
+
+```{r}
+data(snp_geno_gr)
+data(snp_geno_gr)
+data(parents_geno)
+```
+
+### Format the genotype
+
+In order to detect crossovers from the 22 samples' genotype results, we'd need
+to format the result into `Homo_ref`, `Homo_alt` and `Het` encoding. This can be
+simply done through comparing with the parents' genotypes.
+
+```{r}
+corrected_geno <- correctGT(gt_matrix = mcols(snp_geno_gr),
+                            ref = parents_geno$ref,
+                            alt = parents_geno$alt)
+mcols(snp_geno_gr) <- corrected_geno
+```
+The `corrected_geno` matrix 
+
+```{r}
+head(mcols(snp_geno_gr))
+
+```
+
+Note that there are missing values in this resulting matrix that can be resulted
+from:
+
+- No genotype data from the genotyping result
+- The genotype is wrong and it is converted to `NA`
+
+### Find outlier samples/markers
+
+```{r}
+genotype_counts <- countGT(mcols(snp_geno_gr))
+genotype_counts$plot
+```
+```{r}
+genotype_counts$n_markers
+genotype_counts$n_samples
+```
+
+Filter out markers/samples by `filterGT`.
+
+A printed message contains information about how much markers or samples have 
+been filtered.
+
+```{r}
+corrected_geno <- filterGT(snp_geno_gr,min_markers = 30,
+                           min_samples = 2)
+```
+
+### Find sample duplicates
+
+It perhaps is not necessary for large DNA sequencing dataset.
+
+```{r}
+dups <- findDupSamples(mcols(corrected_geno),plot=FALSE,threshold = 0.99)
+dups
+```
+Remove the duplicated samples
+
+```{r}
+mcols(corrected_geno) <- mcols(corrected_geno)[,colnames(mcols(corrected_geno))!="X98"]
+corrected_geno
+```
+
+
+### Count crossovers
+
+Crossovers are detected through examining the patterns of genotypes in each sample 
+against the list of markers. When there is a shift from one genotype block to 
+another the crossovers are detected.This is done through calling `countCOs`
+function.
+
+```{r}
+marker_gr_cos <- countCOs(corrected_geno)
+
+marker_gr_cos
+```
+
+### Calculate genetic distance via mapping function
+
+```{r}
+dist_gr <- calGeneticDist(marker_gr_cos)
+
+dist_gr
+```
+
+### For binned intervals 
+
+```{r}
+dist_bin_gr <- calGeneticDist(marker_gr_cos,bin_size = 1e6)
+
+dist_bin_gr
+```
+
+### Plotting genetic dist for each bin
+
+```{r}
+plotGeneticDist(dist_bin_gr,chr = "1")
+```
+
+
+```{r,fig.height=10,fig.width=8}
+plotGeneticDist(dist_bin_gr)
+plotGeneticDist(dist_bin_gr,cumulative = TRUE)
+
+```
+### Plot cumulative distances
+
+```{r}
+plotGeneticDist(dist_bin_gr,chr="1",cumulative = T)
+
+```
+```{r,fig.height=10,fig.width=8}
+plotGeneticDist(dist_bin_gr,cumulative = T)
+```
+
+### Visualising marker interval Genetic distances
+
+```{r,eval=F}
+library(Gviz)
+chr = 1
+gtrack <- GenomeAxisTrack()
+
+itrack <- IdeogramTrack(genome = genome(dist_bin_gr)[1], 
+                        chromosome = chr)
+anno_gr <- dist_gr[seqnames(dist_gr)==chr,]
+anno_gr <- anno_gr[mcols(anno_gr)[,1]>3,]
+anno_track <- AnnotationTrack(anno_gr,
+                                        name = "marker interval kosambi 
+                              \nhot_bins")
+data_track <- DataTrack(anno_gr,data = anno_gr$kosambi_cm,type="heatmap")
+plotTracks(list(itrack,gtrack,anno_track,data_track))
+```
+
+
+```{r,eval=F}
+chr = 1
+gtrack <- GenomeAxisTrack()
+
+itrack <- IdeogramTrack(genome = genome(dist_bin_gr)[1], 
+                        chromosome = chr)
+anno_gr <- dist_bin_gr[seqnames(dist_bin_gr)==chr,]
+anno_gr <- anno_gr[mcols(anno_gr)[,1]>0,]
+
+data_track <- DataTrack(anno_gr,data = anno_gr$kosambi_cm,type="heatmap",
+                        name = "genetic distances for bins",
+                        height=1)
+plotTracks(list(itrack,gtrack,data_track),sizes = c(0.1,.2,.05) )
+```
+
+```{r,eval=F}
+chr = 4
+
+itrack <- IdeogramTrack(genome = genome(dist_bin_gr)[1], 
+                        chromosome = chr)
+anno_gr <- dist_bin_gr[seqnames(dist_bin_gr)==chr,]
+anno_gr <- anno_gr[mcols(anno_gr)[,1]>0,]
+
+data_track <- DataTrack(anno_gr,data = anno_gr$kosambi_cm,type="heatmap",
+                        name = "genetic distances for bins",
+                        height=1)
+plotTracks(list(itrack,gtrack,data_track),sizes = c(0.1,.2,.05) )
+```
+
+## Compare sample groups
+
+Suppose the samples are from different groups.
+
+```{r}
+extra_samples <- mcols(marker_gr_cos)
+colnames(extra_samples) <- gsub("X","Y",colnames(extra_samples))                        
+extra_samples <- data.frame(apply(extra_samples,2,function(x) x*0.5))
+marker_gr_cos_multi <- marker_gr_cos
+mcols(marker_gr_cos_multi) <- cbind(mcols(marker_gr_cos_multi),extra_samples)
+
+```
+
+### Calculate Genetic Dist by group
+
+It is assumed the groupping information is in the prefix of sample names
+
+
+```{r}
+multi_gr <- calGeneticDist(marker_gr_cos_multi,by_group=c("X","Y"))
+
+```
+
+### plot genetic distances for multiple groups in bins
+```{r}
+multi_gr_bin <-  calGeneticDist(marker_gr_cos_multi,by_group=c("X","Y"),
+                                bin_size = 1e6)
+```
+
+```{r,fig.height=10,fig.width=8}
+plotGeneticDist(multi_gr_bin,cumulative = FALSE)
+
+```
+
+
+```{r,fig.height=10,fig.width=8}
+plotGeneticDist(multi_gr_bin,cumulative = TRUE)
+
+```
+
+

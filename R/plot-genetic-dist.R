@@ -8,6 +8,12 @@
 #' @importFrom dplyr mutate
 #' @importFrom scales unit_format
 #' @importFrom tidyr pivot_longer
+#' @importFrom rlang .data
+#' @importFrom GenomeInfoDb fetchExtendedChromInfoFromUCSC genome seqinfo  
+#' @importFrom GenomicRanges GRanges mcolAsRleList sort width 
+#' @importFrom GenomicRanges tileGenome binnedAverage mcols
+#' @importFrom GenomeInfoDb sortSeqlevels seqlevels
+#' @importFrom S4Vectors Rle
 #' @import ggplot2
 #' @importFrom RColorBrewer brewer.pal
 #' @export
@@ -25,7 +31,7 @@
 #' 
 #' 
 plotGeneticDist <- function(gr,bin=TRUE,chr=NULL,cumulative=FALSE){
-  col_to_plot <- colnames(mcols(gr))
+  col_to_plot <- colnames(GenomicRanges::mcols(gr))
   sample_group_colors <- RColorBrewer::brewer.pal(ifelse(length(col_to_plot)>2,
                                                          length(col_to_plot),3),
                                                   name="Set1")
@@ -33,7 +39,7 @@ plotGeneticDist <- function(gr,bin=TRUE,chr=NULL,cumulative=FALSE){
   
   if(cumulative){
    
-    mcols(gr) <- apply(mcols(gr),2 ,function(x,seq = as.character(seqnames(gr))) {
+    GenomicRanges::mcols(gr) <- apply(mcols(gr),2 ,function(x,seq = as.character(seqnames(gr))) {
       temp_df <- data.frame(x=x,seq=seq) %>% dplyr::group_by(seq) %>% 
         dplyr::mutate(cum = cumsum(x))
       temp_df$cum
@@ -43,13 +49,13 @@ plotGeneticDist <- function(gr,bin=TRUE,chr=NULL,cumulative=FALSE){
   ## in case colnames for groups (| -> .) was escaped 
   colnames(plot_df)[(ncol(plot_df)-length(col_to_plot)+1):ncol(plot_df)] <- col_to_plot
   
-  plot_df <- plot_df %>% dplyr::mutate(x_tick = 0.5*(start+end))
+  plot_df <- plot_df %>% dplyr::mutate(x_tick = 0.5*(.data$start + .data$end))
 #                                       bin_dist = mcols(gr)[,1]) 
   
   plot_df <- plot_df %>% tidyr::pivot_longer(cols=col_to_plot,
                                              names_to = "SampleGroup",
                                              values_to = "bin_dist") 
-  
+  x_tick <- bin_dist <- end <- SampleGroup <- NULL
     if(is.null(chr)){
       p <-  plot_df %>%
         ggplot()+

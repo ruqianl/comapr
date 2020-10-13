@@ -27,6 +27,8 @@ chrs in the GRanges object will be summed together.}
 
 \item{group_prefix}{the prefix for each group that we need to generate 
 distributions for}
+
+\item{BPPARAM, }{the bpparam backend registered for parallel computing}
 }
 \value{
 lists of numeric genetic distances for multiple samples

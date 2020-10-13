@@ -15,6 +15,7 @@
 #' chrs in the GRanges object will be summed together.
 #' @param group_prefix the prefix for each group that we need to generate 
 #' distributions for
+#' @param BPPARAM, the bpparam backend registered for parallel computing
 
 #' @importFrom BiocParallel bplapply
 #' @export

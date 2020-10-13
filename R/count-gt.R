@@ -8,7 +8,7 @@
 #'
 #' @importFrom plotly plot_ly subplot
 #' @importFrom gridExtra grid.arrange
-
+#' @importFrom rlang .data
 #' @author Ruqian Lyu
 #'
 #' @param geno the genotype data.frame of markers by samples from output of
@@ -24,7 +24,7 @@
 countGT <- function(geno, plot =TRUE,interactive=FALSE){
   n_samples <- rowSums(!is.na(geno))
   n_markers <- colSums(!is.na(geno))
-  
+  counts <- type <- NULL
   pl_df <- data.frame(counts=c(n_samples,n_markers),
                       type = c(rep("by_marker", each = length(n_samples)),
                                rep("by_sample", each= length(n_markers))))

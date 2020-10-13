@@ -11,11 +11,13 @@
 #' @importFrom foreach foreach
 #' @importFrom foreach %dopar%
 #' @importFrom BiocParallel bplapply
-#' @importFrom GenomicRanges GRanges seqnames mcols ranges
+#' @importFrom rlang .data
+#' @importFrom GenomicRanges GRanges seqnames mcols ranges seqinfo<- mcols<-
 #' @importFrom IRanges mergeByOverlaps
 #' @importFrom IRanges IRanges ranges start width
 #' @export
 #' @param geno GRanges object with SNP positions and genotypes codes
+#' @param BPPARAM the registered backend for parallel computing
 #' across samples
 
 #' @return 
@@ -40,11 +42,11 @@ countCOs <- function(geno,BPPARAM=BiocParallel::bpparam()){
                                   Pos= IRanges::start(GenomicRanges::ranges(snp_gr)),
                                   GT = as.character(sid_geno),
                                   stringsAsFactors = F)
-              to_re <- temp_df %>% dplyr::filter(!is.na(GT)) %>%
-                dplyr::group_by(chr) %>%
-                dplyr::mutate(CO = (GT!= dplyr::lag(GT)),
-                              Prev = dplyr::lag(Pos)) %>%
-                dplyr::filter(CO) %>% dplyr::mutate(coid = cumsum(CO))
+              to_re <- temp_df %>% dplyr::filter(!is.na(.data$GT)) %>%
+                dplyr::group_by(.data$chr) %>%
+                dplyr::mutate(CO = (.data$GT!= dplyr::lag(.data$GT)),
+                              Prev = dplyr::lag(.data$Pos)) %>%
+                dplyr::filter(.data$CO) %>% dplyr::mutate(coid = cumsum(.data$CO))
 
               if(nrow(to_re)==0){
                 re_df <- data.frame(chr=temp_df$chr,Pos = temp_df$Pos,
@@ -62,10 +64,10 @@ countCOs <- function(geno,BPPARAM=BiocParallel::bpparam()){
                 mapped_marker_state <- as.data.frame(mapped_marker_state)
 
                 mapped_marker_state <- mapped_marker_state %>%
-                  dplyr::group_by(snp_gr.seqnames,coid) %>%
-                  mutate(snp_gr.prev = dplyr::lag(snp_gr.start,
-                                                  default = dplyr::first(snp_gr.start))) %>%
-                  mutate(len_prop = (snp_gr.start-snp_gr.prev)/(unique(co_gr.width)-1))
+                  dplyr::group_by(.data$snp_gr.seqnames,.data$coid) %>%
+                  mutate(snp_gr.prev = dplyr::lag(.data$snp_gr.start,
+                                                  default = dplyr::first(.data$snp_gr.start))) %>%
+                  mutate(len_prop = (.data$snp_gr.start-.data$snp_gr.prev)/(unique(.data$co_gr.width)-1))
 #                message(paste0("\t sec \t",re_df$Pos))
                 
                 re_df <- data.frame(chr=temp_df$chr,Pos = temp_df$Pos,
@@ -93,8 +95,8 @@ countCOs <- function(geno,BPPARAM=BiocParallel::bpparam()){
         
         gr <- data.frame(seqnames = sapply( strsplit(rownames(final_df),"_"), `[[`,1),
                   end = as.numeric(sapply(strsplit(rownames(final_df),"_"), `[[`,2))) %>% 
-          dplyr::group_by(seqnames) %>%
-          mutate(start = dplyr::lag(end,default = dplyr::first(end)))
+          dplyr::group_by(.data$seqnames) %>%
+          mutate(start = dplyr::lag(.data$end,default = dplyr::first(.data$end)))
         
         co_gr <- GenomicRanges::GRanges(
           seqnames = gr$seqnames,

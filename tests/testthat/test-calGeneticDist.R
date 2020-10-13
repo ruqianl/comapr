@@ -1,5 +1,7 @@
+BiocParallel::register(BPPARAM =BiocParallel::SerialParam())
+
 test_that("Calculate genetic distances", {
-  data("snp_geno_gr")
+  data(snp_geno_gr)
   corrected_geno <- correctGT(gt_matrix = mcols(snp_geno_gr),
                               ref = parents_geno$ref,
                               alt = parents_geno$alt)
@@ -15,6 +17,22 @@ test_that("Calculate genetic distances", {
 
 })
 
+test_that("Calculate genetic distances", {
+  data(snp_geno_gr)
+  corrected_geno <- correctGT(gt_matrix = mcols(snp_geno_gr),
+                              ref = parents_geno$ref,
+                              alt = parents_geno$alt)
+  GenomicRanges::mcols(snp_geno_gr) <- corrected_geno
+  #  co_geno$interval_ID <- rownames(co_geno)
+  # melt_geno <- melt(co_geno,id= 'interval_ID')
+  # colnames(melt_geno) <- c("interval_ID","SampleID","Cross_over")
+  marker_gr_cos <- countCOs(snp_geno_gr)
+  
+  expect_equal(sum(marker_gr_cos[4:5,"X92"]$X92),1)
+  dist <- calGeneticDist(marker_gr_cos,bin_size = 1e7)
+  expect_true(abs(dist$kosambi_cm[4]-14.87363)<1e-3)
+  
+})
 
 # test_that("Calculate genetic distances successfully for all failed marker", {
 #   or_geno <-snp_geno[,grep("X",colnames(snp_geno))]

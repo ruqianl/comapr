@@ -26,6 +26,8 @@ can be one of the mapping functions: "k","h"}
 chrs in the GRanges object will be summed together.}
 
 \item{group_prefix}{a character vector of two}
+
+\item{BPPARAM}{the bpparam backend registered for parallel computing}
 }
 \value{
 the list of length B with numeric differences of two groups

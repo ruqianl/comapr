@@ -7,7 +7,9 @@
 countCOs(geno, BPPARAM = BiocParallel::bpparam())
 }
 \arguments{
-\item{geno}{GRanges object with SNP positions and genotypes codes
+\item{geno}{GRanges object with SNP positions and genotypes codes}
+
+\item{BPPARAM}{the registered backend for parallel computing
 across samples}
 }
 \value{

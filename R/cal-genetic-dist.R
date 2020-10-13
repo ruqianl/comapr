@@ -64,10 +64,11 @@ cal_marker_dist <- function(co_geno_gr,mapping_fun="k",by_group = NULL){
 #' different sample groups. If NULL all samples are assumed to be from one group
 #' @param BPPARAM, the back-end of type bpparamClass
 #' @importFrom rlang .data
-#' @importFrom GenomeInfoDb fetchExtendedChromInfoFromUCSC
+#' @importFrom GenomeInfoDb fetchExtendedChromInfoFromUCSC genome genome<-   
 #' @importFrom GenomicRanges GRanges mcolAsRleList sort width 
-#' @importFrom GenomicRanges tileGenome binnedAverage 
-#' @importFrom GenomeInfoDb sortSeqlevels seqlevels
+#' @importFrom GenomicRanges tileGenome binnedAverage mcols
+#' @importFrom GenomeInfoDb sortSeqlevels seqlevels seqinfo
+#' @importFrom S4Vectors Rle
 #' @return GRanges object
 #' GRanges for marker intervals or binned intervals with Haldane or Kosambi 
 #' centiMorgans
@@ -104,7 +105,7 @@ calGeneticDist <- function(co_geno_gr,bin_size=NULL,mapping_fun="k",
       seqnames = Rle(names(seq_length)),
       ranges = IRanges(1, end = seq_length, names = names(seq_length)),
       seqlengths = seq_length)
-    genome(dna_mm10_gr) <- ref_genome
+    GenomeInfoDb::genome(dna_mm10_gr) <- ref_genome
     #dna_mm10_gr
     
     

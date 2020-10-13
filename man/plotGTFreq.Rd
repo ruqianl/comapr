@@ -9,8 +9,6 @@ plotGTFreq(geno)
 \arguments{
 \item{geno}{the genotype data.frame of markers by samples from output of
 function \code{correctGT}}
-
-\item{color_set, }{the RColorBrewer::brewer.pal color set names}
 }
 \description{
 Function to plot the genotypes for all samples faceted by genotype

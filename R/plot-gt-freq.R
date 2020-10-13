@@ -6,7 +6,6 @@
 #' @importFrom reshape2 melt
 #' @inheritParams countGT
 #' @author Ruqian Lyu
-#' @param color_set, the RColorBrewer::brewer.pal color set names 
 #' @export
 #' @examples
 #' or_geno <- snp_geno[,grep("X",colnames(snp_geno))]
@@ -35,7 +34,8 @@ plotGTFreq <- function(geno){
   #                          stringsAsFactors = FALSE)
   # pltdf <- melt(geno_table)
   pltdf <- data.frame(geno) %>% tidyr::pivot_longer(colnames(geno),
-                                                    names_to = "sample",values_to="geno")
+                                                    names_to = "sample",
+                                                    values_to="geno")
   
   # if(interactive){
   #   ply1 <- plot_ly(pltdf, x=~.data$samples,y=~.data$value,type = "scatter",

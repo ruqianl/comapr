@@ -43,8 +43,9 @@ We load the SNP genotyping data from excel spreadsheet, here we are using the sh
 
 ```{r}
 
-mutate_inform1 <- read_excel(path = "/mnt/mcfiles/rlyu/Projects/Snakemake_projects/yeln_2019_spermtyping/analysis/All_data_May_to_August_2019.xlsx",
+mutate_inform1 <- read_excel(path = "../data/All_data_May_to_August_2019.xlsx",
                              sheet = "mutant_25-6-19_informative")
+# mutant_25-6-19_informative
 mutate_inform1 <- data.frame(mutate_inform1)
 
 ```
@@ -52,6 +53,7 @@ mutate_inform1 <- data.frame(mutate_inform1)
 Check if we have any duplicated markers names by checking any duplicate `CHR_POS`:
 
 Then we name the markers using the combination of CHR and POS.
+
 ```{r}
 mutate_inform1[duplicated(paste0(mutate_inform1$CHR,"_",mutate_inform1$POS)),]
 mutate_inform1$CHR_POS <- paste0(mutate_inform1$CHR,"_",mutate_inform1$POS)
@@ -67,9 +69,11 @@ rownames(mutate_inform1) <- mutate_inform1$CHR_POS
 
 ### Get the genotype matrix
 
-The genotype matrix is a matrix of markers (rows) by samples(columns): 
+The genotype matrix is a matrix of markers (rows) by samples (columns): 
 
 ```{r}
+## only selecting the columns for samples
+
 gt_matrix <- mutate_inform1[,grep("[0-9].*[0-9]$",colnames(mutate_inform1))]
 
 head(gt_matrix)
@@ -77,7 +81,8 @@ head(gt_matrix)
 
 `plotMissingGT` generates dot plots plot of markers by samples indicating which markers are missing from which samples.
 
-```{r}
+```{r pltm}
+
 plotMissingGT(gt_matrix = gt_matrix, plot_wg = FALSE)+theme_classic()+ 
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
@@ -85,7 +90,7 @@ plotMissingGT(gt_matrix = gt_matrix, plot_wg = FALSE)+theme_classic()+
 
 ### Correct the geneotypes 
 
-Next, we correct the geneotypes which includes 1), change genotype to labels, 2) infer the missing genotypes, 3) change "Home_ref" to "Het".
+Next, we correct the geneotypes which includes 1), change genotype to labels, 2) infer the missing genotypes, 3) correct "Homo_ref" to "Het".
 
 ```{r}
 #rownames(gt_matrix)
@@ -94,22 +99,25 @@ gt_matrix <- correctGT(gt_matrix = gt_matrix,
                        alt = mutate_inform1$FVB.NJ..i.)
 ```
 
-Then we plot the missing genotype again, there are still some SNP markers that have missing values:
+Then we plot the missing genotype again, we still have  missing values:
 
-```{r}
-plotMissingGT(gt_matrix = gt_matrix, plot_wg = FALSE)+theme_classic()+ theme(axis.text.x = element_text(angle = 90, hjust = 1))
+Marker `12_102311711` seems erroneous.
+
+```{r pltmpost}
+plotMissingGT(gt_matrix = gt_matrix, plot_wg = FALSE)+theme_classic()+ 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 ```
 
 ### Filter genotype matrix 
 
-We need to remove the missing markers to make the entire dataset suitable for statistical testing (i.e for testing difference in genetic lengths in contrasting groups).
+We need to remove the missing markers or samples with many missing values.
 
 We can either remove markers with missing genotype or samples with any missing genotype. 
 
 Let's first check how many markers have missing values/ how many samples have missing values:
 
-```{r}
+```{r countMissing}
 cts <- countGT(gt_matrix,plot = TRUE, interactive = FALSE)
 ```
 
@@ -120,10 +128,9 @@ ply_cts <- countGT(gt_matrix,plot = TRUE, interactive = TRUE)
 ply_cts$ply
 ```
 
-Filter samples:
+Filter samples or markers using `filterGT` by setting minimun markers for filtering samples and minimum samples for filtering markers:
 
 ```{r}
-
 
 #p$plot
 gt_matrix_filtered <- filterGT(gt_matrix,min_markers = 245)
@@ -134,12 +141,6 @@ p <- countGT(gt_matrix_filtered,plot = TRUE, interactive = FALSE)
 Filter markers
 
 ```{r}
-#p$plot
-## filter NA markers
-## The idea here is because we will do K-S test on the kosambi genetic lengths calculated we would like to make sure they are derived on the
-## same set of marker intervals
-
-
 gt_matrix_filtered <- filterGT(gt_matrix,min_samples = 14)
 
 p <- countGT(gt_matrix_filtered,plot = TRUE, interactive = FALSE)
@@ -148,9 +149,8 @@ p <- countGT(gt_matrix_filtered,plot = TRUE, interactive = FALSE)
 
 We choose to retain all samples and filter out some markers. We now have 251 markers by 22 samples
 
-Check there is no NA in the genotype matrix anymore:
-
 We still have some NA genotypes in the genotype matrix.
+
 ```{r}
 sum(apply(gt_matrix_filtered,1,anyNA))
 ```
@@ -184,7 +184,7 @@ dup_samples
 
 We have some markers that almost always have the same genotype across samples but not exactly the same.
 
-We are not removing duplicated markers for now.
+We are not removing markers for this dataset since we do not have a lot markers.
 
 ```{r,fig.width=10}
 
@@ -197,8 +197,7 @@ dup_markers
 Marker disortation detection using chisq-test
 We expect the genotypes to appear with the frequenceis of 1:1 homo_alt:hets, we
 use chisq-test for finding markers that have genotypes significantly diffferent from
-the 1:1 ratio and report them
-
+the 1:1 ratio and report them.
 
 The significantly distorted markers are markers on X chromosome:
 
@@ -214,6 +213,7 @@ We find crossovers within each marker intervals across all samples by calling th
 For intervals tha have NA values for some samples, they are due to the genotypes for relevant SNP markers are missing.
 
 ```{r}
+#saveRDS(gt_matrix_filtered, file="../data/")
 gt_matrix_co <- detectCO(gt_matrix = gt_matrix_filtered,
                           chrs = sapply(strsplit(rownames(gt_matrix_filtered),"_"),`[[`,1),
                           chrPos = sapply(strsplit(rownames(gt_matrix_filtered),"_"),`[[`,2),
@@ -222,7 +222,7 @@ gt_matrix_co <- detectCO(gt_matrix = gt_matrix_filtered,
 head(gt_matrix_co)
 ```
 
-If we set the type of the returned matrix as "counts", this function returns a matrix with cumulative crossover counts.
+If we set the type of the returned matrix as "counts", this function returns a matrix with cumulative crossover counts on each chromosome for each sample.
 
 ```{r}
 gt_matrix_co_counts <- detectCO(gt_matrix = gt_matrix_filtered,
@@ -246,7 +246,11 @@ gt_matrix_co_by_marker <- melt(gt_matrix_co, id = "interval_ID")
 colnames(gt_matrix_co_by_marker) <- c("interval_ID","Sample","Cross_over")
 
 gt_matrix_co_by_marker$interval_ID <- as.character(gt_matrix_co_by_marker$interval_ID)
+```
 
+The `gt_matrix_co_by_marker` dataframe has a long format:
+
+```{r}
 head(gt_matrix_co_by_marker)
 ```
 
@@ -254,37 +258,45 @@ head(gt_matrix_co_by_marker)
 
 We expect the samples' frequecies of hets and homo_alternative genotypes should be around 0.5.
 
-```{r}
-plotGTFreq(gt_matrix_filtered)+facet_wrap(.~variable)+theme(axis.text.x = element_text(
-  angle = 90
+```{r plotGT}
+
+plotGTFreq(gt_matrix_filtered)+facet_wrap(.~variable)+
+  theme(axis.text.x = element_text( 
+    angle = 90
 ))
 ```
 
 ### Calculate genetic map
 
-Then we call `calGeneticMap` which generates the point estimates of crossover rate, upper_ci, lower_ci and the mapped kosambi/haldane genetic lengths for each interval.
+Then we call `calGeneticMap` which generates the point estimates of crossover rate, upper_ci, lower_ci and the mapped kosambi/haldane genetic lengths via defined mapping functions for each interval.
 
 ```{r}
 #head(gt_matrix_co_by_marker)
 
 ## Problems in getting kosambi confidence interval, NaN produced
 
-gt_matrix_dist <- calGeneticMap(gt_matrix_co_by_marker = gt_matrix_co_by_marker )
+gt_matrix_dist <- calGeneticMap(gt_matrix_co_by_marker = gt_matrix_co_by_marker,
+                                message = TRUE)
 
 head(gt_matrix_dist)
+
 ```
+Two marker intervals were removed (9_83445613_92659805,9_92659805_94284389) because the crossover rates detected were larger than 0.5.
 
 We now order the intervals by chromosomes then by starting positions of the interval.
 
 ```{r}
 gt_matrix_dist$CHR  <-  sapply(strsplit(gt_matrix_dist$interval_ID,"_"),`[[`,1)
 
-gt_matrix_dist$POS <-   as.numeric(sapply(strsplit(gt_matrix_dist$interval_ID,"_"),`[[`,3))
+gt_matrix_dist$POS <-   as.numeric(sapply(strsplit(gt_matrix_dist$interval_ID,"_"),
+                                          `[[`,3))
 
 gt_matrix_dist$CHR  <-  factor(gt_matrix_dist$CHR,levels = c(seq(1:19),"X"))
 
 ## important to order the markers by chr then by position
-gt_matrix_dist <- gt_matrix_dist[order(gt_matrix_dist$CHR, rank(gt_matrix_dist$POS,na.last = FALSE)), ]
+gt_matrix_dist <- gt_matrix_dist[order(gt_matrix_dist$CHR,
+                                       rank(gt_matrix_dist$POS,
+                                            na.last = FALSE)), ]
 ```
 
 We derive the cumulative haldane and kosambi genetic lengths per chromosome:

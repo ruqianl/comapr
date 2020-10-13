@@ -1,7 +1,7 @@
 
-#title: "YELN_2019_09_04_Genetic-mapsTest"
+#title: "Comapr"
 #author: "Ruqian Lyu"
-#date: "9/4/2019"
+#date: "Sep/4/2019"
 
 
 #' @import methods
@@ -439,7 +439,8 @@ detectCO <-function(gt_matrix, prefix = "Sample_",
 #' data.frame for all markers with Haldane and Kosambi morgans calculated
 #' @export
 
-calGeneticMap <- function(gt_matrix_co_by_marker, alpha = 0.05){
+calGeneticMap <- function(gt_matrix_co_by_marker, alpha = 0.05,
+                          message = TRUE){
 
   #gt_matrix_co
 
@@ -452,7 +453,7 @@ calGeneticMap <- function(gt_matrix_co_by_marker, alpha = 0.05){
       total_na = sum(is.na(Cross_over)),
       total_samples = length(Cross_over)
     )
-  if (any(gt_matrix_dst$total_calls == 0)) {
+  if (any(gt_matrix_dst$total_calls == 0) && message ==TRUE) {
     message(paste0(
       sum(gt_matrix_dst$total_calls == 0),
       " marker(s) do not have calls across all samples, they will be removed"

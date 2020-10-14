@@ -42,6 +42,7 @@
 #' Markers by genotype results for a group of samples 
 #'
 #' @source TBD
+#' @export
 #' @format A GRanges object:
 #' \describe{
 #'  \item{X100}{a mouse sample }
@@ -76,6 +77,7 @@
 "snp_geno_gr"
 
 #' Parents genotype for F1 samples in `snp_geno`
+#' @export
 #' @format A data.frame:
 #' \describe{
 #'  \item{C57BL.6J}{genotype of reference mouse train across markers}

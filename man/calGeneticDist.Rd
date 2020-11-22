@@ -2,19 +2,90 @@
 % Please edit documentation in R/cal-genetic-dist.R
 \name{calGeneticDist}
 \alias{calGeneticDist}
+\alias{calGeneticDist,GRanges,missing,ANY,ANY,missing-method}
+\alias{calGeneticDist,GRanges,numeric,ANY,ANY,missing-method}
+\alias{calGeneticDist,GRanges,missing,ANY,ANY,character-method}
+\alias{calGeneticDist,GRanges,numeric,ANY,ANY,character-method}
+\alias{calGeneticDist,RangedSummarizedExperiment,missing,ANY,ANY,missing-method}
+\alias{calGeneticDist,RangedSummarizedExperiment,missing,ANY,ANY,character-method}
+\alias{calGeneticDist,RangedSummarizedExperiment,numeric,ANY,ANY,character-method}
+\alias{calGeneticDist,RangedSummarizedExperiment,numeric,ANY,ANY,missing-method}
 \title{calGeneticDist}
 \usage{
 calGeneticDist(
-  co_geno_gr,
+  co_count,
   bin_size = NULL,
   mapping_fun = "k",
   ref_genome = "mm10",
-  by_group = NULL,
-  BPPARAM = BiocParallel::bpparam()
+  by_group = NULL
+)
+
+\S4method{calGeneticDist}{GRanges,missing,ANY,ANY,missing}(
+  co_count,
+  bin_size = NULL,
+  mapping_fun = "k",
+  ref_genome = "mm10",
+  by_group = NULL
+)
+
+\S4method{calGeneticDist}{GRanges,numeric,ANY,ANY,missing}(
+  co_count,
+  bin_size = NULL,
+  mapping_fun = "k",
+  ref_genome = "mm10",
+  by_group = NULL
+)
+
+\S4method{calGeneticDist}{GRanges,missing,ANY,ANY,character}(
+  co_count,
+  bin_size = NULL,
+  mapping_fun = "k",
+  ref_genome = "mm10",
+  by_group = NULL
+)
+
+\S4method{calGeneticDist}{GRanges,numeric,ANY,ANY,character}(
+  co_count,
+  bin_size = NULL,
+  mapping_fun = "k",
+  ref_genome = "mm10",
+  by_group = NULL
+)
+
+\S4method{calGeneticDist}{RangedSummarizedExperiment,missing,ANY,ANY,missing}(
+  co_count,
+  bin_size = NULL,
+  mapping_fun = "k",
+  ref_genome = "mm10",
+  by_group = NULL
+)
+
+\S4method{calGeneticDist}{RangedSummarizedExperiment,missing,ANY,ANY,character}(
+  co_count,
+  bin_size = NULL,
+  mapping_fun = "k",
+  ref_genome = "mm10",
+  by_group = NULL
+)
+
+\S4method{calGeneticDist}{RangedSummarizedExperiment,numeric,ANY,ANY,character}(
+  co_count,
+  bin_size = NULL,
+  mapping_fun = "k",
+  ref_genome = "mm10",
+  by_group = NULL
+)
+
+\S4method{calGeneticDist}{RangedSummarizedExperiment,numeric,ANY,ANY,missing}(
+  co_count,
+  bin_size = NULL,
+  mapping_fun = "k",
+  ref_genome = "mm10",
+  by_group = NULL
 )
 }
 \arguments{
-\item{co_geno_gr}{GRange object, returned by \code{countCO}}
+\item{co_count}{GRange object, returned by \code{countCO}}
 
 \item{bin_size}{The binning size for grouping marker intervals into bins. If not supplied,the
 orginial marker intervals are returned with converted genetic distancens
@@ -25,10 +96,10 @@ based on recombination rate}
 \item{ref_genome}{The reference genome name. It is used to fetch the chromosome Information
 from UCSC database.}
 
-\item{by_group, }{the unique prefix of sample names that are used for defining
-different sample groups. If NULL all samples are assumed to be from one group}
-
-\item{BPPARAM, }{the back-end of type bpparamClass}
+\item{by_group, }{character vector contains the unique prefix of sample names 
+that are used for defining different sample groups. Or the column name in 
+colData(co_count) that specify the group factor. If missing all samples are 
+assumed to be from one group}
 }
 \value{
 GRanges object
@@ -36,9 +107,7 @@ GRanges for marker intervals or binned intervals with Haldane or Kosambi
 centiMorgans
 }
 \description{
-Calculate genetic distances of marker intervals or bins
-}
-\details{
+Calculate genetic distances of marker intervals or binned-chromosome 
 Given whether crossover happens in each marker interval, calculate the
 recombination fraction in samples and then derive the Haldane or Kosambi
 genetic distances via mapping functions

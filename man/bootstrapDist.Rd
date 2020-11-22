@@ -4,29 +4,21 @@
 \alias{bootstrapDist}
 \title{bootstrapDist}
 \usage{
-bootstrapDist(
-  co_gr,
-  B = 100,
-  mapping_fun = "k",
-  chr = NULL,
-  group_prefix,
-  BPPARAM = BiocParallel::bpparam()
-)
+bootstrapDist(co_gr, B = 100, mapping_fun = "k", by_group)
 }
 \arguments{
-\item{co_gr}{GRanges the crossover counts for each marker interval across all
-samples. Returned by \code{countCO}}
+\item{co_gr}{GRanges or RangedSummarizedExperiment object that contains the
+crossover counts for each marker interval across all samples.
+Returned by \code{countCO}}
 
 \item{B}{integer the number of sampling times}
 
 \item{mapping_fun}{character default to "k" (kosambi mapping function). It 
 can be one of the mapping functions: "k","h"}
 
-\item{chr}{character the specific chromosome to test or NULL indicates all
-chrs in the GRanges object will be summed together.}
-
-\item{group_prefix}{the prefix for each group that we need to generate 
-distributions for}
+\item{by_group, }{the prefix for each group that we need to generate 
+distributions for(only when co_gr is a GRanges object). Or the column name for colData(co_gr) that contains the
+group factor (only when co_gr is a RangedSummarizedExperiment object)}
 
 \item{BPPARAM, }{the bpparam backend registered for parallel computing}
 }

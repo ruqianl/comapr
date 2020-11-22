@@ -2,24 +2,30 @@
 % Please edit documentation in R/count-co.R
 \name{countCOs}
 \alias{countCOs}
+\alias{countCOs,GRanges-method}
+\alias{countCOs,RangedSummarizedExperiment-method}
 \title{countCOs}
 \usage{
-countCOs(geno, BPPARAM = BiocParallel::bpparam())
+countCOs(geno)
+
+\S4method{countCOs}{GRanges}(geno)
+
+\S4method{countCOs}{RangedSummarizedExperiment}(geno)
 }
 \arguments{
-\item{geno}{GRanges object with SNP positions and genotypes codes}
-
-\item{BPPARAM}{the registered backend for parallel computing
-across samples}
+\item{geno}{GRanges object or RangedSummarizedExperiment object with genotype
+matrix that has SNP positions in the rows and cells/samples in the columns}
 }
 \value{
-data.frame with markers as rows and samples in columns, values as the
-number of COs estimated for each marker interval
+GRanges object or RangedSummarizedExperiment with markers-intervals as rows 
+and samples in columns, values as the number of COs estimated for each marker 
+interval
 }
 \description{
 Count number of COs within each marker interval
 COs identified in the interval overlapping missing markers are distributed
-according to marker interval base-pair sizes
+according to marker interval base-pair sizes. Genotypes encoded with "0" are
+treated as missing value.
 }
 \author{
 Ruqian Lyu

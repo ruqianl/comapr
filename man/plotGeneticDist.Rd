@@ -7,7 +7,7 @@
 plotGeneticDist(gr, bin = TRUE, chr = NULL, cumulative = FALSE)
 }
 \arguments{
-\item{gr}{GRanges object with genetic distances calculated for listed
+\item{gr}{GRanges object with genetic distances calculated for marker
 intervals}
 
 \item{bin}{TRUE or FALSE, indicating whether the supplied GRange objecct 

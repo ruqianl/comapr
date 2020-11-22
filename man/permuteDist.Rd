@@ -4,33 +4,26 @@
 \alias{permuteDist}
 \title{permuteDist}
 \usage{
-permuteDist(
-  co_gr,
-  B = 100,
-  mapping_fun = "k",
-  chr = NULL,
-  group_prefix,
-  BPPARAM = BiocParallel::bpparam()
-)
+permuteDist(co_gr, B = 100, mapping_fun = "k", by_group)
 }
 \arguments{
-\item{co_gr}{GRanges the crossover counts for each marker interval across all
-samples. Returned by \code{countCO}}
+\item{co_gr}{GRanges or RangedSummarizedExperiment object that contains the
+crossover counts for each marker interval across all samples.
+Returned by \code{countCO}}
 
 \item{B}{integer the number of sampling times}
 
 \item{mapping_fun}{character default to "k" (kosambi mapping function). It 
 can be one of the mapping functions: "k","h"}
 
-\item{chr}{character the specific chromosome to test or NULL indicates all
-chrs in the GRanges object will be summed together.}
-
-\item{group_prefix}{a character vector of two}
-
-\item{BPPARAM}{the bpparam backend registered for parallel computing}
+\item{by_group}{the prefix for each group that we need to generate 
+distributions for(only when co_gr is a GRanges object). Or the column name for colData(co_gr) that contains the
+group factor (only when co_gr is a RangedSummarizedExperiment object)}
 }
 \value{
-the list of length B with numeric differences of two groups
+A list of three elements. `permutes` of length B with numeric differences 
+of permuted group differences,`observed_diff` the observed genetic distances of
+two groups, `nSample`, the number of samples in the first and second group.
 }
 \description{
 Permutation test of two sample groups

@@ -3,7 +3,8 @@
 #' 
 #' Count number of COs within each marker interval
 #' COs identified in the interval overlapping missing markers are distributed
-#' according to marker interval base-pair sizes
+#' according to marker interval base-pair sizes. Genotypes encoded with "0" are
+#' treated as missing value.
 #' 
 #' @importFrom dplyr group_by
 #' @importFrom dplyr %>%
@@ -15,26 +16,42 @@
 #' @importFrom GenomicRanges GRanges seqnames mcols ranges seqinfo<- mcols<-
 #' @importFrom IRanges mergeByOverlaps
 #' @importFrom IRanges IRanges ranges start width
+#' @importClassesFrom SummarizedExperiment SummarizedExperiment
 #' @export
-#' @param geno GRanges object with SNP positions and genotypes codes
-#' @param BPPARAM the registered backend for parallel computing
-#' across samples
+#' @param geno GRanges object or RangedSummarizedExperiment object with genotype
+#' matrix that has SNP positions in the rows and cells/samples in the columns
 
 #' @return 
-#' data.frame with markers as rows and samples in columns, values as the
-#' number of COs estimated for each marker interval
+#' GRanges object or RangedSummarizedExperiment with markers-intervals as rows 
+#' and samples in columns, values as the number of COs estimated for each marker 
+#' interval
 
 #' @author Ruqian Lyu
-countCOs <- function(geno,BPPARAM=BiocParallel::bpparam()){
+
+setGeneric("countCOs",function(geno)
+  standardGeneric("countCOs"))
+
+#'@rdname countCOs
+setMethod("countCOs",signature = c(geno="GRanges"),function(geno){
+  countCOs_gr(geno)
+})
+
+#'@rdname countCOs
+setMethod("countCOs",signature = c(geno="RangedSummarizedExperiment"),
+          function(geno){
+            geno_gr <- rowRanges(geno)
+            mcols(geno_gr) <- as.matrix( assay(geno))
+            colnames(mcols(geno_gr)) <- as.character(colData(geno)$barcodes)
+            result_gr <- countCOs_gr(geno_gr)
+            stopifnot(colData(geno)$barcodes==colnames(mcols(result_gr)))
+            SummarizedExperiment(assay=list(co_count=mcols(result_gr)),
+                                 colData = colData(geno),
+                                 rowRanges =granges(result_gr) )
+})
+
+countCOs_gr <- function(geno){
   stopifnot(!is.null(seqnames(geno)))
 
-    
-    #   snp_wg_gr <-  GenomicRanges::GRanges(
-    # seqnames = sapply(strsplit(rownames(geno),"_"),`[[`,1),
-    # ranges = IRanges::IRanges(start = 
-    #                             as.numeric(sapply(strsplit(rownames(geno),"_"),`[[`,2)),
-    #                           width = 1))
-  
     crossover_counts <- bplapply(GenomicRanges::mcols(geno),
                           FUN=function(sid_geno,snp_gr=geno[,0]){
 
@@ -42,7 +59,8 @@ countCOs <- function(geno,BPPARAM=BiocParallel::bpparam()){
                                   Pos= IRanges::start(GenomicRanges::ranges(snp_gr)),
                                   GT = as.character(sid_geno),
                                   stringsAsFactors = F)
-              to_re <- temp_df %>% dplyr::filter(!is.na(.data$GT)) %>%
+              to_re <- temp_df %>% dplyr::filter((!is.na(.data$GT)) & 
+                                                   (!.data$GT=="0")) %>%
                 dplyr::group_by(.data$chr) %>%
                 dplyr::mutate(CO = (.data$GT!= dplyr::lag(.data$GT)),
                               Prev = dplyr::lag(.data$Pos)) %>%
@@ -78,8 +96,10 @@ countCOs <- function(geno,BPPARAM=BiocParallel::bpparam()){
                 mapped_marker_state <-
                   mapped_marker_state[mapped_marker_state$snp_gr.start !=
                                         mapped_marker_state$snp_gr.prev,]
-                re_df$crossovers[match(mapped_marker_state$snp_gr.start,
-                                       re_df$Pos)] <- mapped_marker_state$len_prop
+                
+                re_df$crossovers[match(paste0(mapped_marker_state$co_gr.seqnames,
+                                              "_",mapped_marker_state$snp_gr.start),
+                                      paste0(re_df$chr,"_", re_df$Pos))] <- mapped_marker_state$len_prop
                 
                colnames(re_df) <- c(colnames(re_df)[1:2],names(sid_geno))
 
@@ -88,7 +108,7 @@ countCOs <- function(geno,BPPARAM=BiocParallel::bpparam()){
 #              message(paste0("\t fourth \t",start(ranges(snp_gr))))
               rownames(re_df) <- paste0(as.character(re_df$chr),"_",re_df$Pos)
               re_df[,3,drop =F]
-    },BPPARAM = BPPARAM)
+    })
     
         final_df <- do.call(cbind,crossover_counts)
         colnames(final_df) <- names(crossover_counts)
@@ -110,3 +130,4 @@ countCOs <- function(geno,BPPARAM=BiocParallel::bpparam()){
         co_gr[IRanges::width(ranges(co_gr))!=0,]
 
 }
+

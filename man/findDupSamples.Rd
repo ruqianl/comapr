@@ -4,7 +4,7 @@
 \alias{findDupSamples}
 \title{findDupSamples}
 \usage{
-findDupSamples(geno, threshold = 0.99, plot = FALSE, in_text = FALSE)
+findDupSamples(geno, threshold = 0.99, in_text = FALSE)
 }
 \arguments{
 \item{geno}{the genotype data.frame of markers by samples from output of
@@ -14,9 +14,6 @@ function \code{correctGT}}
 all geneotypes for determining whether the pair of samples
 are duplicated, defaults to \code{0.99}. NAs are regarded as same genotypes for
 two samples if they both have NA for a marker.}
-
-\item{plot}{whether a frequency heatmap plot should be generated for 
-paired-samples}
 
 \item{in_text}{whether text of frequencies should be displayed in the
 heatmap cells}
@@ -35,7 +32,7 @@ or_geno[,1] <- or_geno[,5]
 cr_geno <- correctGT(or_geno,ref = snp_geno$C57BL.6J,
                     alt = snp_geno$FVB.NJ..i.,
                     chr = snp_geno$CHR)
-dups <- findDupSamples(cr_geno,plot = TRUE)
+dups <- findDupSamples(cr_geno)
 }
 \author{
 Ruqian Lyu

@@ -5,3 +5,4 @@
 ^data-raw$
 .gitlab-ci.yml
 ^LICENSE\.md$
+^public$

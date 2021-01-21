@@ -17,6 +17,6 @@ test_that("bootstrapDist works", {
   # expect_true(abs(dist$kosambi_cm[4]-13.67603)<1e-3)
   # 
   bootstrap_results <- bootstrapDist(marker_gr_cos,B=10,
-                                     group_prefix = c("X1","X9"))
-  expect_true(class(bootstrap_results)=="matrix")
+                                     by_group  = c("X1","X9"))
+  expect_true(is.matrix(bootstrap_results))
 })

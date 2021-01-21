@@ -1,0 +1,138 @@
+---
+title: "single-sperm-co-analysis"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{single-sperm-co-analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(comapr)
+library(SummarizedExperiment)
+```
+
+## Locate file path
+
+The `comapr` package includes a list of toy example output files from the `sscocaller`
+command line tool. The follow code will get the file path that we will use later.
+
+```{r}
+demo_path <-paste0(system.file("extdata",package = "comapr"),"/")
+```
+
+We can see that we have two samples (individual donors) and each of them has 
+haplotype states inferred for chr1 to chr5.
+
+```{r}
+list.files(demo_path)
+```
+
+### File information
+
+- _vi.mtx 
+  A haplotype
+- _snpAnnot.txt
+  The SNP annotations
+  
+
+
+Parse output from `sscocaller` and filter out low-confidence COs
+
+```{r}
+s1_rse_state <- readHapState("s1",chroms=c("chr1","chr2"),
+                             path=demo_path,barcodeFile=NULL,
+                             minSNP = 0,
+                             minlogllRatio = 50,
+                             bpDist = 100,
+                             maxRawCO=10,
+                             minCellSNP = 1)
+
+s2_rse_state <- readHapState("s2",chroms=c("chr1","chr2"),
+                             path=demo_path,
+                             barcodeFile=NULL,
+                             minSNP = 0,
+                             minlogllRatio = 50,
+                             bpDist = 100,
+                             maxRawCO=10,
+                             minCellSNP = 1)
+```
+
+
+```{r}
+s1_rse_state
+```
+
+```{r}
+assay(s1_rse_state)
+rowRanges(s1_rse_state)
+```
+
+Sample group factor
+
+```{r}
+colData(s1_rse_state)
+
+colData(s1_rse_state)$sampleGroup <- "s1"
+
+colData(s2_rse_state)$sampleGroup <- "s2"
+
+```
+
+combine two individual: combine sample s1 and sample s2
+
+
+```{r}
+twoSample <- combineHapState(s1_rse_state,s2_rse_state)
+assay(twoSample)
+rowRanges(twoSample)
+```
+
+```{r}
+cocounts <- countCOs(twoSample)
+
+rowRanges(cocounts)
+assay(cocounts)
+```
+
+
+```{r}
+colData(cocounts)
+
+#colData(cocounts)$sampleGroup <- c(rep("s1",5),rep("s2",5))
+
+dist_gr <- calGeneticDist(co_count = cocounts)
+dist_gr
+```
+
+```{r}
+rowData(dist_gr)
+```
+
+```{r}
+
+dist_gr <- calGeneticDist(co_count = cocounts,
+                          by_group = "sampleGroup")
+
+```
+
+```{r}
+rowData(dist_gr)$kosambi
+```
+
+
+```{r}
+p_gr <- granges(dist_gr)
+mcols(p_gr) <- rowData(dist_gr)$kosambi
+
+plotWholeGenome(p_gr)
+
+```
+

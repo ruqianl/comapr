@@ -1,16 +1,17 @@
 Package: comapr
 Title: Converts genotype reports for SNP markers to quantified genetic lengths
-Version: 0.0.1.0004
+Version: 0.0.1.0010
 Authors@R: 
     person(given = "Lyu",
            family = "Ruqian",
            role = c("aut", "cre"),
-           email = "rlyu@svi.edu.au",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Maintainer: Ruqian Lyu <rlyu@svi.edu.au>
-Author: Ruqian Lyu <rlyu@svi.edu.au>
-Description: This package converts genotyping test reports of genotypes for SNP markers in excel spreadsheets to quantified genetic lengths. 
-Depends: R (>= 3.5.0)
+           email = "ruqianl@student.unimelb.edu.au",
+           comment = c(ORCID = "0000-0002-7736-6612"))
+Maintainer: Ruqian Lyu <ruqianl@student.unimelb.edu.au>
+Author: Ruqian Lyu <ruqianl@student.unimelb.edu.au>
+Description: This package examins haplotype patterns for genetic markers along the genome and compares genetic distances for different sample groups. 
+Depends: 
+    R (>= 3.5.0)
 Imports:
  methods,
  ggplot2,
@@ -19,7 +20,6 @@ Imports:
  dplyr,
  gridExtra,
  plotly,
- ComplexHeatmap,
  circlize,
  rlang,
  GenomicRanges,
@@ -31,7 +31,9 @@ Imports:
  RColorBrewer,
  tidyr,
  S4Vectors,
- utils
+ utils,
+ Matrix,
+ SummarizedExperiment
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

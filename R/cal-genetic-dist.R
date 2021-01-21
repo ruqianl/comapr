@@ -67,11 +67,13 @@ cal_marker_dist <- function(co_count,mapping_fun="k",by_group = NULL){
 #' assumed to be from one group
 #' 
 #' @importFrom rlang .data
-#' @importFrom GenomeInfoDb fetchExtendedChromInfoFromUCSC genome genome<-   
+#' @importFrom GenomeInfoDb getChromInfoFromUCSC genome genome<-   
 #' @importFrom GenomicRanges GRanges mcolAsRleList sort width 
 #' @importFrom GenomicRanges tileGenome binnedAverage mcols
 #' @importFrom GenomeInfoDb sortSeqlevels seqlevels seqinfo
 #' @importFrom S4Vectors Rle
+#' @importClassesFrom SummarizedExperiment SummarizedExperiment
+#' @importFrom SummarizedExperiment colData rowRanges
 #' @return GRanges object
 #' GRanges for marker intervals or binned intervals with Haldane or Kosambi 
 #' centiMorgans
@@ -115,18 +117,18 @@ cal_bin_dist <- function(new_gr,bin_size,
   ## This is only for getting the basepair lengths of the genome
   
   
-  chrom_info <- GenomeInfoDb::fetchExtendedChromInfoFromUCSC(ref_genome)
+  chrom_info <- GenomeInfoDb::getChromInfoFromUCSC(ref_genome)
   ## only for chr1-M
-  chrom_info <- chrom_info[grep("_",chrom_info$UCSC_seqlevel,invert = TRUE),]
+  chrom_info <- chrom_info[grep("_",chrom_info$chrom,invert = TRUE),]
   
   ## Check what seqnames is in new_gr and make it consistent
   if(!grepl("chr",as.character(seqnames(new_gr)[1]))){
-    chrom_info$UCSC_seqlevel <- gsub("chr","",chrom_info$UCSC_seqlevel)
+    chrom_info$chrom <- gsub("chr","",chrom_info$chrom)
   }
-  chrom_info <- chrom_info[chrom_info$UCSC_seqlevel %in% GenomeInfoDb::seqlevels(new_gr),]
+  chrom_info <- chrom_info[chrom_info$chrom %in% GenomeInfoDb::seqlevels(new_gr),]
   ## create Granges object for chromosomes
-  seq_length <- chrom_info$UCSC_seqlength
-  names(seq_length) <- chrom_info$UCSC_seqlevel
+  seq_length <- chrom_info$size
+  names(seq_length) <- chrom_info$chrom
   
   dna_mm10_gr <- GenomicRanges::GRanges(
     seqnames = Rle(names(seq_length)),
@@ -237,6 +239,8 @@ setMethod("calGeneticDist",signature = c(co_count = 'GRanges',
           })
 
 #'@rdname calGeneticDist
+#'@importFrom SummarizedExperiment rowRanges rowRanges<-
+#'
 setMethod("calGeneticDist",signature = c(co_count = 'RangedSummarizedExperiment',
                                          bin_size='missing',
                                          by_group='missing'),

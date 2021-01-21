@@ -106,19 +106,24 @@ plotGeneticDist <- function(gr,bin=TRUE,chr=NULL,cumulative=FALSE){
 #' This function takes the calculated genetic distances for all
 #' marker intervals across all chromosomes provided and plot the
 #' cumulative genetic distances
+#' @importFrom GenomicRanges mcols
+#' @importFrom dplyr select mutate 
 #' @export
 #' @param  gr, GRanges object with genetic distances calculated for marker 
 #' intervals
 plotWholeGenome <- function(gr){
 
-  mcols(gr) <- apply(mcols(gr), 2, function(x) {
+  end <- chr_len <- tot <- all_of <- x_tick <- bin_dist <- SampleGroup <- NULL
+  BPcum <- NULL
+  
+  GenomicRanges::mcols(gr) <- apply(mcols(gr), 2, function(x) {
     temp_df <- data.frame(x = x) %>% 
       dplyr::mutate(cum = cumsum(x))
     temp_df$cum
   })
   
   gr_df <- data.frame(gr,check.names = F)
-  col_to_plot <- gsub("\\|",".", colnames(mcols(gr)))
+  col_to_plot <- gsub("\\|",".", colnames(GenomicRanges::mcols(gr)))
   don <- gr_df %>% 
     
     # Compute chromosome size
@@ -154,7 +159,7 @@ plotWholeGenome <- function(gr){
     axisdf <-  don %>% dplyr::group_by(seqnames) %>%
       dplyr::summarize(center=( max(BPcum) + min(BPcum) ) / 2 )
     
-    p <- p+scale_x_continuous(label = axisdf$seqnames, breaks= axisdf$center ) + 
+    p <- p+scale_x_continuous(labels = axisdf$seqnames, breaks= axisdf$center ) + 
       theme_classic(base_size = 15) +
       xlab("Chromosome positions \n cumulative whole genome") +
       ylab("cumulative centiMorgans")

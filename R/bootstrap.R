@@ -15,7 +15,6 @@
 #' @param by_group, the prefix for each group that we need to generate 
 #' distributions for(only when co_gr is a GRanges object). Or the column name for colData(co_gr) that contains the
 #' group factor (only when co_gr is a RangedSummarizedExperiment object)
-#' @param BPPARAM, the bpparam backend registered for parallel computing
 
 #' @importFrom BiocParallel bplapply
 #' @export

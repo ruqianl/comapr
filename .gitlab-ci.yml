@@ -17,6 +17,14 @@ variables:
 
 before_script:
 
+buildCMD:
+  tags: 
+    - docker
+  image: svirlyu/comapr_dev
+  stage: build
+  script:
+    - R CMD build
+
 buildbinary:
   tags: 
     - docker

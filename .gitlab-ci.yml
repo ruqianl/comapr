@@ -25,7 +25,7 @@ installDeps:
   image: svirlyu/comapr_dev
   stage: installDeps
   script:
-    - R -e 'BiocManager::install(c("GenomicRanges", "IRanges", "foreach", "BiocParallel", "GenomeInfoDb", "S4Vectors", "SummarizedExperiment" )'
+    - R -e 'BiocManager::install(c("GenomicRanges", "IRanges", "foreach", "BiocParallel", "GenomeInfoDb", "S4Vectors", "SummarizedExperiment" ))'
     
 buildCMD:
   tags: 

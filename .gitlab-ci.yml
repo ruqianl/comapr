@@ -2,6 +2,7 @@ default:
   image: svirlyu/comapr_dev
 
 stages:
+  - installDeps
   - build
   - document
   - check
@@ -17,6 +18,15 @@ variables:
 
 before_script:
 
+
+installDeps:
+  tags: 
+    - docker
+  image: svirlyu/comapr_dev
+  stage: installDeps
+  script:
+    - R -e 'BiocManager::install(c("GenomicRanges", "IRanges", "foreach", "BiocParallel", "GenomeInfoDb", "S4Vectors", "SummarizedExperiment" )'
+    
 buildCMD:
   tags: 
     - docker

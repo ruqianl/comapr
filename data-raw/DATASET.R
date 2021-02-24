@@ -205,7 +205,7 @@ segInfo <- data.frame(ithSperm = c("ithSperm0",
                       State = c(1,2,1,1,2,1,2))
 for(chr in paste0("chr",seq(1:5))){
   write.table(segInfo,col.names = F,row.names = F,quote = F,
-              file = paste0("inst/extdata/s2_",chr,"_viSegInO.txt"))
+              file = paste0("inst/extdata/s2_",chr,"_viSegInfO.txt"))
 }
 
 

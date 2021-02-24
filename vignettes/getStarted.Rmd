@@ -52,9 +52,9 @@ data(parents_geno)
 
 ### Format the genotype
 
-In order to detect crossovers from the 22 samples' genotype results, we'd need
-to format the result into `Homo_ref`, `Homo_alt` and `Het` encoding. This can be
-simply done through comparing with the parents' genotypes.
+In order to detect crossovers from the 22 samples' genotype results (BC1F1 
+samples), we need to format the result into `Homo_ref`, `Homo_alt` and `Het`
+encoding. This can be simply done through comparing with the parents' genotypes.
 
 ```{r}
 corrected_geno <- correctGT(gt_matrix = mcols(snp_geno_gr),
@@ -118,7 +118,8 @@ mcols(corrected_geno) <- mcols(corrected_geno)[,colnames(mcols(corrected_geno))!
 
 Crossovers are detected and counted through examining the patterns of genotypes 
 in each sample against the list of markers. When there is a shift from one 
-genotype block to another the crossovers are detected. This is done through calling `countCOs` function.
+genotype block to another the crossovers are detected. This is done through 
+calling `countCOs` function.
 
 ```{r}
 marker_gr_cos <- countCOs(corrected_geno)
@@ -178,6 +179,7 @@ plotGeneticDist(dist_bin_gr,cumulative = T)
 ```{r}
 plotWholeGenome(dist_bin_gr)
 ```
+
 
 # Sessioninfo
 

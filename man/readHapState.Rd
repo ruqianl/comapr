@@ -12,7 +12,10 @@ readHapState(
   minSNP = 30,
   minlogllRatio = 200,
   bpDist = 100,
-  maxRawCO = 10
+  maxRawCO = 10,
+  nmad = 1.5,
+  minCellSNP = 200,
+  bias_off_set = 0.45
 )
 }
 \arguments{

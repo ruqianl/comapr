@@ -4,7 +4,16 @@
 \alias{filterCOs}
 \title{Filter out doublet cells and uninformative SNPs}
 \usage{
-filterCOs(se, minSNP = 30, minlogllRatio = 200, bpDist = 100, maxRawCO = 10)
+filterCOs(
+  se,
+  minSNP = 30,
+  minlogllRatio = 200,
+  minCellSNP = 200,
+  bpDist = 100,
+  maxRawCO = 10,
+  bias_off_set = 0.45,
+  nmad = 1.5
+)
 }
 \arguments{
 \item{se, }{the SummarizedExperiment object that contains the called haplotype

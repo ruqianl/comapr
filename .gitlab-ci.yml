@@ -27,13 +27,13 @@ buildCMD:
   script:
     - R CMD build
 
-buildbinary:
-  tags: 
-    - docker
-  image: svirlyu/comapr_dev
-  stage: build
-  script:
-    - R -e 'devtools::build(binary = TRUE)'
+#buildbinary:
+#  tags: 
+#    - docker
+#  image: svirlyu/comapr_dev
+#  stage: build
+#  script:
+#    - R -e 'devtools::build(binary = TRUE)'
 
 documentation:
   tags: 

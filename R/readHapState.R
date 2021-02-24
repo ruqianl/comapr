@@ -57,12 +57,17 @@ readHapState <- function(sampleName,chroms=c("chr1"),path,
                                rowRanges = GRanges(seqnames = chr,
                                                    ranges = IRanges::IRanges(start = snpAnno$POS,
                                                                               width = 1)),
-                               metadata = data.frame(segInfo,chr=chr,sampleGroup=sampleName))
+                               metadata = data.frame(segInfo,chr=chr,
+                                                     sampleGroup=sampleName))
     # se <- filterCOs(se,minSNP = minSNP, minlogllRatio = minlogllRatio,
     #                 bpDist = bpDist,maxRawCO=maxRawCO)
     # 
-    se <- filterCOsExtra(se ,minSNP = minSNP, minlogllRatio = minlogllRatio,minCellSNP = minCellSNP,
-                         bpDist = bpDist,maxRawCO=maxRawCO,bias_off_set=bias_off_set,
+    se <- filterCOsExtra(se ,minSNP = minSNP, 
+                         minlogllRatio = minlogllRatio,
+                         minCellSNP = minCellSNP,
+                         bpDist = bpDist,
+                         maxRawCO=maxRawCO,
+                         bias_off_set=bias_off_set,
                          nmad=nmad)
     se
   })
@@ -117,7 +122,9 @@ filterCOs <- function(se,minSNP = 30, minlogllRatio = 200,minCellSNP = 200,
   segInfo <- data.frame(S4Vectors::metadata(se),stringsAsFactors = F)
   
   segInfo$bp_dist <- segInfo$Seg_end - segInfo$Seg_start
-  segInfo$barcode <- SummarizedExperiment::colData(se)$barcodes[as.numeric(gsub("ithSperm","",segInfo$ithSperm))+1]
+  segInfo$barcode <- SummarizedExperiment::colData(se)$barcodes[as.numeric(gsub("ithSperm",
+                                                                                "",
+                                                                                segInfo$ithSperm))+1]
   
   keepCells <- names(table(segInfo$barcode))[table(segInfo$barcode)-1 <= maxRawCO]
   

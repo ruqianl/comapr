@@ -3,7 +3,8 @@ test_that("countCOs works", {
   s1_rse_state <- readHapState("s1",chroms=c("chr1"),
                                path=demo_path,barcodeFile=NULL,minSNP = 0,
                                minlogllRatio = 50,
-                               bpDist = 100,maxRawCO=10)
+                               bpDist = 100,maxRawCO=10,
+                               minCellSNP = 0)
   count_rse <- countCOs(s1_rse_state)
   ## colsums for each cell is either 0 or 1
   expect_true(sum(colSums( as.matrix(assay(  count_rse))) !=0 & 

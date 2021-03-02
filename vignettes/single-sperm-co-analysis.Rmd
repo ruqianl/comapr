@@ -1,6 +1,6 @@
 ---
 title: "single-sperm-co-analysis"
-output: rmarkdown::html_vignette
+output: BiocStyle::html_document
 vignette: >
   %\VignetteIndexEntry{single-sperm-co-analysis}
   %\VignetteEngine{knitr::rmarkdown}
@@ -19,7 +19,18 @@ library(comapr)
 library(SummarizedExperiment)
 ```
 
-## Locate file path
+# Introduction
+
+In the previous vignette, we demonstrated how to calculate genetic distances
+from genotyped markers of a group of samples.
+
+[Genetic distance calculate from genotype shifts of markers](getStarted.html)
+
+In this document, we mainly focus on building individualized genetic maps from
+output files of `sscocaller` which is avaiable at [here](https://gitlab.svi.edu.au/biocellgen-public/sscocaller).
+
+`sscocaller` outputs 
+# Locate file path
 
 The `comapr` package includes a list of toy example output files from the `sscocaller`
 command line tool. The follow code will get the file path that we will use later.

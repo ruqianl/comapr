@@ -43,9 +43,13 @@ test_that("Calculate genetic distances for bined intervals,
           for RangedSummarizedExperiment", {
     demo_path <-paste0(system.file("extdata",package = "comapr"),"/")
     s1_rse_state <- readHapState("s1",chroms=c("chr1"),
-                                 path=demo_path,barcodeFile=NULL,minSNP = 0,
+                                 path=demo_path,
+                                 barcodeFile=NULL,
+                                 minSNP = 0,
                                  minlogllRatio = 50,
-                                 bpDist = 100,maxRawCO=10)
+                                 bpDist = 100,
+                                 maxRawCO=10,
+                                 minCellSNP = 1)
     
     s1_counts <- countCOs(s1_rse_state)
     dist <- calGeneticDist(s1_counts,bin_size = 1e7) 
@@ -56,15 +60,20 @@ test_that("Calculate genetic distances for bined intervals,
 
 test_that("calGeneticDist works for RangedSummarizedExperiment ", {
   demo_path <-paste0(system.file("extdata",package = "comapr"),"/")
-  s1_rse_state <- readHapState("s1",chroms=c("chr1"),
-                               path=demo_path,barcodeFile=NULL,minSNP = 0,
+  s1_rse_state <- readHapState("s1",
+                               chroms=c("chr1"),
+                               path=demo_path,
+                               barcodeFile=NULL,
+                               minSNP = 0,
                                minlogllRatio = 50,
-                               bpDist = 100,maxRawCO=10)
+                               bpDist = 100,
+                               maxRawCO=10,
+                               minCellSNP = 1)
   
   s1_counts <- countCOs(s1_rse_state)
   dist <- calGeneticDist(s1_counts) 
   
-  expect_equivalent(colSums(as.matrix(assay(dist))),c( 1,1,0,0,0 ))
+  expect_equivalent(colSums(as.matrix(assay(dist))), c(1,1,0,0,0 ))
   expect_true(sum(rowRanges(dist)$kosambi)-41.84747 <0.001)
   
 })

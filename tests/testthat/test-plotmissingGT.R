@@ -3,8 +3,7 @@ test_that("Plot missing GT works", {
   rownames(or_geno) <- paste0(snp_geno$CHR,"_",snp_geno$POS)
   or_geno[1,] <- rep("Fail",dim(or_geno)[2])
   cr_geno <- correctGT(or_geno,ref = snp_geno$C57BL.6J,
-                      alt = snp_geno$FVB.NJ..i.,
-                      chr = snp_geno$CHR)
+                      alt = snp_geno$FVB.NJ..i.)
   p1 <- plotMissingGT(cr_geno)
   p2 <- plotMissingGT(cr_geno,plot_type = "bar")
   p3 <- plotMissingGT(cr_geno,plot_type = "bar", plot_wg = "TRUE")

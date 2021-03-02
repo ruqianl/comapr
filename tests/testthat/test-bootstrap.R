@@ -16,7 +16,7 @@ test_that("bootstrapDist works", {
   # dist <- calGeneticDist(marker_gr_cos)
   # expect_true(abs(dist$kosambi_cm[4]-13.67603)<1e-3)
   # 
-  bootstrap_results <- bootstrapDist(marker_gr_cos,B=10,
-                                     by_group  = c("X1","X9"))
+  bootstrap_results <- suppressWarnings(bootstrapDist(marker_gr_cos,B=10,
+                                                      by_group  = c("X1","X9")))
   expect_true(is.matrix(bootstrap_results))
 })

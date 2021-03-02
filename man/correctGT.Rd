@@ -4,38 +4,24 @@
 \alias{correctGT}
 \title{correctGT}
 \usage{
-correctGT(
-  gt_matrix,
-  ref,
-  alt,
-  chr,
-  ref_change_to = "Fail",
-  infer_fail = FALSE,
-  fail = "Fail"
-)
+correctGT(gt_matrix, ref, alt, failed = "Fail", wrong_label = "Homo_ref")
 }
 \arguments{
 \item{gt_matrix}{the input genotype matrix of markers by samples with rownames as marker IDs
 and column names as sample IDs}
 
-\item{ref}{a vector of genotypes of reference strain}
+\item{ref}{a vector of genotypes of the inbred reference strain}
 
-\item{alt}{a vector of genotypes of alternative strain}
+\item{alt}{a vector of genotypes of the inbred alternative strain}
 
 \item{chr}{the vector of chromosomes that the markers are from}
-
-\item{ref_change_to}{change homo_reference genotype calls to, default to "Het". The other option is
-"Fail".}
-
-\item{infer_fail}{whether the Failed genotype should be imputed. The ways of imputing Failed
-genotype is described in \code{\link{fill_fail}},default to FALSE.}
 
 \item{fail}{what was used for encoding failed genotype calling such as "Fail" in example
 data \code{snp_geno}}
 }
 \value{
-a genotype data.frame of sample dimension as the input gt_matrix with genotypes
-converted to labels and failed calls are changed to NA.
+a genotype data.frame of sample genotypes with dimension as the input `gt_matrix`
+with genotypes converted to labels and failed calls are changed to NA.
 }
 \description{
 function for formatting and correction genotypes of markers
@@ -46,10 +32,9 @@ to Hets/Fail, infer Failed genotype, and change "Failed" to NA for
 counting crossover later
 
 
-This function changes genotype in alleles to labels by calling \code{lable_gt},
-corrects the Homo_reference geneotype calls to Hets or Fail by calling
-\code{correct_ref}, infer the failed genotype calls by calling \code{fill_fail}
-and change missing values to NA by calling \code{change_missing}.
+This function changes genotype in alleles to labels by calling internal 
+functions \code{lable_gt}, and changes the wrong genotype Homo_ref to Fail by 
+calling \code{.change_missing}.
 }
 \author{
 Ruqian Lyu

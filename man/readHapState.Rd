@@ -15,7 +15,7 @@ readHapState(
   maxRawCO = 10,
   nmad = 1.5,
   minCellSNP = 200,
-  bias_off_set = 0.45
+  biasTol = 0.45
 )
 }
 \arguments{
@@ -25,8 +25,8 @@ finding relevant files for the underlying sample}
 \item{chroms, }{the character vectors of chromosomes to parse. Multiple chromosomes'
 results will be concated together.}
 
-\item{path, }{the path to the files, with name patterns *chrom_vi.mtx, *chrom_viSegInfo.txt,
-end with slash}
+\item{path, }{the path to the files, with name patterns *{chrom}_vi.mtx, 
+*{chrom}_viSegInfo.txt, end with slash}
 
 \item{barcodeFile, }{if NULL, it is assumed to be in the same directory as the 
 other files and with name sampleName_barcodes.txt}
@@ -42,6 +42,19 @@ that is shorter than `bpDist` basepairs.}
 
 \item{maxRawCO}{if a cell has more than `maxRawCO` number of raw crossovers
 called across one chromosome, the cell is filtered out}
+
+\item{nmad}{how many mean absolute deviations lower than the median number 
+of SNPs per cellfor a cell to be considered as low coverage cell and filtered 
+This or `minCellSNP`, whichever is larger, is applied}
+
+\item{minCellSNP}{the minimum number of SNPs detected for a cell to be kept, 
+used with `nmads`}
+
+\item{biasTol}{the SNP's haplotype ratio across all cells is assumed 
+to be 1:1. This argument can be used for removing SNPs that have a biased
+haplotype. i.e. almost always inferred to be haplotype state 1. It specifies
+a bias tolerance value, SNPs with bias from 0.5 smaller than this value are 
+kept.}
 }
 \value{
 a RangedSummarizedExperiment with rowRanges as SNP positions that contribute
@@ -57,7 +70,7 @@ demo_path <-system.file("extdata",package = "comapr")
 s1_rse_state <- readHapState(sampleName="s1",chroms=c("chr1"),
 path=paste0(demo_path,"/"),
 barcodeFile=NULL,minSNP = 0, minlogllRatio = 50,
-bpDist = 100,maxRawCO=10)
+bpDist = 100,maxRawCO=10,minCellSNP=10)
 s1_rse_state
 }
 \author{

@@ -177,16 +177,19 @@ fill_fail <- function(s_gt,fail = "Fail",chr = NULL){
 #' @param gt_matrix
 #' the input genotype matrix of markers by samples with rownames as marker IDs
 #' and column names as sample IDs
-#' @param chr
-#' the vector of chromosomes that the markers are from
 #' @param ref
 #'  a vector of genotypes of the inbred reference strain
 #' @param alt
 #'  a vector of genotypes of the inbred alternative strain
-#' @param fail
+#' @param failed
 #' what was used for encoding failed genotype calling such as "Fail" in example
 #' data \code{snp_geno}
-#'
+#' @param wrong_label
+#' what would be considered a wrong genotype label for example Homo_ref which 
+#' should not be in the possible genotypes of BC1F1 samples
+#' 
+#' data \code{snp_geno}
+#' 
 #' @details
 #' This function changes genotype in alleles to labels by calling internal 
 #' functions \code{lable_gt}, and changes the wrong genotype Homo_ref to Fail by 

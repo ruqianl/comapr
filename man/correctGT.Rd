@@ -14,9 +14,12 @@ and column names as sample IDs}
 
 \item{alt}{a vector of genotypes of the inbred alternative strain}
 
-\item{chr}{the vector of chromosomes that the markers are from}
+\item{failed}{what was used for encoding failed genotype calling such as "Fail" in example
+data \code{snp_geno}}
 
-\item{fail}{what was used for encoding failed genotype calling such as "Fail" in example
+\item{wrong_label}{what would be considered a wrong genotype label for example Homo_ref which 
+should not be in the possible genotypes of BC1F1 samples
+
 data \code{snp_geno}}
 }
 \value{

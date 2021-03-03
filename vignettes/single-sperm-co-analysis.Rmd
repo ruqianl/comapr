@@ -22,14 +22,15 @@ library(SummarizedExperiment)
 # Introduction
 
 In the previous vignette, we demonstrated how to calculate genetic distances
-from genotyped markers of a group of samples.
+using genotyped markers from a group of samples.
 
 [Genetic distance calculate from genotype shifts of markers](getStarted.html)
 
-In this document, we mainly focus on building individualized genetic maps from
+In this document, we will focus on building individualized genetic maps from
 output files of `sscocaller` which is avaiable at [here](https://gitlab.svi.edu.au/biocellgen-public/sscocaller).
 
 `sscocaller` outputs 
+
 # Locate file path
 
 The `comapr` package includes a list of toy example output files from the `sscocaller`

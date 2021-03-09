@@ -15,8 +15,10 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(comapr)
-library(SummarizedExperiment)
+suppressPackageStartupMessages({
+  library(comapr)
+  library(SummarizedExperiment)
+  })
 ```
 
 # Introduction
@@ -28,8 +30,6 @@ using genotyped markers from a group of samples.
 
 In this document, we will focus on building individualized genetic maps from
 output files of `sscocaller` which is avaiable at [here](https://gitlab.svi.edu.au/biocellgen-public/sscocaller).
-
-`sscocaller` outputs 
 
 # Locate file path
 
@@ -47,14 +47,39 @@ haplotype states inferred for chr1 to chr5.
 list.files(demo_path)
 ```
 
-### File information
+# File information
 
-- _vi.mtx 
-  A haplotype
-- _snpAnnot.txt
-  The SNP annotations
-  
+- *.mtx
+  - sparse matrix with columns corresponding to the list of sperm cell barcodes 
+  and rows corresponding to the list of SNP positions in VCF file
+  - {sample}_chr1_altCount.mtx, a sparse mtx with entries representing alternative allele counts
+  - {sample}_chr1_totalCount.mtx, a sparse mtx with entries representing total allele counts
+  - {sample}_chr1_vi.mtx, a sparse mtx with entries representing inferred viterbi state (haplotype state)
 
+
+- {sample}_chr1_snpAnnot.txt, the SNP positions and allele
+- {sample}_chr1_SegInfo.txt, statistics of viterbi state segments in text file format.
+   It contains consecutive viterbi states for each chromosome with statistics including, 
+   starting SNP position, ending SNP position, the number of SNPs supporting the segment, 
+   the log likelihood ratio of the viterbi segment and the inferred hidden state.
+
+# Diagnostic functions
+
+`comapr` provides quality check functions for examining SNP coverage per chr and 
+per cell, chromosome segregation checks, and summary statics for filtering low
+confidence crossovers.
+
+## perCellChrQC
+
+```{r}
+pcQC <- perCellChrQC(sampleName="s1",chroms=c("chr1"),
+                     path=paste0(demo_path,"/"),
+                     barcodeFile=NULL)
+```
+
+
+
+# Construct `RangedSummarizedExpriment` object from parsing files
 
 Parse output from `sscocaller` and filter out low-confidence COs
 

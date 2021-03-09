@@ -1,6 +1,6 @@
 #' readHapState
 #' 
-#' A helper function that parses the viterbi state matrix (in .mtx format), 
+#' A function that parses the viterbi state matrix (in .mtx format), 
 #' barcode.txt and snpAnno.txt files for each individual.
 #' 
 #' @importClassesFrom SummarizedExperiment SummarizedExperiment
@@ -40,10 +40,10 @@ readHapState <- function(sampleName,chroms=c("chr1"),path,
   if(is.null(barcodeFile)){
     barcodeFile <- paste0(path,sampleName,"_barcodes.txt")
   }
-  barcodes <- read.table(file=barcodeFile,stringsAsFactors = F,
-                           col.names = "barcodes")
   se_list <- bplapply(chroms,function(chr){
-
+    
+    barcodes <- read.table(file=barcodeFile,stringsAsFactors = F,
+                           col.names = "barcodes")
     snpAnno <- read.table(file=paste0(path,sampleName,"_",chr,"_snpAnnot.txt"),
                           stringsAsFactors = F,
                           header=T)
@@ -93,7 +93,7 @@ readHapState <- function(sampleName,chroms=c("chr1"),path,
 #'state matrix in the assay field and haplotype segment information in the metadata
 #'field.
 #'@param maxRawCO, if a cell has more than `maxRawCO` number of raw crossovers
-#'called across one chromosome, the cell is filtered out
+#'called across a chromosome, the cell is filtered out
 #'@param minSNP, the crossover(s) will be filtered out if introduced by a segment
 #'that has fewer than `minSNP` SNPs to support.
 #'@param bpDist, the crossover(s) will be filtered out if introduced by a segment

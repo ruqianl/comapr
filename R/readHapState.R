@@ -27,7 +27,7 @@
 #' s1_rse_state <- readHapState(sampleName="s1",chroms=c("chr1"),
 #' path=paste0(demo_path,"/"),
 #' barcodeFile=NULL,minSNP = 0, minlogllRatio = 50,
-#' bpDist = 100,maxRawCO=10,minCellSNP=10)
+#' bpDist = 100,maxRawCO=10,minCellSNP=3)
 #' s1_rse_state
 #' @export
 #' @author Ruqian Lyu

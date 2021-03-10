@@ -41,7 +41,7 @@ segment that has lower than `minlogllRatio` to its reversed state.}
 that is shorter than `bpDist` basepairs.}
 
 \item{maxRawCO}{if a cell has more than `maxRawCO` number of raw crossovers
-called across one chromosome, the cell is filtered out}
+called across a chromosome, the cell is filtered out}
 
 \item{nmad}{how many mean absolute deviations lower than the median number 
 of SNPs per cellfor a cell to be considered as low coverage cell and filtered 
@@ -62,7 +62,7 @@ to crossovers in any cells. colData contains cells annotation including barcodes
 sampleName.
 }
 \description{
-A helper function that parses the viterbi state matrix (in .mtx format), 
+A function that parses the viterbi state matrix (in .mtx format), 
 barcode.txt and snpAnno.txt files for each individual.
 }
 \examples{
@@ -70,7 +70,7 @@ demo_path <-system.file("extdata",package = "comapr")
 s1_rse_state <- readHapState(sampleName="s1",chroms=c("chr1"),
 path=paste0(demo_path,"/"),
 barcodeFile=NULL,minSNP = 0, minlogllRatio = 50,
-bpDist = 100,maxRawCO=10,minCellSNP=10)
+bpDist = 100,maxRawCO=10,minCellSNP=3)
 s1_rse_state
 }
 \author{

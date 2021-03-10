@@ -23,8 +23,7 @@
 #' rownames(or_geno) <- paste0(snp_geno$CHR,"_",snp_geno$POS)
 #' or_geno[,1] <- or_geno[,5]
 #' cr_geno <- correctGT(or_geno,ref = snp_geno$C57BL.6J,
-#'                     alt = snp_geno$FVB.NJ..i.,
-#'                     chr = snp_geno$CHR)
+#'                     alt = snp_geno$FVB.NJ..i.)
 #' dups <- findDupSamples(cr_geno)
 findDupSamples <- function(geno, threshold = 0.99, 
                            in_text = FALSE){

@@ -33,7 +33,7 @@ used with `nmads`}
 that is shorter than `bpDist` basepairs.}
 
 \item{maxRawCO, }{if a cell has more than `maxRawCO` number of raw crossovers
-called across one chromosome, the cell is filtered out}
+called across a chromosome, the cell is filtered out}
 
 \item{biasTol, }{the SNP's haplotype ratio across all cells is assumed 
 to be 1:1. This argument can be used for removing SNPs that have a biased

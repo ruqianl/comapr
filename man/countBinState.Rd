@@ -11,7 +11,8 @@ countBinState(chr, snpAnno, viState, genomeRange, ntile = 5)
 
 \item{snpAnno, }{data.frame, the SNP annotation for the supplied chromosome}
 
-\item{viState, }{dgTMatrix/Matrix, the viterbi state matrix, output from `sscocaller`}
+\item{viState, }{dgTMatrix/Matrix, the viterbi state matrix, output from
+`sscocaller`}
 
 \item{genomeRange, }{GRanges object with seqlengths information for the genome}
 
@@ -25,11 +26,11 @@ Bins the chromosome into supplied number of bins and find the state of
 the chromosome bins across all sperms
 }
 \details{
-This function is used for checking whether chromosome segregation pattern obeys
-the expected ratio.
+This function is used for checking whether chromosome segregation pattern
+obeys the expected ratio.
 }
 \examples{
-\dontrun{
+\donttest{
 chrom_info <- GenomeInfoDb::getChromInfoFromUCSC("mm10")
 seq_length <- chrom_info$size
 names(seq_length) <- chrom_info$chrom
@@ -42,14 +43,14 @@ dna_mm10_gr <- GenomicRanges::GRanges(
 GenomeInfoDb::genome(dna_mm10_gr) <- "mm10"
 demo_path <- system.file("extdata",package = "comapr")
 sampleName <- "s1"
-vi_mtx <- Matrix::readMM(file = paste0(demo_path, sampleName, "_", 
+vi_mtx <- Matrix::readMM(file = paste0(demo_path, sampleName, "_",
                                        chr, "_vi.mtx"))
 
 snpAnno <- read.table(file = paste0(demo_path, sampleName,
-                                    "_", chr, "_snpAnnot.txt"), 
-                                    stringsAsFactors = F,
-                      header = T)
-                      
+                                    "_", chr, "_snpAnnot.txt"),
+                                    stringsAsFactors = FALSE,
+                      header = TRUE)
+
 countBinState(chr = "chr1",snpAnno = snpAnno,
 viState = vi_mtx,genomeRange = dna_mm10_gr,
 ntile = 1)

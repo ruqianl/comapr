@@ -10,6 +10,9 @@ plotGTFreq(geno)
 \item{geno}{the genotype data.frame of markers by samples from output of
 function \code{correctGT}}
 }
+\value{
+A ggplot object
+}
 \description{
 Function to plot the genotypes for all samples faceted by genotype
 }

@@ -42,9 +42,7 @@ snp_geno_gr
 Markers by genotype results for a group of samples
 }
 \examples{
-\dontrun{
  snp_geno_gr
-}
 
 }
 \keyword{datasets}

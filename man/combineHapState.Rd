@@ -11,11 +11,11 @@ combineHapState(rse1, rse2, groupName = c("Sample1", "Sample2"))
 
 \item{rse2, }{the second `RangedSummarizedExperiment`}
 
-\item{groupName, }{a character vector of length 2 that contains the first and 
+\item{groupName, }{a character vector of length 2 that contains the first and
 the second group's names}
 }
 \value{
-A `RangedSummarizedExperiment` that contains the cells and SNPs in 
+A `RangedSummarizedExperiment` that contains the cells and SNPs in
 both `rse`
 }
 \description{
@@ -33,7 +33,8 @@ s1_rse_state <- readHapState("s1",chroms=c("chr1"),
 
 s2_rse_state <- readHapState("s2",chroms=c("chr1"),
                              path=demo_path,
-                             barcodeFile=paste0(demo_path,"s2_barcodes.txt"),minSNP = 0, 
+                             barcodeFile=paste0(demo_path,"s2_barcodes.txt"),
+                             minSNP = 0,
                              minlogllRatio = 50,
                              bpDist = 100,maxRawCO=10,
                              minCellSNP = 1)

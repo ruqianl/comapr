@@ -30,6 +30,10 @@ Filter markers or samples that have too many missing values
 This function takes the \code{geno} data.frame and filter the data.frame by
 the provided cut-offs.
 }
+\examples{
+corrected_geno <- filterGT(snp_geno_gr, min_markers = 30,min_samples = 2)
+
+}
 \author{
 Ruqian Lyu
 }

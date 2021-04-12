@@ -18,10 +18,13 @@ function \code{correctGT}}
 A list of two elements including \code{n_markers} and \code{n_samples}
 }
 \description{
-count how many samples have genotypes calls across markers and count how 
-many markers that each individual has called genotypes for. This function 
+count how many samples have genotypes calls across markers and count how
+many markers that each individual has called genotypes for. This function
 helps identify poor samples or poor markers for filtering. It can also generate
 plots that help identify outlier samples/markers
+}
+\examples{
+genotype_counts <- countGT(mcols(snp_geno_gr))
 }
 \author{
 Ruqian Lyu

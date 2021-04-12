@@ -96,19 +96,24 @@ based on recombination rate}
 \item{ref_genome}{The reference genome name. It is used to fetch the chromosome Information
 from UCSC database.}
 
-\item{by_group, }{character vector contains the unique prefix of sample names 
-that are used for defining different sample groups. Or the column name in 
-colData(co_count) that specify the group factor. If missing all samples are 
+\item{by_group, }{character vector contains the unique prefix of sample names
+that are used for defining different sample groups. Or the column name in
+colData(co_count) that specify the group factor. If missing all samples are
 assumed to be from one group}
 }
 \value{
 GRanges object
-GRanges for marker intervals or binned intervals with Haldane or Kosambi 
+GRanges for marker intervals or binned intervals with Haldane or Kosambi
 centiMorgans
 }
 \description{
-Calculate genetic distances of marker intervals or binned-chromosome 
+Calculate genetic distances of marker intervals or binned-chromosome
 Given whether crossover happens in each marker interval, calculate the
 recombination fraction in samples and then derive the Haldane or Kosambi
 genetic distances via mapping functions
+}
+\examples{
+dist_se <- calGeneticDist(coCount)
+# dist_se <- calGeneticDist(coCount,by_group="sampleGroup")
+
 }

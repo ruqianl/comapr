@@ -33,13 +33,11 @@
 #'  \item{rsID}{the SNP ID}
 #' }
 #' @examples
-#' \dontrun{
 #'  snp_geno
-#' }
 #'
 "snp_geno"
 
-#' Markers by genotype results for a group of samples 
+#' Markers by genotype results for a group of samples
 #'
 #' @source TBD
 #' @format A GRanges object:
@@ -69,9 +67,7 @@
 #'  \item{rsID}{the SNP ID}
 #' }
 #' @examples
-#' \dontrun{
 #'  snp_geno_gr
-#' }
 #'
 "snp_geno_gr"
 

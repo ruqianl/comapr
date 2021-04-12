@@ -1,3 +1,6 @@
 # comapR
 
-The R package for converting excel sheet data of genotyping test to recombination events counts.
+The R package for counting crossovers for SNP marker intervals across groups 
+of samples. 
+
+

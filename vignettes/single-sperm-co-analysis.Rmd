@@ -1,6 +1,7 @@
 ---
 title: "single-sperm-co-analysis"
 output: BiocStyle::html_document
+bibliography: ref.bib
 vignette: >
   %\VignetteIndexEntry{single-sperm-co-analysis}
   %\VignetteEngine{knitr::rmarkdown}
@@ -65,7 +66,7 @@ list.files(demo_path)
 
 # Diagnostic functions
 
-`comapr` provides quality check functions for examining SNP coverage per chr and 
+`comapr` provides quality-control functions for examining SNP coverage per chr and 
 per cell, chromosome segregation checks, and summary statics for filtering low
 confidence crossovers.
 
@@ -79,9 +80,10 @@ pcQC <- perCellChrQC(sampleName="s1",chroms=c("chr1"),
 
 
 
-# Construct `RangedSummarizedExpriment` object from parsing files
+# Construct `RangedSummarizedExpriment` object 
 
-Parse output from `sscocaller` and filter out low-confidence COs
+We first construct `RangedSummarizedExpriment` object from parsing output files
+from `sscocaller` and filter out low-confidence crossovers.
 
 ```{r}
 s1_rse_state <- readHapState("s1",chroms=c("chr1","chr2"),
@@ -112,7 +114,7 @@ assay(s1_rse_state)
 rowRanges(s1_rse_state)
 ```
 
-Sample group factor
+## Add sample group factor
 
 ```{r}
 colData(s1_rse_state)
@@ -123,53 +125,153 @@ colData(s2_rse_state)$sampleGroup <- "s2"
 
 ```
 
-combine two individual: combine sample s1 and sample s2
+## Combine two groups
+
+We now call `combineHapState` function to combine sample s1 and sample s2
+into one `RangedSummarizedExperiment` object.
 
 
 ```{r}
-twoSample <- combineHapState(s1_rse_state,s2_rse_state)
-assay(twoSample)
-rowRanges(twoSample)
+twoSample <- combineHapState(s1_rse_state,
+                             s2_rse_state)
 ```
+
+Now the `assay` data slot contains the Viterbi states across SNP positions for
+the combined samples.
+
+```{r}
+assay(twoSample)
+```
+
+# Count crossovers for SNP intervals
+
+`countCOs` function will find the crossover intervals for each samples and 
+attribute the observed crossovers from each sample to the corresponding intervals.
 
 ```{r}
 cocounts <- countCOs(twoSample)
+```
 
+Now `rowRanges` contains the intervals
+
+```{r}
 rowRanges(cocounts)
+```
+
+and `assay` slot contains the number of crossovers found in each sample across these intervals.
+
+```{r}
 assay(cocounts)
 ```
 
 
+# Calculate genetic distances
+
+`calGeneticDist` function will convert the raw crossover frequencies to genetic
+distances via selected mapping function (ie. kosambi or haldane).
+
 ```{r}
-colData(cocounts)
-
-#colData(cocounts)$sampleGroup <- c(rep("s1",5),rep("s2",5))
-
-dist_gr <- calGeneticDist(co_count = cocounts)
+dist_gr <- calGeneticDist(co_count = cocounts, mapping_fun = "k")
 dist_gr
 ```
+
+The genetic distances for each interval are stored in `rowData`.
 
 ```{r}
 rowData(dist_gr)
 ```
+The above genetic distances have been calculated using all samples. We can also
+specify the group factor so that we can calculate genetic distances for different
+sample groups:
 
 ```{r}
-
+## sampleGroup is a column in the colData slot
 dist_gr <- calGeneticDist(co_count = cocounts,
-                          by_group = "sampleGroup")
+                          by_group = "sampleGroup",
+                          mapping_fun = "k")
 
 ```
+
+Now the group/Sample specific distances are stored in `rowData`
 
 ```{r}
 rowData(dist_gr)$kosambi
 ```
 
+# Plot whole genome genetic distances
+
+We construct a `GRange` object from the `dist_gr` first.
 
 ```{r}
 p_gr <- granges(dist_gr)
 mcols(p_gr) <- rowData(dist_gr)$kosambi
 
+
+```
+
+We can plot whole-genome genetic distances
+
+```{r}
 plotWholeGenome(p_gr)
 
+```
+
+We can also do per chromosome plot
+
+```{r}
+plotGeneticDist(p_gr,chr = "chr1",cumulative = TRUE)
+
+```
+
+
+
+
+# Group differences
+
+`bootstrapDist` function generates the sampling distribution of the difference
+in total genetic distances for the two groups under comparisons.
+
+```{r}
+set.seed(100)
+bootsDiff <- bootstrapDist(co_gr = cocounts,B=10,
+                           by_group = "sampleGroup")
+```
+
+```{r}
+hist(bootsDiff)
+```
+
+From the `bootsDiff` data object, we can find a 95% confidence interval to test
+whether the difference is statistically significant. 
+
+```{r}
+quantile(bootsDiff,c(0.025,0.975),na.rm =TRUE)
+```
+
+
+An alternative re-sampling method, `permuteDist`, can be applied to generate a
+null distribution for the group difference by reshuffling the group labels across
+the samples.
+
+```{r}
+set.seed(100)
+perms <- permuteDist(cocounts,B=1000,by_group = "sampleGroup")
+```
+
+ A p-value can be calculated using the `statmod::permp` function [@Phipson2010-xi].
+
+```{r}
+statmod::permp(x = sum(perms$permutes>=perms$observed_diff,
+                       na.rm = TRUE),
+               nperm = sum(!is.na(perms$permutes)),
+               n1 = perms$nSample[1],
+               n2 = perms$nSample[2])
+
+```
+
+# Session info
+
+```{r}
+sessionInfo()
 ```
 

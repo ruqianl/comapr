@@ -1,8 +1,8 @@
 
 #' countGT
-#' 
-#' count how many samples have genotypes calls across markers and count how 
-#' many markers that each individual has called genotypes for. This function 
+#'
+#' count how many samples have genotypes calls across markers and count how
+#' many markers that each individual has called genotypes for. This function
 #' helps identify poor samples or poor markers for filtering. It can also generate
 #' plots that help identify outlier samples/markers
 #'
@@ -16,8 +16,11 @@
 #'
 #' @param plot, it determines whether a plot will be generated, defaults to TRUE
 #' @param interactive, it determines whether an interactive plot will be generated
-#' @export
 #'
+#' @export
+#' @examples
+#' genotype_counts <- countGT(mcols(snp_geno_gr))
+
 #' @return
 #' A list of two elements including \code{n_markers} and \code{n_samples}
 
@@ -45,9 +48,9 @@ countGT <- function(geno, plot =TRUE,interactive=FALSE){
       #          "by_marker"="No. markers by sample")
       return(list(ply = p,n_samples = rowSums(!is.na(geno)),
                   n_markers = colSums(!is.na(geno))))
-      
+
     } else {
-      
+
       p <- ggplot(data = pl_df,mapping = aes(y = counts,x = type))+
         geom_boxplot(size=1.5,aes(fill=type),alpha = 0.5)+
         geom_jitter(position = "jitter",aes(color=type),size=2,alpha=.8 )+
@@ -56,13 +59,13 @@ countGT <- function(geno, plot =TRUE,interactive=FALSE){
 #        ggtitle("Genotype counts\nfor markers/samples")+
         scale_color_manual(values=type_colors)+
         scale_fill_manual(values=type_colors)
-    
+
     }
     return(list(plot = p,
                 n_samples = rowSums(!is.na(geno)),
                 n_markers = colSums(!is.na(geno))))
   }
-  
+
   return(list(n_samples = rowSums(!is.na(geno)),
               n_markers = colSums(!is.na(geno))))
 }
@@ -84,19 +87,23 @@ countGT <- function(geno, plot =TRUE,interactive=FALSE){
 #'
 #' @return
 #' The filtered genotype matrix
+#'
+#' @examples
+#' corrected_geno <- filterGT(snp_geno_gr, min_markers = 30,min_samples = 2)
+#'
 #' @export
 #'
 filterGT <- function(geno, min_markers = 5, min_samples = 3){
-  
+
   gt_counts <- countGT(geno,plot = FALSE)
   keep_markers <- gt_counts$n_samples >= min_samples
   keep_samples <- gt_counts$n_markers >= min_markers
-  
+
   message(paste0( "filter out ",sum(keep_markers==FALSE)," marker(s)"))
   message(paste0( "filter out ",sum(keep_samples==FALSE)," sample(s)"))
-  
+
   return(geno[keep_markers, keep_samples])
-  
+
 }
 setGeneric("filterGT")
 
@@ -107,7 +114,7 @@ setMethod("filterGT",signature = c(geno ="matrix",min_markers = "numeric",
                    min_samples){
             filterGT(geno ,min_markers,
                      min_samples)
-  
+
 })
 
 #' @rdname filterGT
@@ -115,18 +122,18 @@ setMethod("filterGT",signature = c(geno ="GRanges",min_markers = "numeric",
                                    min_samples = "numeric"),
           function(geno ,min_markers,
                    min_samples){
-            
+
             gt_counts <- countGT(mcols(geno),plot = FALSE)
             keep_markers <- gt_counts$n_samples >= min_samples
             keep_samples <- gt_counts$n_markers >= min_markers
             geno <- geno[keep_markers,]
-            
+
             mcols(geno) <- mcols(geno)[,keep_samples]
             message(paste0( "filter out ",sum(keep_markers==FALSE)," marker(s)"))
             message(paste0( "filter out ",sum(keep_samples==FALSE)," sample(s)"))
-            
+
             return(geno)
-            
+
           })
 
 #' Plot markers with missing genotypes, deprecate
@@ -166,16 +173,16 @@ setMethod("filterGT",signature = c(geno ="GRanges",min_markers = "numeric",
 
 plotMissingGT <- function(geno, missing = "Fail", plot_wg = FALSE,
                           plot_type = "dot"){
-  
+
   stopifnot(plot_type == "dot" | plot_type == "bar")
-  
-  
+
+
   mis_matrix <- apply(geno, 2, function(es){
     is.na(es) | es == missing
   })
-  
+
   plot_df <- melt(mis_matrix)
-  
+
   if(plot_wg){
     switch (plot_type,
             dot = ggplot(data = plot_df)+
@@ -186,7 +193,7 @@ plotMissingGT <- function(geno, missing = "Fail", plot_wg = FALSE,
               scale_color_manual(values = c("TRUE" = "red",
                                             "FALSE"= "lightgrey"))+
               theme_classic()+theme(axis.text.x = element_text(angle = -90)),
-            
+
             bar =  ggplot(data = plot_df)+
               geom_bar(mapping = aes_string( fill = "value", x = "Var1"))+
               xlab("markers")+ylab("samples")+
@@ -194,25 +201,25 @@ plotMissingGT <- function(geno, missing = "Fail", plot_wg = FALSE,
               scale_fill_manual(values = c("TRUE" = "red",
                                            "FALSE"= "lightgrey"))+
               theme_classic()+theme(axis.text.x = element_text(angle = -90))
-            
+
     )
-    
-    
+
+
   } else {
     remain_m <- plot_df %>% group_by(.data$Var1) %>%
       summarise(no_missing = sum(.data$value)) %>% filter(.data$no_missing >0)
-    
+
     plot_df <- plot_df[plot_df$Var1 %in% remain_m$Var1,]
     switch (plot_type,
             dot = ggplot(data = plot_df)+
-              geom_point(mapping =  aes_string(x = "Var1", colour = "value", 
+              geom_point(mapping =  aes_string(x = "Var1", colour = "value",
                                                y = "Var2"))+
               xlab("markers")+ylab("samples")+
               labs(colour = "is_missing")+
               scale_color_manual(values = c("TRUE" = "red",
                                             "FALSE"= "lightgrey"))+
               theme_classic()+theme(axis.text.x = element_text(angle = -90)),
-            
+
             bar =  ggplot(data = plot_df)+
               geom_bar(mapping = aes_string( fill = "value", x = "Var1"))+
               xlab("markers")+ylab("samples")+
@@ -220,9 +227,9 @@ plotMissingGT <- function(geno, missing = "Fail", plot_wg = FALSE,
               scale_fill_manual(values = c("TRUE" = "red",
                                            "FALSE"= "lightgrey"))+
               theme_classic()+theme(axis.text.x = element_text(angle = -90))
-            
+
     )
-    
-    
+
+
   }
 }

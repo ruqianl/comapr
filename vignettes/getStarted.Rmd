@@ -213,14 +213,14 @@ plotGeneticDist(dist_bin_gr,chr = "1")
 We can also plot the cumulative genetic distances of certain chromosomes
 
 ```{r}
-plotGeneticDist(dist_bin_gr,chr=c("1"),cumulative = T)
+plotGeneticDist(dist_bin_gr,chr=c("1"),cumulative = TRUE)
 
 ```
 
 Multiple chromosomes
 
 ```{r,fig.height=10,fig.width=8}
-plotGeneticDist(dist_bin_gr,cumulative = T)
+plotGeneticDist(dist_bin_gr,cumulative = TRUE)
 ```
 
 ## Whole Genome Genetic distances Plot

@@ -26,7 +26,7 @@ that has fewer than `minSNP` SNPs to support.}
 \item{minlogllRatio, }{the crossover(s) will be filtered out if introduced by a
 segment that has lower than `minlogllRatio` to its reversed state.}
 
-\item{minCellSNP, }{the minimum number of SNPs detected for a cell to be kept, 
+\item{minCellSNP, }{the minimum number of SNPs detected for a cell to be kept,
 used with `nmads`}
 
 \item{bpDist, }{the crossover(s) will be filtered out if introduced by a segment
@@ -35,14 +35,14 @@ that is shorter than `bpDist` basepairs.}
 \item{maxRawCO, }{if a cell has more than `maxRawCO` number of raw crossovers
 called across a chromosome, the cell is filtered out}
 
-\item{biasTol, }{the SNP's haplotype ratio across all cells is assumed 
+\item{biasTol, }{the SNP's haplotype ratio across all cells is assumed
 to be 1:1. This argument can be used for removing SNPs that have a biased
 haplotype. i.e. almost always inferred to be haplotype state 1. It specifies
-a bias tolerance value, SNPs with bias from 0.5 smaller than this value are 
+a bias tolerance value, SNPs with bias from 0.5 smaller than this value are
 kept.}
 
-\item{nmad, }{how many mean absolute deviations lower than the median number 
-of SNPs per cellfor a cell to be considered as low coverage cell and filtered 
+\item{nmad, }{how many mean absolute deviations lower than the median number
+of SNPs per cellfor a cell to be considered as low coverage cell and filtered
 This or `minCellSNP`, whichever is larger, is applied}
 }
 \value{
@@ -53,13 +53,13 @@ contribute to crossovers.
 \description{
 This function filter out cells that have been called too many crossovers due
 to diploid cell contamination or doublets. It also only keeps SNPs (rows) that
-ever contribute to a crossover interval. This function should be run for 
+ever contribute to a crossover interval. This function should be run for
 individual chromosomes and is called internaly by `readHapState`
 }
 \details{
 The `logllRatio` value is returned by `sscocaller` for each haplotype
 segment formed by consecutive SNPs that are called to have a same state. It is
-calculated by taking log of ratio (likelihood of SNPs with inferred states) 
+calculated by taking log of ratio (likelihood of SNPs with inferred states)
 and (likelihood of SNPs with reversed states)
 }
 \author{

@@ -1,21 +1,28 @@
 Package: comapr
 Title: Converts genotype reports for SNP markers to quantified genetic lengths
-Version: 0.0.1.0010
+Version: 0.99.10
 Authors@R: 
     person(given = "Lyu",
            family = "Ruqian",
            role = c("aut", "cre"),
            email = "ruqianl@student.unimelb.edu.au",
            comment = c(ORCID = "0000-0002-7736-6612"))
-Maintainer: Ruqian Lyu <ruqianl@student.unimelb.edu.au>
-Author: Ruqian Lyu <ruqianl@student.unimelb.edu.au>
-Description: This package examins haplotype patterns for genetic markers along the genome and compares genetic distances for different sample groups. 
+Description: comapr detects crossover intervals for single cells from their 
+    haplotype states matrices. The genetic distances can then be calculated via the
+    mapping functions for the list of SNP intervals. Visualisation functions for 
+    plotting interval-based genetic map or cumulative genetic distances are 
+    implemented, which help reveal the variation of crossovers landscape across 
+    the genome and across individuals. 
+biocViews:
+  Software,
+  SingleCell,
+  Visualization,
+  Genetics
 Depends: 
-    R (>= 3.5.0)
+    R (>= 4.0)
 Imports:
  methods,
  ggplot2,
- readxl,
  reshape2,
  dplyr,
  gridExtra,
@@ -33,6 +40,8 @@ Imports:
  S4Vectors,
  utils,
  Matrix,
+ grid,
+ stats,
  SummarizedExperiment
 License: MIT + file LICENSE
 Encoding: UTF-8

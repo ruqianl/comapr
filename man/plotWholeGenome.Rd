@@ -20,5 +20,5 @@ cumulative genetic distances
 }
 \examples{
 dist_se <- calGeneticDist(coCount)
-plotWholeGenome(rowRanges(dist_se))
+plotWholeGenome(SummarizedExperiment::rowRanges(dist_se))
 }

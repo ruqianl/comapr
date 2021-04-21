@@ -30,8 +30,9 @@
 #' @author Ruqian Lyu
 #'
 #' @examples
+#' library(comapr)
 #' dist_se <- calGeneticDist(coCount)
-#' plotGeneticDist(rowRanges(dist_se))
+#' plotGeneticDist(SummarizedExperiment::rowRanges(dist_se))
 
 plotGeneticDist <- function(gr,bin=TRUE,chr=NULL,cumulative=FALSE){
   col_to_plot <- colnames(GenomicRanges::mcols(gr))
@@ -117,7 +118,7 @@ plotGeneticDist <- function(gr,bin=TRUE,chr=NULL,cumulative=FALSE){
 #' @return A ggplot object
 #' @examples
 #' dist_se <- calGeneticDist(coCount)
-#' plotWholeGenome(rowRanges(dist_se))
+#' plotWholeGenome(SummarizedExperiment::rowRanges(dist_se))
 plotWholeGenome <- function(gr){
 
   end <- chr_len <- tot <- all_of <- x_tick <- bin_dist <- SampleGroup <- NULL

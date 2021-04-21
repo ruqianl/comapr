@@ -15,7 +15,7 @@ function \code{correctGT}}
 \item{adj.method}{Methods to adjust for multiple comparisons, defaults to "BH"}
 }
 \value{
-data.frame with each row respresenting one SNP marker and columns
+data.frame with each row representing one SNP marker and columns
 containing the chisq.test results
 }
 \description{
@@ -27,14 +27,13 @@ We usechisq.test for finding markers that have genotypes among samples that
 are significantly different from the 1:1 ratio and report them
 }
 \examples{
-corrected_geno <- correctGT(gt_matrix = mcols(snp_geno_gr),
-ref = parents_geno$ref,
-alt = parents_geno$alt,
-fail = "Fail",
+library(comapr)
+corrected_geno <- correctGT(gt_matrix = GenomicRanges::mcols(snp_geno_gr),
+ref = parents_geno$ref,alt = parents_geno$alt,fail = "Fail",
 wrong_label = "Homo_ref")
-mcols(snp_geno_gr) <- corrected_geno
+GenomicRanges::mcols(snp_geno_gr) <- corrected_geno
 corrected_geno <- filterGT(snp_geno_gr, min_markers = 30,min_samples = 2)
-pvalues <- getDistortedMarkers(mcols(corrected_geno))
+pvalues <- getDistortedMarkers(GenomicRanges::mcols(corrected_geno))
 }
 \author{
 Ruqian Lyu

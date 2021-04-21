@@ -19,7 +19,7 @@
 #'
 #' @export
 #' @examples
-#' genotype_counts <- countGT(mcols(snp_geno_gr))
+#' genotype_counts <- countGT(GenomicRanges::mcols(snp_geno_gr))
 
 #' @return
 #' A list of two elements including \code{n_markers} and \code{n_samples}

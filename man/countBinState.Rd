@@ -43,10 +43,11 @@ dna_mm10_gr <- GenomicRanges::GRanges(
 GenomeInfoDb::genome(dna_mm10_gr) <- "mm10"
 demo_path <- system.file("extdata",package = "comapr")
 sampleName <- "s1"
-vi_mtx <- Matrix::readMM(file = paste0(demo_path, sampleName, "_",
+chr <- "chr1"
+vi_mtx <- Matrix::readMM(file = paste0(demo_path,"/", sampleName, "_",
                                        chr, "_vi.mtx"))
 
-snpAnno <- read.table(file = paste0(demo_path, sampleName,
+snpAnno <- read.table(file = paste0(demo_path,"/", sampleName,
                                     "_", chr, "_snpAnnot.txt"),
                                     stringsAsFactors = FALSE,
                       header = TRUE)

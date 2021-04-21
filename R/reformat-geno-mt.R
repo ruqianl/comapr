@@ -199,7 +199,7 @@ fill_fail <- function(s_gt,fail = "Fail",chr = NULL){
 #' with genotypes converted to labels and failed calls are changed to NA.
 #'
 #' @examples
-#' snp_gt_crt <- correctGT(gt_matrix = mcols(snp_geno_gr),
+#' snp_gt_crt <- correctGT(gt_matrix = GenomicRanges::mcols(snp_geno_gr),
 #'                       ref = parents_geno$ref,
 #'                       alt = parents_geno$alt,
 #'                       fail = "Fail",

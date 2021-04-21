@@ -71,10 +71,25 @@
 #'
 "snp_geno_gr"
 
-#' Parents genotype for F1 samples in `snp_geno`
+#' Parents' genotype for F1 samples in `snp_geno`
 #' @format A data.frame:
 #' \describe{
 #'  \item{C57BL.6J}{genotype of reference mouse train across markers}
 #'  \item{FVB.NJ..i.}{genotype of alternative mouse train across markers}
 #'}
 "parents_geno"
+
+
+#' RangedSummarizedExperiment object containing the Viterbi states SNP markers
+#' for samples from two groups. `colData(twoSamples)` contains the sample group
+#' factor.
+#'
+"twoSamples"
+
+
+#' RangedSummarizedExperiment object containing the crossover counts across
+#' samples for the list of SNP marker intervals
+#'
+"coCount"
+
+

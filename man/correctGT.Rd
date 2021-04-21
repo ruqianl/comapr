@@ -38,7 +38,7 @@ functions \code{lable_gt}, and changes the wrong genotype Homo_ref to Fail by
 calling \code{.change_missing}.
 }
 \examples{
-snp_gt_crt <- correctGT(gt_matrix = mcols(snp_geno_gr),
+snp_gt_crt <- correctGT(gt_matrix = GenomicRanges::mcols(snp_geno_gr),
                       ref = parents_geno$ref,
                       alt = parents_geno$alt,
                       fail = "Fail",

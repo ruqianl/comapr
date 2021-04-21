@@ -26,8 +26,9 @@ Plotting the calculated genetic distanced for each bin or marker interval
 supplied by the GRanges object
 }
 \examples{
+library(comapr)
 dist_se <- calGeneticDist(coCount)
-plotGeneticDist(rowRanges(dist_se))
+plotGeneticDist(SummarizedExperiment::rowRanges(dist_se))
 }
 \author{
 Ruqian Lyu

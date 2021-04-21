@@ -3,7 +3,7 @@
 \docType{data}
 \name{parents_geno}
 \alias{parents_geno}
-\title{Parents genotype for F1 samples in `snp_geno`}
+\title{Parents' genotype for F1 samples in `snp_geno`}
 \format{
 A data.frame:
 \describe{
@@ -15,6 +15,6 @@ A data.frame:
 parents_geno
 }
 \description{
-Parents genotype for F1 samples in `snp_geno`
+Parents' genotype for F1 samples in `snp_geno`
 }
 \keyword{datasets}

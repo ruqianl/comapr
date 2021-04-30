@@ -187,7 +187,7 @@ sample groups:
 ```{r}
 ## sampleGroup is a column in the colData slot
 dist_gr <- calGeneticDist(co_count = cocounts,
-                          by_group = "sampleGroup",
+                          group_by  = "sampleGroup",
                           mapping_fun = "k")
 
 ```
@@ -234,7 +234,7 @@ in total genetic distances for the two groups under comparisons.
 ```{r}
 set.seed(100)
 bootsDiff <- bootstrapDist(co_gr = cocounts,B=10,
-                           by_group = "sampleGroup")
+                           group_by = "sampleGroup")
 ```
 
 ```{r}
@@ -255,7 +255,7 @@ the samples.
 
 ```{r}
 set.seed(100)
-perms <- permuteDist(cocounts,B=1000,by_group = "sampleGroup")
+perms <- permuteDist(cocounts,B=1000,group_by = "sampleGroup")
 ```
 
  A p-value can be calculated using the `statmod::permp` function [@Phipson2010-xi].

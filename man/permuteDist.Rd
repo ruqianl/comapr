@@ -4,7 +4,7 @@
 \alias{permuteDist}
 \title{permuteDist}
 \usage{
-permuteDist(co_gr, B = 100, mapping_fun = "k", by_group)
+permuteDist(co_gr, B = 100, mapping_fun = "k", group_by)
 }
 \arguments{
 \item{co_gr}{GRanges or RangedSummarizedExperiment object that contains the
@@ -16,7 +16,7 @@ Returned by \code{countCOs}}
 \item{mapping_fun}{character default to "k" (kosambi mapping function). It
 can be one of the mapping functions: "k","h"}
 
-\item{by_group}{the prefix for each group that we need to generate
+\item{group_by}{the prefix for each group that we need to generate
 distributions for(only when co_gr is a GRanges object). Or the column name
 for colData(co_gr) that contains the
 group factor (only when co_gr is a RangedSummarizedExperiment object)}
@@ -35,7 +35,7 @@ It shuffles the group labels for the samples and calculate a difference
 between two groups after shuffling.
 }
 \examples{
-perms <- permuteDist(coCount, by_group = "sampleGroup")
+perms <- permuteDist(coCount, group_by = "sampleGroup")
 }
 \author{
 Ruqian Lyu

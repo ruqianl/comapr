@@ -12,7 +12,7 @@
 #' @param mapping_fun character default to "k" (kosambi mapping function). It
 #' can be one of the mapping functions: "k","h"
 #' @param B integer the number of sampling times
-#' @param by_group, the prefix for each group that we need to generate
+#' @param group_by, the prefix for each group that we need to generate
 #' distributions for(only when co_gr is a GRanges object). Or the column name
 #' for colData(co_gr) that contains the
 #' group factor (only when co_gr is a RangedSummarizedExperiment object)
@@ -21,20 +21,20 @@
 #' @export
 #' @return lists of numeric genetic distances for multiple samples
 #' @examples
-#' bootsDiff <- bootstrapDist(coCount, by_group = "sampleGroup")
+#' bootsDiff <- bootstrapDist(coCount, group_by = "sampleGroup")
 #' @author Ruqian Lyu
 #'
-bootstrapDist <- function(co_gr, B = 1000, mapping_fun = "k", by_group)
+bootstrapDist <- function(co_gr, B = 1000, mapping_fun = "k", group_by)
 {
     if(is(co_gr,"RangedSummarizedExperiment")) {
         count_matrix <- as.matrix(assay(co_gr))
 
-        group_idx <- lapply(unique(as.character(colData(co_gr)[, by_group])),
+        group_idx <- lapply(unique(as.character(colData(co_gr)[, group_by])),
                         function(gp) {
-                          grep(gp, colData(co_gr)[, by_group])})
+                          grep(gp, colData(co_gr)[, group_by])})
         } else {
           count_matrix <- as.matrix(mcols(co_gr))
-          group_idx <- lapply(by_group, function(gp){
+          group_idx <- lapply(group_by, function(gp){
             grep(gp,colnames(mcols(co_gr)))
     })
   }
@@ -74,24 +74,24 @@ bootstrapDist <- function(co_gr, B = 1000, mapping_fun = "k", by_group)
 #' genetic distances of two groups, `nSample`, the number of samples in the
 #' first and second group.
 #' @examples
-#' perms <- permuteDist(coCount, by_group = "sampleGroup")
+#' perms <- permuteDist(coCount, group_by = "sampleGroup")
 #' @author Ruqian Lyu
 #'
-permuteDist <- function(co_gr,B=100,mapping_fun="k",by_group){
+permuteDist <- function(co_gr,B=100,mapping_fun="k",group_by){
 
   if(is(co_gr,"RangedSummarizedExperiment")){
-    ## by_group contains the
+    ## group_by contains the
     count_matrix <- as.matrix(assay(co_gr))
-    group_idx <- lapply(unique(as.character(colData(co_gr)[, by_group])),
+    group_idx <- lapply(unique(as.character(colData(co_gr)[, group_by])),
                         function(gp) {
-                          grep(gp, colData(co_gr)[, by_group])})
+                          grep(gp, colData(co_gr)[, group_by])})
 
   } else {
     ## co_gr is of GRanges class
     count_matrix <- as.matrix(mcols(co_gr))
-    #stopifnot(length(by_group)==2)
+    #stopifnot(length(group_by)==2)
 
-    group_idx <- lapply(by_group, function(gp){
+    group_idx <- lapply(group_by, function(gp){
     grep(gp,colnames(mcols(co_gr)))
     })
   }

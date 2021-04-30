@@ -3,14 +3,14 @@
 #' Covert the recombination rate to cM by mapping functions
 #' @importFrom GenomicRanges mcols
 #' @noRd
-cal_marker_dist <- function(co_count,mapping_fun="k",by_group = NULL){
+cal_marker_dist <- function(co_count,mapping_fun="k",group_by = NULL){
 
 
   ## just covert the recombination rate to cM by mapping functions
 
   new_gr <- co_count[,0]
 
-  if(is.null(by_group)){
+  if(is.null(group_by)){
     co_rate <- rowMeans(as.matrix(GenomicRanges::mcols(co_count)))
     stopifnot(sum(co_rate>=0.5)==0)
     if(mapping_fun=="k"){
@@ -22,8 +22,8 @@ cal_marker_dist <- function(co_count,mapping_fun="k",by_group = NULL){
       GenomicRanges::mcols(new_gr)$haldane_cm <- haldane_cm
     }
   } else {
-    ## by_group has the character of prefix of groups
-     groups_rb <- bplapply(by_group,function(group_prefix,mapping_fun){
+    ## group_by has the character of prefix of groups
+     groups_rb <- bplapply(group_by,function(group_prefix,mapping_fun){
        sids <- grep(group_prefix,colnames(GenomicRanges::mcols(co_count)))
        co_rate <- rowMeans(as.matrix(GenomicRanges::mcols(co_count)[,sids]))
 
@@ -37,7 +37,7 @@ cal_marker_dist <- function(co_count,mapping_fun="k",by_group = NULL){
     },mapping_fun=mapping_fun)
 
      GenomicRanges::mcols(new_gr) <- do.call(cbind,groups_rb)
-      colnames(GenomicRanges::mcols(new_gr)) <- paste0(by_group,"_",mapping_fun)
+      colnames(GenomicRanges::mcols(new_gr)) <- paste0(group_by,"_",mapping_fun)
 
   }
   new_gr
@@ -51,7 +51,7 @@ cal_marker_dist <- function(co_count,mapping_fun="k",by_group = NULL){
 #' genetic distances via mapping functions
 #'
 #' @param co_count
-#' GRange object, returned by \code{countCO}
+#' GRange or RangedSummarizedExperiment object, returned by \code{countCO}
 #' @param bin_size
 #' The binning size for grouping marker intervals into bins. If not supplied,the
 #' orginial marker intervals are returned with converted genetic distancens
@@ -61,7 +61,7 @@ cal_marker_dist <- function(co_count,mapping_fun="k",by_group = NULL){
 #' @param ref_genome
 #' The reference genome name. It is used to fetch the chromosome Information
 #' from UCSC database.
-#' @param by_group, character vector contains the unique prefix of sample names
+#' @param group_by, character vector contains the unique prefix of sample names
 #' that are used for defining different sample groups. Or the column name in
 #' colData(co_count) that specify the group factor. If missing all samples are
 #' assumed to be from one group
@@ -79,7 +79,7 @@ cal_marker_dist <- function(co_count,mapping_fun="k",by_group = NULL){
 #' centiMorgans
 #' @examples
 #' dist_se <- calGeneticDist(coCount)
-#' # dist_se <- calGeneticDist(coCount,by_group="sampleGroup")
+#' # dist_se <- calGeneticDist(coCount,group_by="sampleGroup")
 #'
 #' @export
 #'
@@ -89,7 +89,7 @@ setGeneric("calGeneticDist",
                     bin_size=NULL,
                     mapping_fun="k",
                     ref_genome="mm10",
-                    by_group = NULL)
+                    group_by = NULL)
              standardGeneric("calGeneticDist"))
 
 #'@noRd
@@ -97,12 +97,12 @@ calGenetic_dist <- function(co_count,
                             bin_size=NULL,
                             mapping_fun="k",
                             ref_genome="mm10",
-                            by_group = NULL){
+                            group_by = NULL){
   stopifnot(is.null(bin_size) | is.numeric(bin_size))
   stopifnot(mapping_fun %in% c("k","h"))
   new_gr <- cal_marker_dist(co_count = co_count,
                           mapping_fun = mapping_fun,
-                          by_group = by_group)
+                          group_by = group_by)
   if(is.null(bin_size)){
     return(new_gr)
   } else {
@@ -175,73 +175,73 @@ cal_bin_dist <- function(new_gr,bin_size,
 #'@rdname calGeneticDist
 setMethod("calGeneticDist",signature = c(co_count = 'GRanges',
                                          bin_size='missing',
-                                         by_group='missing'),
+                                         group_by='missing'),
 
           function(co_count,
                    bin_size=NULL,
                    mapping_fun="k",
                    ref_genome="mm10",
-                   by_group = NULL){
+                   group_by = NULL){
             stopifnot(mapping_fun %in% c("k","h"))
 
             new_gr <- cal_marker_dist(co_count = co_count,
                                       mapping_fun = mapping_fun,
-                                      by_group = NULL)
+                                      group_by = NULL)
             new_gr
 })
 #'@rdname calGeneticDist
 setMethod("calGeneticDist",signature = c(co_count = 'GRanges',
                                          bin_size='numeric',
-                                         by_group='missing'),
+                                         group_by='missing'),
 
           function(co_count,
                    bin_size=NULL,
                    mapping_fun="k",
                    ref_genome="mm10",
-                   by_group = NULL){
+                   group_by = NULL){
             stopifnot(mapping_fun %in% c("k","h"))
 
             new_gr <- calGenetic_dist(co_count = co_count,
                                       mapping_fun = mapping_fun,
                                       bin_size = bin_size,
-                                      by_group = NULL)
+                                      group_by = NULL)
             new_gr
           })
 
 #'@rdname calGeneticDist
 setMethod("calGeneticDist",signature = c(co_count = 'GRanges',
                                          bin_size='missing',
-                                         by_group='character'),
+                                         group_by='character'),
 
           function(co_count,
                    bin_size=NULL,
                    mapping_fun="k",
                    ref_genome="mm10",
-                   by_group  ){
+                   group_by  ){
             stopifnot(mapping_fun %in% c("k","h"))
 
             new_gr <- cal_marker_dist(co_count = co_count,
                                       mapping_fun = mapping_fun,
-                                      by_group = by_group)
+                                      group_by = group_by)
             new_gr
 })
 
 #'@rdname calGeneticDist
 setMethod("calGeneticDist",signature = c(co_count = 'GRanges',
                                          bin_size='numeric',
-                                         by_group='character'),
+                                         group_by='character'),
 
           function(co_count,
                    bin_size,
                    mapping_fun="k",
                    ref_genome="mm10",
-                   by_group){
+                   group_by){
             stopifnot(mapping_fun %in% c("k","h"))
 
             new_gr <- calGenetic_dist(co_count = co_count,
                                       mapping_fun = mapping_fun,
                                       bin_size = bin_size,
-                                      by_group = by_group)
+                                      group_by = group_by)
             new_gr
           })
 
@@ -251,13 +251,13 @@ setMethod("calGeneticDist",signature = c(co_count = 'GRanges',
 setMethod("calGeneticDist",
           signature = c(co_count = 'RangedSummarizedExperiment',
                         bin_size='missing',
-                        by_group='missing'),
+                        group_by='missing'),
 
           function(co_count,
                    bin_size=NULL,
                    mapping_fun="k",
                    ref_genome="mm10",
-                   by_group = NULL){
+                   group_by = NULL){
             stopifnot(mapping_fun %in% c("k","h"))
             co_rate <- rowMeans(as.matrix(assay(co_count)))
             rowRanges(co_count)$raw_rate <- co_rate
@@ -273,18 +273,18 @@ setMethod("calGeneticDist",
 setMethod("calGeneticDist",
           signature = c(co_count = 'RangedSummarizedExperiment',
                         bin_size='missing',
-                        by_group='character'),
+                        group_by='character'),
 
           function(co_count,
                    bin_size=NULL,
                    mapping_fun="k",
                    ref_genome="mm10",
-                   by_group ){
+                   group_by ){
             stopifnot(mapping_fun %in% c("k","h"))
-            stopifnot(length(by_group)==1)
-            ##by_group should refer to a column in colData(co_count)
-            stopifnot(by_group %in% colnames(colData(co_count)))
-            fcts <- colData(co_count)[,by_group]
+            stopifnot(length(group_by)==1)
+            ##group_by should refer to a column in colData(co_count)
+            stopifnot(group_by %in% colnames(colData(co_count)))
+            fcts <- colData(co_count)[,group_by]
 
             co_rate <- vapply(unique(as.character(fcts)),
                               function(fct){
@@ -305,19 +305,19 @@ setMethod("calGeneticDist",
 setMethod("calGeneticDist",
           signature = c(co_count = 'RangedSummarizedExperiment',
                         bin_size='numeric',
-                        by_group='character'),
+                        group_by='character'),
 
           function(co_count,
                    bin_size,
                    mapping_fun="k",
                    ref_genome="mm10",
-                   by_group ){
+                   group_by ){
 
             stopifnot(mapping_fun %in% c("k","h"))
-            stopifnot(length(by_group)==1)
-            ##by_group should refer to a column in colData(co_count)
-            stopifnot(by_group %in% colnames(colData(co_count)))
-            fcts <- colData(co_count)[,by_group]
+            stopifnot(length(group_by)==1)
+            ##group_by should refer to a column in colData(co_count)
+            stopifnot(group_by %in% colnames(colData(co_count)))
+            fcts <- colData(co_count)[,group_by]
 
             #####
             # divide the cos into bins
@@ -353,13 +353,13 @@ setMethod("calGeneticDist",
 setMethod("calGeneticDist",
           signature = c(co_count = 'RangedSummarizedExperiment',
                         bin_size='numeric',
-                        by_group='missing'),
+                        group_by='missing'),
 
           function(co_count,
                    bin_size,
                    mapping_fun="k",
                    ref_genome="mm10",
-                   by_group =NULL){
+                   group_by =NULL){
 
             stopifnot(mapping_fun %in% c("k","h"))
 

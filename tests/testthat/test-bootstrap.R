@@ -17,7 +17,7 @@ test_that("bootstrapDist works", {
   # expect_true(abs(dist$kosambi_cm[4]-13.67603)<1e-3)
   #
   bootstrap_results <- suppressWarnings(bootstrapDist(marker_gr_cos,B=10,
-                                                      by_group  = c("X1","X9")))
+                                                      group_by  = c("X1","X9")))
   expect_true(length(bootstrap_results)==10)
 })
 
@@ -38,7 +38,7 @@ test_that("permuteDist works", {
   # expect_true(abs(dist$kosambi_cm[4]-13.67603)<1e-3)
   #
   perms_results <- suppressWarnings(permuteDist(marker_gr_cos,B=10,
-                                                      by_group  = c("X1","X9")))
+                                                      group_by  = c("X1","X9")))
   expect_true(!is.null(perms_results$permutes))
   expect_true(!is.null(perms_results$observed_diff))
   expect_true(!is.null(perms_results$nSample))

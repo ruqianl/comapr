@@ -155,7 +155,7 @@ plot_count <- function(co_count, group_by  = "sampleGroup",
 
     tmp <- assay(co_count)
     tmp$chr <- GenomicRanges::seqnames(co_count)
-    tmp <- data.frame(tmp) %>%
+    tmp <- data.frame(tmp,check.names = FALSE) %>%
       tidyr::pivot_longer(cols = colnames(co_count),
                           values_to = "COs", names_to = "BC")
     tmp$sampleGroup <- plyr::mapvalues(tmp$BC, from = colnames(co_count),
@@ -180,7 +180,7 @@ plot_count <- function(co_count, group_by  = "sampleGroup",
 
     plt_df <- data.frame(COs = colSums(as.matrix(assay(co_count))),
 
-                         sampleGroup =colData(co_count)[,group_by])
+                         sampleGroup = colData(co_count)[,group_by])
     p <- ggplot(data = plt_df,
                 mapping = aes(x = sampleGroup, color = sampleGroup,
                               y = COs))+geom_boxplot()+geom_jitter(width = 0.2,

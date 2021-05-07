@@ -54,7 +54,7 @@ combineHapState <- function(rse1,rse2,
   combinedCols <- rbind(colData(rse1),colData(rse2))
 
 
-  SummarizedExperiment(assay=list(vi_state=t),
+  SummarizedExperiment(assays=list(vi_state=t),
                          colData = combinedCols,
                          rowRanges = merged_anno)
 

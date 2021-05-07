@@ -84,7 +84,7 @@ setMethod("plotCount",signature = c(co_count = 'GRanges',
           function(co_count, group_by, by_chr = FALSE){
            tmp_counts <-  SummarizedExperiment(rowRanges = granges(co_count),
                                  colData = data.frame(sampleGroup=rep("all",ncol(mcols(co_count)))),
-                                 assay=list(co_count=mcols(co_count)))
+                                 assays=list(co_count=mcols(co_count)))
             plot_count(co_count = tmp_counts,group_by  = "sampleGroup",
                        by_chr = by_chr)
 
@@ -97,7 +97,7 @@ setMethod("plotCount",signature = c(co_count = 'GRanges',
           function(co_count, group_by, by_chr){
             tmp_counts <-  SummarizedExperiment(rowRanges = granges(co_count),
                                                 colData = data.frame(sampleGroup=rep("all",ncol(mcols(co_count)))),
-                                                assay=list(co_count=mcols(co_count)))
+                                                assays=list(co_count=mcols(co_count)))
             plot_count(co_count = tmp_counts,group_by  = "sampleGroup",
                        by_chr = FALSE)
 
@@ -115,7 +115,7 @@ setMethod("plotCount",signature = c(co_count = 'GRanges',
 
             tmp_counts <- SummarizedExperiment(rowRanges = granges(co_count),
                                                 colData = data.frame(sampleGroup=sampleGroup),
-                                                assay=list(co_count=mcols(co_count)))
+                                                assays=list(co_count=mcols(co_count)))
             plot_count(co_count = tmp_counts,group_by  = "sampleGroup",
                        by_chr = FALSE)
 
@@ -133,7 +133,7 @@ setMethod("plotCount",signature = c(co_count = 'GRanges',
 
             tmp_counts <- SummarizedExperiment(rowRanges = granges(co_count),
                                                colData = data.frame(sampleGroup=sampleGroup),
-                                               assay=list(co_count=mcols(co_count)))
+                                               assays=list(co_count=mcols(co_count)))
             plot_count(co_count = tmp_counts,group_by  = "sampleGroup",
                        by_chr = by_chr)
 

@@ -47,7 +47,7 @@ setMethod("countCOs",signature = c(geno="RangedSummarizedExperiment"),
             colnames(mcols(geno_gr)) <- as.character(colData(geno)$barcodes)
             result_gr <- countCOs_gr(geno_gr)
             stopifnot(colData(geno)$barcodes==colnames(mcols(result_gr)))
-            SummarizedExperiment(assay=list(co_count=mcols(result_gr)),
+            SummarizedExperiment(assays=list(co_count=mcols(result_gr)),
                                  colData = colData(geno),
                                  rowRanges =granges(result_gr) )
 })

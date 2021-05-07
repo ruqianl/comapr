@@ -11,7 +11,7 @@
 #' all samples are assumed to be from one group
 #' @param by_chr, whether it should plot each chromosome separately
 #' @return ggplot object
-
+#' @importFrom plyr mapvalues
 #' @examples
 #' demo_path <-paste0(system.file("extdata",package = "comapr"),"/")
 #' s1_rse_state <- readHapState("s1",chroms=c("chr1"),
@@ -150,7 +150,8 @@ plot_count <- function(co_count, group_by  = "sampleGroup",
 
   names(sample_group_colors)[seq_along(col_to_plot)] <- col_to_plot
 
-
+  chr <- BC <- COs <- sampleGroup <- NULL
+  ChrCOs <- meanCOs <- sd <- lower <- upper <- NULL
   if(by_chr){
 
     tmp <- assay(co_count)
@@ -167,8 +168,8 @@ plot_count <- function(co_count, group_by  = "sampleGroup",
                        sampleGroup = unique(sampleGroup)) %>%
              dplyr::group_by(chr,sampleGroup) %>%
        dplyr::summarise(meanCOs = mean(ChrCOs),
-                        lower = meanCOs-sd(ChrCOs),
-                        upper = meanCOs+sd(ChrCOs)) %>%
+                        lower = meanCOs-sd(ChrCOs)/sqrt(length(ChrCOs)),
+                        upper = meanCOs+sd(ChrCOs)/sqrt(length(ChrCOs))) %>%
              ggplot(mapping = aes(x=chr,y = meanCOs,
                                   color=chr))+geom_point()+
              geom_errorbar(mapping = aes(ymin = lower,

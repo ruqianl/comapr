@@ -82,10 +82,48 @@ vi_state[c(1,2,6),4] <-2
 
 vi_state[c(1,2,3,4),5] <-1
 vi_state[6,5] <-2
-vi_state
+#vi_state
 for(chr in paste0("chr",seq(1:5))){
   writeMM(vi_state,file=paste0("inst/extdata/s1_",chr,"_vi.mtx"))
 }
+
+dp_count <- Matrix(data=0,nrow = 6,ncol=5)
+dp_count[c(1,2),1] <- 3
+dp_count[c(5,6),1] <- 3
+
+dp_count[c(1,3),2] <- 4
+dp_count[c(5,6),2] <- 4
+dp_count[c(1,2,3,5,6),3] <- 2
+
+dp_count[c(1,2,6),4] <-2
+
+
+dp_count[c(1,2,3,4),5] <-3
+dp_count[6,5] <-2
+#dp_count
+for(chr in paste0("chr",seq(1:5))){
+  Matrix::writeMM(dp_count,file=paste0("inst/extdata/s1_",chr,"_totalCount.mtx"))
+}
+
+
+alt_count <- Matrix(data=0,nrow = 6,ncol=5)
+alt_count[c(1,2),1] <- 0
+alt_count[c(5,6),1] <- 3
+
+alt_count[c(1,3),2] <- 4
+alt_count[c(5,6),2] <- 0
+alt_count[c(1,2,3,5,6),3] <- 0
+
+alt_count[c(1,2,6),4] <-2
+
+
+alt_count[c(1,2,3,4),5] <-0
+alt_count[6,5] <-2
+#alt_count
+for(chr in paste0("chr",seq(1:5))){
+  Matrix::writeMM(alt_count,file=paste0("inst/extdata/s1_",chr,"_altCount.mtx"))
+}
+
 
 vi_state <- Matrix(data=0,nrow = 6,ncol=5)
 vi_state[c(1,2,6),1] <- 1

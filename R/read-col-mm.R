@@ -3,7 +3,7 @@
 #' Modified the `Matrix::readMM` function for reading matrices stored in the
 #' Harwell-Boeing or MatrixMarket formats but only reading selected column.
 #'
-#' See \link[Matrix]{readMM}.
+#' See \code{\link[Matrix]{readMM}}
 #'
 #' @param file the name of the file to be read from as a character scalar. Those
 #'  storing matrices in the MatrixMarket format usually end in ".mtx".

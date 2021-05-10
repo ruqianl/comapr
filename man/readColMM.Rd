@@ -25,7 +25,7 @@ Modified the `Matrix::readMM` function for reading matrices stored in the
 Harwell-Boeing or MatrixMarket formats but only reading selected column.
 }
 \details{
-See \link[Matrix]{readMM}.
+See \code{\link[Matrix]{readMM}}
 }
 \examples{
 demo_path <-paste0(system.file("extdata",package = "comapr"),"/")

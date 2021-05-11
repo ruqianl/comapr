@@ -14,14 +14,14 @@
 #' @param B integer the number of sampling times
 #' @param group_by, the prefix for each group that we need to generate
 #' distributions for(only when co_gr is a GRanges object). Or the column name
-#' for colData(co_gr) that contains the
+#' for `colData(co_gr)` that contains the
 #' group factor (only when co_gr is a RangedSummarizedExperiment object)
 
 #' @importFrom BiocParallel bplapply
 #' @export
 #' @return lists of numeric genetic distances for multiple samples
 #' @examples
-#' bootsDiff <- bootstrapDist(coCount, group_by = "sampleGroup")
+#' bootsDiff <- bootstrapDist(coCount, group_by = "sampleGroup",B=10)
 #' @author Ruqian Lyu
 #'
 bootstrapDist <- function(co_gr, B = 1000, mapping_fun = "k", group_by)
@@ -74,7 +74,7 @@ bootstrapDist <- function(co_gr, B = 1000, mapping_fun = "k", group_by)
 #' genetic distances of two groups, `nSample`, the number of samples in the
 #' first and second group.
 #' @examples
-#' perms <- permuteDist(coCount, group_by = "sampleGroup")
+#' perms <- permuteDist(coCount, group_by = "sampleGroup",B=10)
 #' @author Ruqian Lyu
 #'
 permuteDist <- function(co_gr,B=100,mapping_fun="k",group_by){

@@ -55,7 +55,7 @@ demo_path <-paste0(system.file("extdata",package = "comapr"),"/")
 meanDP_track <- getMeanDPTrack(chrom ="chr1",
                                path_loc = demo_path,
                                sampleName = "s1",
-                               barcodeFile = "")
+                               barcodeFile = paste0(demo_path,"s1_barcodes.txt"))
 
 }
 \author{

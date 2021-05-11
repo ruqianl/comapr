@@ -18,7 +18,7 @@ can be one of the mapping functions: "k","h"}
 
 \item{group_by, }{the prefix for each group that we need to generate
 distributions for(only when co_gr is a GRanges object). Or the column name
-for colData(co_gr) that contains the
+for `colData(co_gr)` that contains the
 group factor (only when co_gr is a RangedSummarizedExperiment object)}
 }
 \value{
@@ -33,7 +33,7 @@ by `countCO`. It then draws samples from a group with replacement and
 calculate the distribution of relevant statistics.
 }
 \examples{
-bootsDiff <- bootstrapDist(coCount, group_by = "sampleGroup")
+bootsDiff <- bootstrapDist(coCount, group_by = "sampleGroup",B=10)
 }
 \author{
 Ruqian Lyu

@@ -18,7 +18,7 @@ can be one of the mapping functions: "k","h"}
 
 \item{group_by}{the prefix for each group that we need to generate
 distributions for(only when co_gr is a GRanges object). Or the column name
-for colData(co_gr) that contains the
+for `colData(co_gr)` that contains the
 group factor (only when co_gr is a RangedSummarizedExperiment object)}
 }
 \value{
@@ -35,7 +35,7 @@ It shuffles the group labels for the samples and calculate a difference
 between two groups after shuffling.
 }
 \examples{
-perms <- permuteDist(coCount, group_by = "sampleGroup")
+perms <- permuteDist(coCount, group_by = "sampleGroup",B=10)
 }
 \author{
 Ruqian Lyu

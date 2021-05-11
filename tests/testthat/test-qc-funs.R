@@ -13,9 +13,9 @@ test_that("diagnostic function for per cell chr works", {
 test_that("diagnostic per seg works", {
   demo_path <-paste0(system.file("extdata",package = "comapr"),"/")
   sampleName <- "s1"
-  psqc <- perSegChrQC(sampleName,
-                       chroms=c("chr1"),
-                       path=demo_path)
+  suppressWarnings(psqc <- perSegChrQC(sampleName,
+                                       chroms=c("chr1"),
+                                       path=demo_path))
 
   expect_s3_class(psqc,"gtable")
 

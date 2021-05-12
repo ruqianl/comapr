@@ -123,7 +123,8 @@ getCellAFTrack <-  function(chrom = "chr1",
                        window = nwindow,
                        na.rm=TRUE,
                        aggregation = "mean",
-                       type="p")
+                       type="p",
+                       ylim=0:1)
   co_range_cell1 <- getCellCORange(co_count, cellBarcode = cellBarcode)
   co_range_cell1[seqnames(co_range_cell1)==chrom,]
   # ht <- HighlightTrack(trackList = af_track,

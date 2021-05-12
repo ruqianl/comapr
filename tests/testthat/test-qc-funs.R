@@ -17,6 +17,6 @@ test_that("diagnostic per seg works", {
                                        chroms=c("chr1"),
                                        path=demo_path))
 
-  expect_s3_class(psqc,"gtable")
+  expect_s3_class(psqc,"ggplot")
 
 })

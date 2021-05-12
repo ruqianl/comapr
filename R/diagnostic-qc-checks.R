@@ -185,6 +185,7 @@ countBinState <- function(chr,
 #'
 perSegChrQC <- function(sampleName,chroms = c("chr1","chr7","chr15"),
                         path,barcodeFile = NULL,maxRawCO=10){
+  logllRatio <- nSNP <- bpDist <- NULL
   if (is.null(barcodeFile)) {
     barcodeFile <- paste0(path, sampleName, "_barcodes.txt")
   }
@@ -217,24 +218,10 @@ perSegChrQC <- function(sampleName,chroms = c("chr1","chr7","chr15"),
     dplyr::filter(.data$nCORaw < maxRawCO) %>%
     dplyr::select(.data$ithSperm)
 
-  p1 <-  segInfo_chrs %>% dplyr::filter(.data$ithSperm %in%
-                                          keepCells$ithSperm) %>%
-    dplyr::mutate(bpDist=(.data$Seg_end - .data$Seg_start)) %>%
-    ggplot() + geom_histogram(mapping = aes(x = .data$nSNP))+scale_x_log10()+
-    theme_classic()
-
-  p2 <-  segInfo_chrs %>% dplyr::filter(.data$ithSperm %in%
-                                          keepCells$ithSperm) %>%
-    dplyr::mutate(bpDist=(.data$Seg_end -.data$Seg_start)) %>%
-    ggplot() + geom_histogram(mapping = aes(x = .data$bpDist))+scale_x_log10()+
-    theme_classic()
-
-  p3 <-  segInfo_chrs %>% dplyr::filter(.data$ithSperm %in%
-                                          keepCells$ithSperm) %>%
-    dplyr::mutate(bpDist=(.data$Seg_end - .data$Seg_start)) %>%
-    ggplot()+
-    geom_histogram(mapping = aes(x = .data$logllRatio))+scale_x_log10()+
-    theme_classic()
-  gridExtra::grid.arrange(p1,p2,p3)
-
+  p <- segInfo_chrs %>% dplyr::filter(.data$ithSperm %in% keepCells$ithSperm) %>%
+    dplyr::mutate(bpDist = (.data$Seg_end -.data$Seg_start)) %>%
+    ggplot()+geom_point(mapping = aes(x =nSNP,y = bpDist,
+                                      color = log10(logllRatio)))+
+    scale_x_log10()+scale_y_log10()+scale_color_viridis_c()
+ p
 }

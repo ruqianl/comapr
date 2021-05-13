@@ -1,5 +1,5 @@
 ---
-title: "Genetic distance calculate from genotype shifts of markers"
+title: "Genetic distance calculation from genotype shifts of markers"
 output: BiocStyle::html_document
 vignette: >
   %\VignetteIndexEntry{Get-Started-With-comapr}

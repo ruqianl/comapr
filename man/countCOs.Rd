@@ -17,8 +17,8 @@ countCOs(geno)
 matrix that has SNP positions in the rows and cells/samples in the columns}
 }
 \value{
-GRanges object or RangedSummarizedExperiment with markers-intervals as rows 
-and samples in columns, values as the number of COs estimated for each marker 
+GRanges object or RangedSummarizedExperiment with markers-intervals as rows
+and samples in columns, values as the number of COs estimated for each marker
 interval
 }
 \description{
@@ -26,6 +26,9 @@ Count number of COs within each marker interval
 COs identified in the interval overlapping missing markers are distributed
 according to marker interval base-pair sizes. Genotypes encoded with "0" are
 treated as missing value.
+}
+\examples{
+cocount <- countCOs(twoSamples)
 }
 \author{
 Ruqian Lyu

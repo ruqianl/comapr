@@ -7,11 +7,18 @@
 plotWholeGenome(gr)
 }
 \arguments{
-\item{gr, }{GRanges object with genetic distances calculated for marker 
+\item{gr, }{GRanges object with genetic distances calculated for marker
 intervals}
+}
+\value{
+A ggplot object
 }
 \description{
 This function takes the calculated genetic distances for all
 marker intervals across all chromosomes provided and plot the
 cumulative genetic distances
+}
+\examples{
+dist_se <- calGeneticDist(coCount)
+plotWholeGenome(SummarizedExperiment::rowRanges(dist_se))
 }

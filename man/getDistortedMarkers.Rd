@@ -4,21 +4,36 @@
 \alias{getDistortedMarkers}
 \title{getDistortedMarkers}
 \usage{
-getDistortedMarkers(geno, p = c(0.5, 0.5))
+getDistortedMarkers(geno, p = c(0.5, 0.5), adj.method = "BH")
 }
 \arguments{
 \item{geno}{the genotype data.frame of markers by samples from output of
 function \code{correctGT}}
 
-\item{p}{the expected geneotype ratio in a numeric vector, defauls to c(0.5,0.5)}
+\item{p}{the expected geneotype ratio in a numeric vector, defaults to c(0.5,0.5)}
+
+\item{adj.method}{Methods to adjust for multiple comparisons, defaults to "BH"}
+}
+\value{
+data.frame with each row representing one SNP marker and columns
+containing the chisq.test results
 }
 \description{
-Marker disortation detection using chisq-test
+Marker segregation distortion detection using chisq-test
 }
 \details{
-We expect the genotypes to appear with the frequenceis of 1:1 homo_alt:hets.
-We use chisq-test for finding markers that have genotypes among samples that
-are significantly diffferent from the 1:1 ratio and report them
+We expect the genotypes to appear with the frequencies of 1:1 homo_alt:hets.
+We usechisq.test for finding markers that have genotypes among samples that
+are significantly different from the 1:1 ratio and report them
+}
+\examples{
+library(comapr)
+corrected_geno <- correctGT(gt_matrix = GenomicRanges::mcols(snp_geno_gr),
+ref = parents_geno$ref,alt = parents_geno$alt,fail = "Fail",
+wrong_label = "Homo_ref")
+GenomicRanges::mcols(snp_geno_gr) <- corrected_geno
+corrected_geno <- filterGT(snp_geno_gr, min_markers = 30,min_samples = 2)
+pvalues <- getDistortedMarkers(GenomicRanges::mcols(corrected_geno))
 }
 \author{
 Ruqian Lyu

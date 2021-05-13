@@ -10,7 +10,7 @@ plotGeneticDist(gr, bin = TRUE, chr = NULL, cumulative = FALSE)
 \item{gr}{GRanges object with genetic distances calculated for marker
 intervals}
 
-\item{bin}{TRUE or FALSE, indicating whether the supplied GRange objecct 
+\item{bin}{TRUE or FALSE, indicating whether the supplied GRange objecct
 is for binned interval}
 
 \item{chr}{the specific chrs selected to plot}
@@ -22,8 +22,13 @@ genetic distances or the cumulative distances}
 ggplot2 plot
 }
 \description{
-Plotting the calculated genetic distanced for each bin or marker interval 
+Plotting the calculated genetic distanced for each bin or marker interval
 supplied by the GRanges object
+}
+\examples{
+library(comapr)
+dist_se <- calGeneticDist(coCount)
+plotGeneticDist(SummarizedExperiment::rowRanges(dist_se))
 }
 \author{
 Ruqian Lyu

@@ -4,20 +4,21 @@
 \alias{bootstrapDist}
 \title{bootstrapDist}
 \usage{
-bootstrapDist(co_gr, B = 100, mapping_fun = "k", by_group)
+bootstrapDist(co_gr, B = 1000, mapping_fun = "k", group_by)
 }
 \arguments{
 \item{co_gr}{GRanges or RangedSummarizedExperiment object that contains the
 crossover counts for each marker interval across all samples.
-Returned by \code{countCO}}
+Returned by \code{countCOs}}
 
 \item{B}{integer the number of sampling times}
 
-\item{mapping_fun}{character default to "k" (kosambi mapping function). It 
+\item{mapping_fun}{character default to "k" (kosambi mapping function). It
 can be one of the mapping functions: "k","h"}
 
-\item{by_group, }{the prefix for each group that we need to generate 
-distributions for(only when co_gr is a GRanges object). Or the column name for colData(co_gr) that contains the
+\item{group_by, }{the prefix for each group that we need to generate
+distributions for(only when co_gr is a GRanges object). Or the column name
+for `colData(co_gr)` that contains the
 group factor (only when co_gr is a RangedSummarizedExperiment object)}
 }
 \value{
@@ -28,8 +29,11 @@ Generating distribution of sample genetic distances
 }
 \details{
 It takes the crossover counts for samples in multiple groups that is returned
-by `countCO`. It then draws samples from a group with replacement and 
+by `countCO`. It then draws samples from a group with replacement and
 calculate the distribution of relevant statistics.
+}
+\examples{
+bootsDiff <- bootstrapDist(coCount, group_by = "sampleGroup",B=10)
 }
 \author{
 Ruqian Lyu

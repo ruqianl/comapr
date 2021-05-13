@@ -13,19 +13,19 @@ perCellChrQC(
 )
 }
 \arguments{
-\item{sampleName, }{the name of the sample to parse which is used as prefix for
-finding relevant files for the underlying sample}
+\item{sampleName, }{the name of the sample to parse which is used as prefix
+for finding relevant files for the underlying sample}
 
-\item{chroms, }{the character vectors of chromosomes to parse. Multiple chromosomes'
-results will be concated together.}
+\item{chroms, }{the character vectors of chromosomes to parse. Multiple
+chromosomes' results will be concated together.}
 
-\item{path, }{the path to the files, with name patterns *{chrom}_vi.mtx, 
+\item{path, }{the path to the files, with name patterns *{chrom}_vi.mtx,
 *{chrom}_viSegInfo.txt, end with slash}
 
-\item{barcodeFile, }{defaults to NULL, it is assumed to be in the same directory as the 
-other files and with name sampleName_barcodes.txt}
+\item{barcodeFile, }{defaults to NULL, it is assumed to be in the same d
+irectory as the other files and with name sampleName_barcodes.txt}
 
-\item{doPlat, }{whether a plot should returned, default to TRUE}
+\item{doPlot, }{whether a plot should returned, default to TRUE}
 }
 \value{
 a list object that contains the data.frame with summarised statistics
@@ -33,7 +33,7 @@ per chr per cell and a plot (if doPlot)
 }
 \description{
 A function that parses output ('_viSegInfo.txt' )from `sscocaller`
-\url{https://gitlab.svi.edu.au/biocellgen-public/sscocaller} and 
+\url{https://gitlab.svi.edu.au/biocellgen-public/sscocaller} and
 generate cell cell (per chr) summary statistics
 }
 \examples{

@@ -17,7 +17,7 @@ calGeneticDist(
   bin_size = NULL,
   mapping_fun = "k",
   ref_genome = "mm10",
-  by_group = NULL
+  group_by = NULL
 )
 
 \S4method{calGeneticDist}{GRanges,missing,ANY,ANY,missing}(
@@ -25,7 +25,7 @@ calGeneticDist(
   bin_size = NULL,
   mapping_fun = "k",
   ref_genome = "mm10",
-  by_group = NULL
+  group_by = NULL
 )
 
 \S4method{calGeneticDist}{GRanges,numeric,ANY,ANY,missing}(
@@ -33,7 +33,7 @@ calGeneticDist(
   bin_size = NULL,
   mapping_fun = "k",
   ref_genome = "mm10",
-  by_group = NULL
+  group_by = NULL
 )
 
 \S4method{calGeneticDist}{GRanges,missing,ANY,ANY,character}(
@@ -41,7 +41,7 @@ calGeneticDist(
   bin_size = NULL,
   mapping_fun = "k",
   ref_genome = "mm10",
-  by_group = NULL
+  group_by = NULL
 )
 
 \S4method{calGeneticDist}{GRanges,numeric,ANY,ANY,character}(
@@ -49,7 +49,7 @@ calGeneticDist(
   bin_size = NULL,
   mapping_fun = "k",
   ref_genome = "mm10",
-  by_group = NULL
+  group_by = NULL
 )
 
 \S4method{calGeneticDist}{RangedSummarizedExperiment,missing,ANY,ANY,missing}(
@@ -57,7 +57,7 @@ calGeneticDist(
   bin_size = NULL,
   mapping_fun = "k",
   ref_genome = "mm10",
-  by_group = NULL
+  group_by = NULL
 )
 
 \S4method{calGeneticDist}{RangedSummarizedExperiment,missing,ANY,ANY,character}(
@@ -65,7 +65,7 @@ calGeneticDist(
   bin_size = NULL,
   mapping_fun = "k",
   ref_genome = "mm10",
-  by_group = NULL
+  group_by = NULL
 )
 
 \S4method{calGeneticDist}{RangedSummarizedExperiment,numeric,ANY,ANY,character}(
@@ -73,7 +73,7 @@ calGeneticDist(
   bin_size = NULL,
   mapping_fun = "k",
   ref_genome = "mm10",
-  by_group = NULL
+  group_by = NULL
 )
 
 \S4method{calGeneticDist}{RangedSummarizedExperiment,numeric,ANY,ANY,missing}(
@@ -81,11 +81,11 @@ calGeneticDist(
   bin_size = NULL,
   mapping_fun = "k",
   ref_genome = "mm10",
-  by_group = NULL
+  group_by = NULL
 )
 }
 \arguments{
-\item{co_count}{GRange object, returned by \code{countCO}}
+\item{co_count}{GRange or RangedSummarizedExperiment object, returned by \code{countCO}}
 
 \item{bin_size}{The binning size for grouping marker intervals into bins. If not supplied,the
 orginial marker intervals are returned with converted genetic distancens
@@ -96,19 +96,24 @@ based on recombination rate}
 \item{ref_genome}{The reference genome name. It is used to fetch the chromosome Information
 from UCSC database.}
 
-\item{by_group, }{character vector contains the unique prefix of sample names 
-that are used for defining different sample groups. Or the column name in 
-colData(co_count) that specify the group factor. If missing all samples are 
+\item{group_by, }{character vector contains the unique prefix of sample names
+that are used for defining different sample groups. Or the column name in
+colData(co_count) that specify the group factor. If missing all samples are
 assumed to be from one group}
 }
 \value{
 GRanges object
-GRanges for marker intervals or binned intervals with Haldane or Kosambi 
+GRanges for marker intervals or binned intervals with Haldane or Kosambi
 centiMorgans
 }
 \description{
-Calculate genetic distances of marker intervals or binned-chromosome 
+Calculate genetic distances of marker intervals or binned-chromosome
 Given whether crossover happens in each marker interval, calculate the
 recombination fraction in samples and then derive the Haldane or Kosambi
 genetic distances via mapping functions
+}
+\examples{
+dist_se <- calGeneticDist(coCount)
+# dist_se <- calGeneticDist(coCount,group_by="sampleGroup")
+
 }

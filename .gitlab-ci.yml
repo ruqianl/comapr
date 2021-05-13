@@ -13,7 +13,6 @@ pages:
 
 stages:
   - build
-  - test
   - deploy
 
 variables:
@@ -43,13 +42,6 @@ buildCMD:
 #    - R -e 'devtools::build(binary = TRUE)'
 
 
-unittests:
-  stage: test
-  tags:
-    - docker
-  image: svirlyu/comapr_dev
-  script:
-    - R -e 'if (any(as.data.frame(devtools::test())[["failed"]] > 0)) stop("Some tests failed.")'
 
 
 install:

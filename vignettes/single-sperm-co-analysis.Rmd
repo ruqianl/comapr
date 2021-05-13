@@ -29,7 +29,8 @@ using genotyped markers from a group of samples.
 [Genetic distance calculate from genotype shifts of markers](getStarted.html)
 
 In this document, we will focus on building individualized genetic maps from
-output files of `sscocaller` which is avaiable at [here](https://gitlab.svi.edu.au/biocellgen-public/sscocaller).
+output files of `sscocaller` which is available at 
+[here](https://gitlab.svi.edu.au/biocellgen-public/sscocaller).
 
 # Locate file path
 
@@ -65,9 +66,9 @@ list.files(demo_path)
 
 # Diagnostic functions
 
-`comapr` provides quality check functions for examining SNP coverage per chr and 
-per cell, chromosome segregation checks, and summary statics for filtering low
-confidence crossovers.
+`comapr` provides quality-check functions for examining SNP coverage per chr and 
+per cell, chromosome segregation pattern checks, and summary statics for 
+filtering low confidence crossovers.
 
 ## perCellChrQC
 
@@ -79,9 +80,20 @@ pcQC <- perCellChrQC(sampleName="s1",chroms=c("chr1"),
 
 
 
-# Construct `RangedSummarizedExpriment` object from parsing files
+# Input parsing
 
-Parse output from `sscocaller` and filter out low-confidence COs
+Input-parsing functions are implemented in `comapr` to construct 
+`RangedSummarizedExpriment` object that parses files generated 
+from `sscocaller` and filter out low-confidence COs at the same time. For the
+demo dataset, these filters do not have any effects:
+
+```
+minSNP = 0, 
+minlogllRatio = 50,
+bpDist = 100,
+maxRawCO=10,
+minCellSNP = 1
+```
 
 ```{r}
 s1_rse_state <- readHapState("s1",chroms=c("chr1","chr2"),
@@ -107,12 +119,22 @@ s2_rse_state <- readHapState("s2",chroms=c("chr1","chr2"),
 s1_rse_state
 ```
 
+The Viterbi states for SNP markers are stored in the "assay" slot:
+
 ```{r}
 assay(s1_rse_state)
+```
+
+The `rowRanges` contains the SNP's positions:
+
+```{r}
 rowRanges(s1_rse_state)
 ```
 
-Sample group factor
+## Formate sample group factor
+
+We have read in the Viterbi states for cells from two samples: s1 and s2. We now
+combine them into one data object for downstream analysis.
 
 ```{r}
 colData(s1_rse_state)
@@ -128,21 +150,48 @@ combine two individual: combine sample s1 and sample s2
 
 ```{r}
 twoSample <- combineHapState(s1_rse_state,s2_rse_state)
+```
+
+
+Now the `twoSample` object contains the cells from both samples with `assay` slot
+contains the Viterbi states and `rowRanges` contains position annotaitons for
+the list SNP markers.
+
+```{r}
 assay(twoSample)
 rowRanges(twoSample)
 ```
 
+# Count crossovers 
+
+The `countCOs` function can then find out the crossover intervals according to 
+the Viterbi states for each cell and the number of crossovers per cell is then
+calculated.
+
 ```{r}
 cocounts <- countCOs(twoSample)
+```
 
+The `rowRanges` from the resulting data object now denotes the crossover interval
+and the `assay` slot now contains the number of crossovers in each cell.
+
+```{r}
 rowRanges(cocounts)
 assay(cocounts)
 ```
 
+The colData slot still contains the annotations of each cell.
 
 ```{r}
 colData(cocounts)
+```
 
+# Calculate genetic distances
+
+The genetic distances can be calculated by using mapping functions such as the
+Kosambi or Haldane \cite{}
+
+```{r}
 #colData(cocounts)$sampleGroup <- c(rep("s1",5),rep("s2",5))
 
 dist_gr <- calGeneticDist(co_count = cocounts)

@@ -1,6 +1,6 @@
 #' getSNPDensityTrack
 #'
-#' Generate the SNP density DataTrack (from Gviz) for selected chromosome
+#' Generate the SNP density DataTrack (from `Gviz`) for selected chromosome
 #' @inheritParams getCellAFTrack
 #' @param log, whether the histogram of SNP density should be plotted on log
 #' scale (log10)

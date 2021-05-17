@@ -64,7 +64,8 @@ NULL
   ## if the genotype is the same as het1 or het2:
   tem[s_gt == het1 | s_gt == het2] <- "Het"
 
-  ## the wrong GTs are GTs that can not be converted to Home_ref, Home_alt, Het or Fail
+  ## the wrong GTs are GTs that can not be converted to Home_ref, Home_alt, Het
+  ## or Fail
   ## the wrong GT will be converted to `Fail`
 
   return(tem)
@@ -195,8 +196,9 @@ fill_fail <- function(s_gt,fail = "Fail",chr = NULL){
 #' calling \code{.change_missing}.
 #'
 #' @return
-#' a genotype data.frame of sample genotypes with dimension as the input `gt_matrix`
-#' with genotypes converted to labels and failed calls are changed to NA.
+#' a genotype data.frame of sample genotypes with dimension as the input
+#' `gt_matrix` with genotypes converted to labels and failed calls are changed
+#' to NA.
 #'
 #' @examples
 #' snp_gt_crt <- correctGT(gt_matrix = GenomicRanges::mcols(snp_geno_gr),

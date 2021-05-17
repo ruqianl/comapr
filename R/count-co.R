@@ -100,7 +100,7 @@ countCOs_gr <- function(geno) {
         # len_prop <- overlapsRanges(query = ranges(gps_snp_gr),subject = ranges(co_gr),
         #                            hits = myHits)
         len_prop <-
-          (width(ranges(gps_snp_gr))[myHits@from] + 1) / (width(ranges(co_gr))[myHits@to])
+          (width(ranges(gps_snp_gr))[myHits@from] + 1)/(width(ranges(co_gr))[myHits@to])
 
         mcols(gps_snp_gr)$crossovers <- 0
         mcols(gps_snp_gr)$crossovers[myHits@from] <-

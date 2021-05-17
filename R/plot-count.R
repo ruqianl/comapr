@@ -95,7 +95,7 @@ setMethod("plotCount",signature = c(co_count = 'GRanges',
                                     group_by='missing',
                                     plot_type='ANY'),
           function(co_count, by_chr = FALSE, group_by, plot_type){
-           tmp_counts <-  SummarizedExperiment(rowRanges = granges(co_count),
+           tmp_counts <- SummarizedExperiment(rowRanges = granges(co_count),
                                  colData = data.frame(sampleGroup=rep("all",ncol(mcols(co_count)))),
                                  assays=list(co_count=mcols(co_count)))
             plot_count(co_count = tmp_counts,group_by  = "sampleGroup",
@@ -110,7 +110,9 @@ setMethod("plotCount",signature = c(co_count = 'GRanges',
                                     plot_type='ANY'),
           function(co_count, by_chr, group_by, plot_type){
             tmp_counts <-  SummarizedExperiment(rowRanges = granges(co_count),
-                                                colData = data.frame(sampleGroup=rep("all",ncol(mcols(co_count)))),
+                                                colData = data.frame(
+                                                  sampleGroup=rep("all",
+                                                                  ncol(mcols(co_count)))),
                                                 assays=list(co_count=mcols(co_count)))
 
             plot_count(co_count = tmp_counts,group_by  = "sampleGroup",
@@ -163,8 +165,8 @@ plot_count <- function(co_count, by_chr=FALSE, group_by  = "sampleGroup",
 
   stopifnot(group_by %in% colnames(colData(co_count)))
   col_to_plot <- unique(colData(co_count)[,group_by])
-  sample_group_colors <- RColorBrewer::brewer.pal(ifelse(length(col_to_plot) > 2,
-                                                         length(col_to_plot), 3),
+  sample_group_colors <- RColorBrewer::brewer.pal(ifelse(length(col_to_plot)> 2,
+                                                         length(col_to_plot),3),
                                                   name = "Set1")
 
   names(sample_group_colors)[seq_along(col_to_plot)] <- col_to_plot
@@ -215,8 +217,9 @@ plot_count <- function(co_count, by_chr=FALSE, group_by  = "sampleGroup",
                          sampleGroup = colData(co_count)[,group_by])
     p <- ggplot(data = plt_df,
                 mapping = aes(x = sampleGroup, color = sampleGroup,
-                              y = COs))+geom_boxplot()+geom_jitter(width = 0.2,
-                                                                   height = 0.0)+
+                              y = COs))+geom_boxplot()+
+      geom_jitter(width = 0.2,
+                  height = 0.0)+
       theme_classic(base_size = 16)+
       scale_color_manual(values = sample_group_colors)
   }

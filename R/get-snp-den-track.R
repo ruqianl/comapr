@@ -22,7 +22,8 @@ getSNPDensityTrack <- function(chrom = "chr1",
                                plot_type = "hist",
                                log = TRUE){
 
-  snp_anno <- read.table(file=paste0(path_loc, sampleName,"_",chrom, "_snpAnnot.txt"),
+  snp_anno <- read.table(file=paste0(path_loc, sampleName,"_",chrom,
+                                     "_snpAnnot.txt"),
                          header=TRUE)
   aggregation_fun <- ifelse(log, function(x) { log10(sum(x)+1)}, sum)
   snp_track <- DataTrack( GRanges(seqnames = chrom,

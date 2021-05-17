@@ -129,8 +129,10 @@ setMethod("filterGT",signature = c(geno ="GRanges",min_markers = "numeric",
             geno <- geno[keep_markers,]
 
             mcols(geno) <- mcols(geno)[,keep_samples]
-            message(paste0( "filter out ",sum(keep_markers==FALSE)," marker(s)"))
-            message(paste0( "filter out ",sum(keep_samples==FALSE)," sample(s)"))
+            message(paste0( "filter out ",sum(keep_markers==FALSE),
+                            " marker(s)"))
+            message(paste0( "filter out ",sum(keep_samples==FALSE),
+                            " sample(s)"))
 
             return(geno)
 
@@ -187,7 +189,8 @@ plotMissingGT <- function(geno, missing = "Fail", plot_wg = FALSE,
     switch (plot_type,
             dot = ggplot(data = plot_df)+
               geom_point(mapping =
-                           aes_string(x = "Var1", colour = "value", y = "Var2"))+
+                           aes_string(x = "Var1", colour = "value",
+                                      y = "Var2"))+
               xlab("markers")+ylab("samples")+
               labs(colour = "is_missing")+
               scale_color_manual(values = c("TRUE" = "red",

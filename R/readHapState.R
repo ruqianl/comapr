@@ -47,7 +47,8 @@ readHapState <- function(sampleName,chroms=c("chr1"),path,
     snpAnno <- read.table(file=paste0(path,sampleName,"_",chr,"_snpAnnot.txt"),
                           stringsAsFactors = FALSE,
                           header=TRUE)
-    segInfo <- read.table(file = paste0(path,sampleName,"_",chr,"_viSegInfo.txt"),
+    segInfo <- read.table(file = paste0(path,sampleName,"_",chr,
+                                        "_viSegInfo.txt"),
                           stringsAsFactors = FALSE,
                           col.names = c("ithSperm","Seg_start","Seg_end",
                                         "logllRatio","nSNP","State"))
@@ -141,7 +142,6 @@ readHapState <- function(sampleName,chroms=c("chr1"),path,
   ithBC <- as.numeric(gsub("ithSperm","",segInfo$ithSperm))+1
   segInfo$barcode <- SummarizedExperiment::colData(se)$barcodes[ithBC]
 
-  #keepCells <- names(table(segInfo$barcode))[table(segInfo$barcode)-1 <= maxRawCO]
 
   suppressMessages(
     keepCells <- segInfo %>% dplyr::group_by(barcode) %>%

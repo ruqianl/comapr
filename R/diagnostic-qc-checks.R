@@ -218,7 +218,7 @@ perSegChrQC <- function(sampleName,chroms = c("chr1","chr7","chr15"),
     dplyr::filter(.data$nCORaw < maxRawCO) %>%
     dplyr::select(.data$ithSperm)
 
-  p <- segInfo_chrs %>% dplyr::filter(.data$ithSperm %in% keepCells$ithSperm) %>%
+  p <- segInfo_chrs %>% dplyr::filter(.data$ithSperm %in% keepCells$ithSperm)%>%
     dplyr::mutate(bpDist = (.data$Seg_end -.data$Seg_start)) %>%
     ggplot()+geom_point(mapping = aes(x =nSNP,y = bpDist,
                                       color = log10(logllRatio)))+

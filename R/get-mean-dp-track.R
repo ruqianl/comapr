@@ -41,7 +41,8 @@ getMeanDPTrack <- function( chrom = "chr1",
   meanDP <- Matrix::rowMeans(dpMM)
 
   if(is.null(snp_track )){
-    snp_anno <- read.table(file=paste0(path_loc, sampleName,"_",chrom, "_snpAnnot.txt"),
+    snp_anno <- read.table(file=paste0(path_loc, sampleName,"_",chrom,
+                                       "_snpAnnot.txt"),
                            header=TRUE)
     snp_pos <- snp_anno$POS
 

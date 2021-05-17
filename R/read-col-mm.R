@@ -64,7 +64,8 @@ readColMM <- function(file,which.col,chunk=1000L)
              ##       an object of an "iMatrix" subclass--once there are
 
 
-             # Reading it in, chunk by chunk (see behavior of nmax= when what= is a list).
+             # Reading it in, chunk by chunk (see behavior of nmax= when what=
+             # is a list).
              els <- list(i=NULL,j=NULL,x=NULL)
              repeat {
                current <- scan(file, what=list(i= integer(),
@@ -90,14 +91,16 @@ readColMM <- function(file,which.col,chunk=1000L)
                           i = els$i - 1L, j = els$j - 1L, x = els$x)
                     },
                     "skew-symmetric" = {
-                      stop("symmetry form 'skew-symmetric' not yet implemented for reading")
+                      stop("symmetry form 'skew-symmetric' not yet implemented
+                           for reading")
                       ## FIXME: use dgT... but must expand the (i,j,x) slots!
                       new("dgTMatrix", uplo = "L", Dim = c(nr, nc),
                           i = els$i - 1L, j = els$j - 1L, x = els$x)
 
                     },
                     "hermitian" = {
-                      stop("symmetry form 'hermitian' not yet implemented for reading")
+                      stop("symmetry form 'hermitian' not yet implemented for
+                           reading")
                     },
                     ## otherwise (not possible; just defensive programming):
                     stop(gettextf("symmetry form '%s' is not yet implemented",
@@ -118,14 +121,16 @@ readColMM <- function(file,which.col,chunk=1000L)
                           i = els$i - 1L, j = els$j - 1L)
                     },
                     "skew-symmetric" = {
-                      stop("symmetry form 'skew-symmetric' not yet implemented for reading")
+                      stop("symmetry form 'skew-symmetric' not yet implemented
+                           for reading")
                       ## FIXME: use dgT... but must expand the (i,j,x) slots!
                       new("ngTMatrix", uplo = "L", Dim = c(nr, nc),
                           i = els$i - 1L, j = els$j - 1L)
 
                     },
                     "hermitian" = {
-                      stop("symmetry form 'hermitian' not yet implemented for reading")
+                      stop("symmetry form 'hermitian' not yet implemented for
+                           reading")
                     },
                     ## otherwise (not possible; just defensive programming):
                     stop(gettextf("symmetry form '%s' is not yet implemented",

@@ -41,9 +41,9 @@ plotGeneticDist <- function(gr,bin=TRUE,chr=NULL,cumulative=FALSE){
   names(sample_group_colors)[seq_along(col_to_plot)] <- col_to_plot
 
   if(cumulative){
-
     GenomicRanges::mcols(gr) <- apply(mcols(gr),2 ,
-                                      function(x,seq = as.character(seqnames(gr))) {
+                                      function(x,
+                                               seq = as.character(seqnames(gr))){
       temp_df <- data.frame(x=x,seq=seq) %>% dplyr::group_by(seq) %>%
         dplyr::mutate(cum = cumsum(x))
       temp_df$cum
@@ -152,7 +152,8 @@ plotWholeGenome <- function(gr){
     plot_df <- don %>% tidyr::pivot_longer(cols = all_of(col_to_plot),
                                          names_to = "SampleGroup",
                                          values_to = "bin_dist")
-    p <- plot_df %>% ggplot() + geom_step(mapping = aes(x = x_tick, y = bin_dist,
+    p <- plot_df %>% ggplot() + geom_step(mapping = aes(x = x_tick,
+                                                        y = bin_dist,
                                                         color = SampleGroup),
                                           size = 1)+
 
@@ -163,7 +164,7 @@ plotWholeGenome <- function(gr){
     axisdf <-  don %>% dplyr::group_by(seqnames) %>%
       dplyr::summarize(center=( max(BPcum) + min(BPcum) ) / 2 )
 
-    p <- p+scale_x_continuous(labels = axisdf$seqnames, breaks= axisdf$center ) +
+    p <- p+scale_x_continuous(labels = axisdf$seqnames, breaks= axisdf$center)+
       theme_classic(base_size = 15) +
       xlab("Chromosome positions \n cumulative whole genome") +
       ylab("cumulative centiMorgans")

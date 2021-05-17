@@ -21,8 +21,9 @@ data \code{snp_geno}}
 should not be in the possible genotypes of BC1F1 samples}
 }
 \value{
-a genotype data.frame of sample genotypes with dimension as the input `gt_matrix`
-with genotypes converted to labels and failed calls are changed to NA.
+a genotype data.frame of sample genotypes with dimension as the input
+`gt_matrix` with genotypes converted to labels and failed calls are changed
+to NA.
 }
 \description{
 function for formatting and correction genotypes of markers

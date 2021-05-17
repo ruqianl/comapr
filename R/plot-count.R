@@ -10,6 +10,8 @@
 #' sample names that are used for defining different sample groups. If missing
 #' all samples are assumed to be from one group
 #' @param by_chr, whether it should plot each chromosome separately
+#' @param plot_type, determins what type the plot will be, choose from "error_bar"
+#'  or "hist". Only relevant when by_chr=TRUE
 #' @return ggplot object
 #' @importFrom plyr mapvalues
 #' @examples
@@ -26,39 +28,48 @@
 
 setGeneric("plotCount",
            function(co_count,
+                    by_chr=FALSE,
                     group_by  = "sampleGroup",
-                    by_chr=FALSE)
+                    plot_type="error_bar")
              standardGeneric("plotCount"))
 
 
 #'@rdname plotCount
 setMethod("plotCount",signature = c(co_count = 'RangedSummarizedExperiment',
                                     by_chr='missing',
-                                    group_by='missing'),
-          function(co_count, group_by, by_chr = FALSE){
+                                    group_by='missing',
+                                    plot_type='ANY'),
+          function(co_count, by_chr = FALSE, group_by, plot_type){
             co_count$sampleGroup <- "all"
             plot_count(co_count = co_count,group_by  = "sampleGroup",
-                       by_chr = by_chr)
+                       by_chr = by_chr,plot_type=plot_type)
+
 
           })
 
 #'@rdname plotCount
 setMethod("plotCount",signature = c(co_count = 'RangedSummarizedExperiment',
                                     by_chr='missing',
-                                    group_by='character'),
-          function(co_count, group_by, by_chr = FALSE){
-            plot_count(co_count = co_count,group_by  = group_by,
-                       by_chr = FALSE)
+                                    group_by='character',
+                                    plot_type='ANY'),
+          function(co_count, by_chr = FALSE, group_by, plot_type){
+
+
+              plot_count(co_count = co_count,group_by  = group_by,
+                         by_chr = FALSE,plot_type=plot_type)
+
+
 
           })
 
 #'@rdname plotCount
 setMethod("plotCount",signature = c(co_count = 'RangedSummarizedExperiment',
                                     by_chr='logical',
-                                    group_by='character'),
-          function(co_count, group_by, by_chr = FALSE){
+                                    group_by='character',
+                                    plot_type='ANY'),
+          function(co_count, by_chr = FALSE , group_by, plot_type){
             plot_count(co_count = co_count,group_by  = group_by,
-                       by_chr = by_chr)
+                       by_chr = by_chr,plot_type=plot_type)
 
           })
 
@@ -66,11 +77,12 @@ setMethod("plotCount",signature = c(co_count = 'RangedSummarizedExperiment',
 #'@rdname plotCount
 setMethod("plotCount",signature = c(co_count = 'RangedSummarizedExperiment',
                                     by_chr='logical',
-                                    group_by='missing'),
-          function(co_count, group_by, by_chr = FALSE){
+                                    group_by='missing',
+                                    plot_type='ANY'),
+          function(co_count, by_chr = FALSE, group_by, plot_type){
             co_count$sampleGroup <- "all"
             plot_count(co_count = co_count,group_by  = "sampleGroup",
-                       by_chr = by_chr)
+                       by_chr = by_chr,plot_type=plot_type)
 
           })
 
@@ -80,33 +92,37 @@ setMethod("plotCount",signature = c(co_count = 'RangedSummarizedExperiment',
 #'@rdname plotCount
 setMethod("plotCount",signature = c(co_count = 'GRanges',
                                     by_chr='logical',
-                                    group_by='missing'),
-          function(co_count, group_by, by_chr = FALSE){
+                                    group_by='missing',
+                                    plot_type='ANY'),
+          function(co_count, by_chr = FALSE, group_by, plot_type){
            tmp_counts <-  SummarizedExperiment(rowRanges = granges(co_count),
                                  colData = data.frame(sampleGroup=rep("all",ncol(mcols(co_count)))),
                                  assays=list(co_count=mcols(co_count)))
             plot_count(co_count = tmp_counts,group_by  = "sampleGroup",
-                       by_chr = by_chr)
+                       by_chr = by_chr,plot_type=plot_type)
 
           })
 
 #'@rdname plotCount
 setMethod("plotCount",signature = c(co_count = 'GRanges',
                                     by_chr='missing',
-                                    group_by='missing'),
-          function(co_count, group_by, by_chr){
+                                    group_by='missing',
+                                    plot_type='ANY'),
+          function(co_count, by_chr, group_by, plot_type){
             tmp_counts <-  SummarizedExperiment(rowRanges = granges(co_count),
                                                 colData = data.frame(sampleGroup=rep("all",ncol(mcols(co_count)))),
                                                 assays=list(co_count=mcols(co_count)))
+
             plot_count(co_count = tmp_counts,group_by  = "sampleGroup",
-                       by_chr = FALSE)
+                       by_chr = FALSE,plot_type=plot_type)
 
           })
 #'@rdname plotCount
 setMethod("plotCount",signature = c(co_count = 'GRanges',
                                     by_chr='missing',
-                                    group_by='character'),
-          function(co_count, group_by, by_chr){
+                                    group_by='character',
+                                    plot_type='ANY'),
+          function(co_count, by_chr, group_by, plot_type){
             sampleGroup <- rep("all",ncol(mcols(co_count)))
             for(group_prefix in group_by){
               sampleGroup[grep(group_prefix,
@@ -117,14 +133,17 @@ setMethod("plotCount",signature = c(co_count = 'GRanges',
                                                 colData = data.frame(sampleGroup=sampleGroup),
                                                 assays=list(co_count=mcols(co_count)))
             plot_count(co_count = tmp_counts,group_by  = "sampleGroup",
-                       by_chr = FALSE)
+                       by_chr = FALSE,plot_type=plot_type)
 
           })
 #'@rdname plotCount
 setMethod("plotCount",signature = c(co_count = 'GRanges',
                                     by_chr='logical',
-                                    group_by='character'),
-          function(co_count, group_by, by_chr){
+                                    group_by='character',
+                                    plot_type='ANY'),
+          function(co_count, by_chr, group_by, plot_type="error_bar"){
+            if(length(plot_type)==0){plot_type <- "error_bar"}
+
             sampleGroup <- rep("all",ncol(mcols(co_count)))
             for(group_prefix in group_by){
               sampleGroup[grep(group_prefix,
@@ -135,12 +154,12 @@ setMethod("plotCount",signature = c(co_count = 'GRanges',
                                                colData = data.frame(sampleGroup=sampleGroup),
                                                assays=list(co_count=mcols(co_count)))
             plot_count(co_count = tmp_counts,group_by  = "sampleGroup",
-                       by_chr = by_chr)
+                       by_chr = by_chr,plot_type=plot_type)
 
           })
 #'@noRd
-plot_count <- function(co_count, group_by  = "sampleGroup",
-                      by_chr=FALSE){
+plot_count <- function(co_count, by_chr=FALSE, group_by  = "sampleGroup",
+                      plot_type=c("error_bar","hist") ){
 
   stopifnot(group_by %in% colnames(colData(co_count)))
   col_to_plot <- unique(colData(co_count)[,group_by])
@@ -162,21 +181,33 @@ plot_count <- function(co_count, group_by  = "sampleGroup",
     tmp$sampleGroup <- plyr::mapvalues(tmp$BC, from = colnames(co_count),
                                        to = colData(co_count)[,group_by])
 
-   suppressMessages(
-     p <- tmp %>% dplyr::group_by(chr,BC) %>%
-             summarise(ChrCOs = sum(COs),
-                       sampleGroup = unique(sampleGroup)) %>%
-             dplyr::group_by(chr,sampleGroup) %>%
-       dplyr::summarise(meanCOs = mean(ChrCOs),
-                        lower = meanCOs-sd(ChrCOs)/sqrt(length(ChrCOs)),
-                        upper = meanCOs+sd(ChrCOs)/sqrt(length(ChrCOs))) %>%
-             ggplot(mapping = aes(x=chr,y = meanCOs,
-                                  color=chr))+geom_point()+
-             geom_errorbar(mapping = aes(ymin = lower,
-                                         ymax = upper))+
-       facet_wrap(.~sampleGroup)+
-             theme_classic(base_size = 18)
-    )
+    stopifnot(plot_type %in% c("error_bar","hist"))
+
+    if(plot_type == "error_bar"){
+      suppressMessages(
+        p <- tmp %>% dplyr::group_by(chr,BC) %>%
+          summarise(ChrCOs = sum(COs),
+                    sampleGroup = unique(sampleGroup)) %>%
+          dplyr::group_by(chr,sampleGroup) %>%
+          dplyr::summarise(meanCOs = mean(ChrCOs),
+                           lower = meanCOs-sd(ChrCOs)/sqrt(length(ChrCOs)),
+                           upper = meanCOs+sd(ChrCOs)/sqrt(length(ChrCOs))) %>%
+          ggplot(mapping = aes(x=chr,y = meanCOs,
+                               color=chr))+geom_point()+
+          geom_errorbar(mapping = aes(ymin = lower,
+                                      ymax = upper))+
+          facet_wrap(.~sampleGroup)+
+          theme_classic(base_size = 18))
+    } else {
+      suppressMessages(
+        p <- tmp %>% dplyr::group_by(chr,BC) %>%
+          summarise(ChrCOs = sum(COs),
+                    sampleGroup = unique(sampleGroup)) %>%
+          dplyr::group_by(chr,sampleGroup) %>%
+          dplyr::mutate(ChrCOs = as.character(ChrCOs)) %>%
+          ggplot()+geom_bar(mapping = aes(x=ChrCOs),
+                            stat ="count")+facet_wrap(.~chr))
+    }
   } else {
 
     plt_df <- data.frame(COs = colSums(as.matrix(assay(co_count))),
@@ -188,7 +219,6 @@ plot_count <- function(co_count, group_by  = "sampleGroup",
                                                                    height = 0.0)+
       theme_classic(base_size = 16)+
       scale_color_manual(values = sample_group_colors)
-
   }
   p
 

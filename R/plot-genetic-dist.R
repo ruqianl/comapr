@@ -30,7 +30,6 @@
 #' @author Ruqian Lyu
 #'
 #' @examples
-#' library(comapr)
 #' dist_se <- calGeneticDist(coCount)
 #' plotGeneticDist(SummarizedExperiment::rowRanges(dist_se))
 

@@ -12,7 +12,12 @@ test_that("Plot counts by sample group with RSE", {
 
   s1_counts <- countCOs(s1_rse_state)
   s1_counts$sampleGroup <- "s1"
-  expect_s3_class(plotCount(s1_counts,group_by = 'sampleGroup'),"ggplot")
+  expect_s3_class(plotCount(s1_counts,group_by = 'sampleGroup',
+                            plot_type ="hist"),
+                  "ggplot")
+
+  expect_s3_class(plotCount(s1_counts,group_by = 'sampleGroup'),
+                  "ggplot")
 })
 
 test_that("Plot counts by chr and sample group with RSE", {
@@ -30,6 +35,11 @@ test_that("Plot counts by chr and sample group with RSE", {
   s1_counts <- countCOs(s1_rse_state)
   s1_counts$sampleGroup <- "s1"
 
+  expect_s3_class(plotCount(s1_counts,
+                            group_by = 'sampleGroup',
+                            by_chr = TRUE,
+                            plot_type = "error_bar"),
+                  "ggplot")
   expect_s3_class(plotCount(s1_counts,
                             group_by = 'sampleGroup',
                             by_chr = TRUE),
@@ -51,6 +61,9 @@ test_that("Plot counts by sample group with GRanges input", {
   marker_gr_cos <- countCOs(snp_geno_gr)
 
   expect_s3_class(plotCount(marker_gr_cos,group_by = 'sampleGroup'),"ggplot")
+  expect_s3_class(plotCount(marker_gr_cos,group_by = 'sampleGroup',
+                            plot_type = "hist"),"ggplot")
+
 })
 
 
@@ -70,6 +83,12 @@ test_that("Plot counts by chr sample group with GRanges input", {
   expect_s3_class(plotCount(marker_gr_cos,
                             group_by = 'sampleGroup',
                             by_chr = TRUE),
+                  "ggplot")
+
+  expect_s3_class(plotCount(marker_gr_cos,
+                            group_by = 'sampleGroup',
+                            by_chr = TRUE,
+                            plot_type = "hist"),
                   "ggplot")
 })
 

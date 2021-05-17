@@ -2,7 +2,7 @@
 #'
 #' It finds the crossover intervals for a selected cell
 #'
-#' @param co_count, `GRange` or `RangedSummarizedExperiment` object,
+#' @param co_count, `GRanges` or `RangedSummarizedExperiment` object,
 #' @param cellBarcode, the selected cell's barcode
 #'
 #' @return GRange object containing the crossover intervals for the selected
@@ -11,11 +11,21 @@
 #' @importFrom GenomicRanges mcols mcols<- reduce
 #' @author Ruqian Lyu
 #' @export
+#' @examples
+#'   demo_path <-paste0(system.file("extdata",package = "comapr"),"/")
+#' s1_rse_state <- readHapState("s1",chroms=c("chr1"),
+#'                              path=demo_path,barcodeFile=NULL,minSNP = 0,
+#'                              minlogllRatio = 50,
+#'                              bpDist = 100,maxRawCO=10,
+#'                              minCellSNP = 0)
+#' s1_counts <- countCOs(s1_rse_state)
 #'
+#' co_ranges <- getCellCORange(cellBarcode = "BC1",
+#'                             co_count = s1_counts)
 getCellCORange <- function(co_count, cellBarcode){
   stopifnot(class(co_count) %in% c("GRanges","RangedSummarizedExperiment"))
 
-  if(class(co_count) == "GRanges"){
+  if(is(co_count,"GRanges")){
     cell1_co <- mcols(co_count)[,cellBarcode]
     cell1_coRange <- granges(co_count)[cell1_co!=0]
     cell1_co <- cell1_co[cell1_co!=0]

@@ -37,6 +37,7 @@ buildCMD:
 install:
   tags:
     - docker
+  image: svirlyu/comapr_dev
   stage: deploy
   script:
     - R CMD install

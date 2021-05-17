@@ -85,4 +85,4 @@ Distances](https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-proce
 
 ## Analysis workflow for demonstration of `comapr` on a single-sperm DNAseq dataset
 
-<https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/public/Crossover-identification-with-sscocaller-and-comapr.html#Group_comparison>
+<https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/public/Crossover-identification-with-sscocaller-and-comapr.html>

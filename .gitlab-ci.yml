@@ -1,19 +1,7 @@
 
 
-pages:
-  stage: deploy
-  script:
-    - echo 'Nothing to do...'
-  artifacts:
-    paths:
-      - public
-  only:
-    - master
-
-
 stages:
   - build
-  - deploy
 
 variables:
   _R_CHECK_CRAN_INCOMING_: "false"
@@ -32,11 +20,3 @@ buildCMD:
   stage: build
   script:
     - R CMD build
-
-
-install:
-  tags:
-    - docker
-  stage: deploy
-  script:
-    - R CMD install

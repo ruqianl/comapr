@@ -36,7 +36,31 @@ of crossovers in each cell.}
 chromosome locations. It could be omitted and the SNP positions will be acquired
 from the "*_snpAnnot.txt" file.}
 }
+\value{
+a list object, in which each element is a list of two items with the
+cell's alternative allele frequency DataTrack and the called crossover ranges.
+}
 \description{
 Generate the raw alternative allele frequencies tracks for all cells in the
-provided co_count
+columns of provided `co_count`
+}
+\examples{
+  demo_path <-paste0(system.file("extdata",package = "comapr"),"/")
+s1_rse_state <- readHapState("s1",chroms=c("chr1"),
+                             path=demo_path,barcodeFile=NULL,minSNP = 0,
+                             minlogllRatio = 50,
+                             bpDist = 100,maxRawCO=10,
+                             minCellSNP = 0)
+s1_counts <- countCOs(s1_rse_state)
+
+af_co_tracks <- getAFTracks(chrom ="chr1",
+                               path_loc = demo_path,
+                               sampleName = "s1",
+                               barcodeFile = paste0(demo_path,
+                                                    "s1_barcodes.txt"),
+                               co_count = s1_counts)
+
+}
+\author{
+Ruqian Lyu
 }

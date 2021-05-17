@@ -71,6 +71,7 @@ getMeanDPTrack <- function( chrom = "chr1",
 #'
 #' It plots the total allele counts for the selected cell.
 #' @inheritParams getCellAFTrack
+#' @inheritParams getSNPDensityTrack
 #' @param chrom, the chromosome
 #' @param path_loc, the path prefix to the output files from sscocaller including
 #' "*_totalCount.mtx"

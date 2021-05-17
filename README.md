@@ -58,10 +58,31 @@ list.files("inst/extdata/")
 #> [40] "s2_chr5_snpAnnot.txt"   "s2_chr5_vi.mtx"         "s2_chr5_viSegInfo.txt"
 ```
 
-## Visulising feature of single-sperm dataset
+## Visualizing feature of single sperms
+
+\[PerCellQC\]\[<https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/public/figure/Crossover-identification-with-sscocaller-and-comapr.Rmd/unnamed-chunk-6-1.png>\]
 
 ## Crossover positions
 
-## Genetic distances
+![Crossover
+Positions](https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/public/figure/Crossover-identification-with-sscocaller-and-comapr.Rmd/unnamed-chunk-31-1.png)
 
-## Resampling methods
+![Crossover counts per
+group](https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/public/figure/Crossover-identification-with-sscocaller-and-comapr.Rmd/unnamed-chunk-33-1.png)
+
+## Cumumative Genetic distances across intervals
+
+![Genetic Distances Per
+Chromosome](https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/public/figure/Crossover-identification-with-sscocaller-and-comapr.Rmd/unnamed-chunk-41-1.png)
+![Whole Genome Cumulative Genetic
+Distances](https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/public/figure/Crossover-identification-with-sscocaller-and-comapr.Rmd/unnamed-chunk-42-1.png)
+
+## Resampling methods for comparing groups
+
+![Permutation](https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/public/figure/Crossover-identification-with-sscocaller-and-comapr.Rmd/unnamed-chunk-48-1.png)
+
+![Bootstrapping](https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/public/figure/Crossover-identification-with-sscocaller-and-comapr.Rmd/unnamed-chunk-45-1.png)
+
+## Analysis workflow for demonstration of `comapr` on a single-sperm DNAseq dataset
+
+<https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/public/Crossover-identification-with-sscocaller-and-comapr.html#Group_comparison>

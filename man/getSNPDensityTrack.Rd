@@ -33,7 +33,7 @@ scale (log10)}
 DataTrack object plotting the SNP density histogram
 }
 \description{
-Generate the SNP density DataTrack (from Gviz) for selected chromosome
+Generate the SNP density DataTrack (from `Gviz`) for selected chromosome
 }
 \examples{
 demo_path <-paste0(system.file("extdata",package = "comapr"),"/")

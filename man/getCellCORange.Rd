@@ -7,7 +7,7 @@
 getCellCORange(co_count, cellBarcode)
 }
 \arguments{
-\item{co_count, }{`GRange` or `RangedSummarizedExperiment` object,}
+\item{co_count, }{`GRanges` or `RangedSummarizedExperiment` object,}
 
 \item{cellBarcode, }{the selected cell's barcode}
 }
@@ -17,6 +17,18 @@ cell
 }
 \description{
 It finds the crossover intervals for a selected cell
+}
+\examples{
+  demo_path <-paste0(system.file("extdata",package = "comapr"),"/")
+s1_rse_state <- readHapState("s1",chroms=c("chr1"),
+                             path=demo_path,barcodeFile=NULL,minSNP = 0,
+                             minlogllRatio = 50,
+                             bpDist = 100,maxRawCO=10,
+                             minCellSNP = 0)
+s1_counts <- countCOs(s1_rse_state)
+
+co_ranges <- getCellCORange(cellBarcode = "BC1",
+                            co_count = s1_counts)
 }
 \author{
 Ruqian Lyu

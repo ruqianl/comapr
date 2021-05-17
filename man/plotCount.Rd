@@ -3,42 +3,90 @@
 \name{plotCount}
 \alias{plotCount}
 \alias{plotCount,RangedSummarizedExperiment,missing,missing-method}
-\alias{plotCount,RangedSummarizedExperiment,character,missing-method}
-\alias{plotCount,RangedSummarizedExperiment,character,logical-method}
-\alias{plotCount,RangedSummarizedExperiment,missing,logical-method}
-\alias{plotCount,GRanges,missing,logical-method}
+\alias{plotCount,RangedSummarizedExperiment,missing,character-method}
+\alias{plotCount,RangedSummarizedExperiment,logical,character-method}
+\alias{plotCount,RangedSummarizedExperiment,logical,missing-method}
+\alias{plotCount,GRanges,logical,missing-method}
 \alias{plotCount,GRanges,missing,missing-method}
-\alias{plotCount,GRanges,character,missing-method}
-\alias{plotCount,GRanges,character,logical-method}
+\alias{plotCount,GRanges,missing,character-method}
+\alias{plotCount,GRanges,logical,character-method}
 \title{plotCount}
 \usage{
-plotCount(co_count, group_by = "sampleGroup", by_chr = FALSE)
+plotCount(
+  co_count,
+  by_chr = FALSE,
+  group_by = "sampleGroup",
+  plot_type = "error_bar"
+)
 
-\S4method{plotCount}{RangedSummarizedExperiment,missing,missing}(co_count, group_by = "sampleGroup", by_chr = FALSE)
+\S4method{plotCount}{RangedSummarizedExperiment,missing,missing}(
+  co_count,
+  by_chr = FALSE,
+  group_by = "sampleGroup",
+  plot_type = "error_bar"
+)
 
-\S4method{plotCount}{RangedSummarizedExperiment,character,missing}(co_count, group_by = "sampleGroup", by_chr = FALSE)
+\S4method{plotCount}{RangedSummarizedExperiment,missing,character}(
+  co_count,
+  by_chr = FALSE,
+  group_by = "sampleGroup",
+  plot_type = "error_bar"
+)
 
-\S4method{plotCount}{RangedSummarizedExperiment,character,logical}(co_count, group_by = "sampleGroup", by_chr = FALSE)
+\S4method{plotCount}{RangedSummarizedExperiment,logical,character}(
+  co_count,
+  by_chr = FALSE,
+  group_by = "sampleGroup",
+  plot_type = "error_bar"
+)
 
-\S4method{plotCount}{RangedSummarizedExperiment,missing,logical}(co_count, group_by = "sampleGroup", by_chr = FALSE)
+\S4method{plotCount}{RangedSummarizedExperiment,logical,missing}(
+  co_count,
+  by_chr = FALSE,
+  group_by = "sampleGroup",
+  plot_type = "error_bar"
+)
 
-\S4method{plotCount}{GRanges,missing,logical}(co_count, group_by = "sampleGroup", by_chr = FALSE)
+\S4method{plotCount}{GRanges,logical,missing}(
+  co_count,
+  by_chr = FALSE,
+  group_by = "sampleGroup",
+  plot_type = "error_bar"
+)
 
-\S4method{plotCount}{GRanges,missing,missing}(co_count, group_by = "sampleGroup", by_chr = FALSE)
+\S4method{plotCount}{GRanges,missing,missing}(
+  co_count,
+  by_chr = FALSE,
+  group_by = "sampleGroup",
+  plot_type = "error_bar"
+)
 
-\S4method{plotCount}{GRanges,character,missing}(co_count, group_by = "sampleGroup", by_chr = FALSE)
+\S4method{plotCount}{GRanges,missing,character}(
+  co_count,
+  by_chr = FALSE,
+  group_by = "sampleGroup",
+  plot_type = "error_bar"
+)
 
-\S4method{plotCount}{GRanges,character,logical}(co_count, group_by = "sampleGroup", by_chr = FALSE)
+\S4method{plotCount}{GRanges,logical,character}(
+  co_count,
+  by_chr = FALSE,
+  group_by = "sampleGroup",
+  plot_type = "error_bar"
+)
 }
 \arguments{
 \item{co_count}{GRange or RangedSummarizedExperiment object, returned by \code{countCO}}
+
+\item{by_chr, }{whether it should plot each chromosome separately}
 
 \item{group_by, }{the column name in `colData(co_count)` that specify the
 grouping factor. Or the character vector contains the unique prefix of
 sample names that are used for defining different sample groups. If missing
 all samples are assumed to be from one group}
 
-\item{by_chr, }{whether it should plot each chromosome separately}
+\item{plot_type, }{determins what type the plot will be, choose from "error_bar"
+or "hist". Only relevant when by_chr=TRUE}
 }
 \value{
 ggplot object

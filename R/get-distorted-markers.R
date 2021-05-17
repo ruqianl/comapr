@@ -14,7 +14,7 @@
 #' @return data.frame with each row representing one SNP marker and columns
 #' containing the chisq.test results
 #' @examples
-#' library(comapr)
+#'
 #' corrected_geno <- correctGT(gt_matrix = GenomicRanges::mcols(snp_geno_gr),
 #' ref = parents_geno$ref,alt = parents_geno$alt,fail = "Fail",
 #' wrong_label = "Homo_ref")

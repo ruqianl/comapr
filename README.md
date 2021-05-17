@@ -60,7 +60,7 @@ list.files("inst/extdata/")
 
 ## Visualizing feature of single sperms
 
-\[PerCellQC\]\[<https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/public/figure/Crossover-identification-with-sscocaller-and-comapr.Rmd/unnamed-chunk-6-1.png>\]
+![PerCellQC](https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/public/figure/Crossover-identification-with-sscocaller-and-comapr.Rmd/unnamed-chunk-6-1.png)
 
 ## Crossover positions
 
@@ -85,4 +85,7 @@ Distances](https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-proce
 
 ## Analysis workflow for demonstration of `comapr` on a single-sperm DNAseq dataset
 
-<https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/public/Crossover-identification-with-sscocaller-and-comapr.html>
+We demonstrate the usage of `sscocaller` and `comapr` for identifying
+and visualising crossovers regions from single-sperm DNA sequencing
+dataset
+[here](https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/public/Crossover-identification-with-sscocaller-and-comapr.html)

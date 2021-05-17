@@ -32,12 +32,3 @@ buildCMD:
   stage: build
   script:
     - R CMD build
-
-
-install:
-  tags:
-    - docker
-  image: svirlyu/comapr_dev
-  stage: deploy
-  script:
-    - R CMD install

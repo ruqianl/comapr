@@ -11,7 +11,7 @@ by detecting haplotype shifts across groups of samples.
 Status](https://travis-ci.com/ruqianl/comapr.svg?branch=master)](https://travis-ci.com/ruqianl/comapr)
 
 
-<img src='https://gitlab.svi.edu.au/biocellgen-public/sscocaller/-/blob/master/images/hexComapr_crop.png' align="right" height="139" />
+<img src='https://gitlab.svi.edu.au/biocellgen-public/sscocaller/-/blob/86d580732bcd31bea6191e42fb6083696e10dab8/images/hexComapr_crop.png' align="right" height="139" />
 
 ## From marker genotyping results in data.frame
 

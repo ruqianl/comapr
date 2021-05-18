@@ -10,6 +10,9 @@ by detecting haplotype shifts across groups of samples.
 [![Build
 Status](https://travis-ci.com/ruqianl/comapr.svg?branch=master)](https://travis-ci.com/ruqianl/comapr)
 
+
+<img src='https://gitlab.svi.edu.au/biocellgen-public/sscocaller/-/blob/master/images/hexComapr_crop.png' align="right" height="139" />
+
 ## From marker genotyping results in data.frame
 
 `comapr` can be applied for detecting crossovers from genotyping results

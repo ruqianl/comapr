@@ -1,14 +1,16 @@
-README
+comapr
 ================
-
-## Introduction
-
-`comapr` is an R package for finding crossovers for SNP marker intervals
-by detecting haplotype shifts across groups of samples.
 
 [![codecov](https://codecov.io/github/ruqianl/comapr/branch/master/graphs/badge.svg)](https://codecov.io/github/ruqianl/comapr/)
 [![Build
 Status](https://travis-ci.com/ruqianl/comapr.svg?branch=master)](https://travis-ci.com/ruqianl/comapr)
+
+## Introduction
+
+<img src='Meta/hexComapr_crop.png' align="right" height="139" />
+
+`comapr` is an R package for finding crossovers for SNP marker intervals
+by detecting haplotype shifts across groups of samples.
 
 ## From marker genotyping results in data.frame
 

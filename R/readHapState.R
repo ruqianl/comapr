@@ -106,8 +106,10 @@ readHapState <- function(sampleName,chroms=c("chr1"),path,
 #'@param biasTol, the SNP's haplotype ratio across all cells is assumed
 #'to be 1:1. This argument can be used for removing SNPs that have a biased
 #'haplotype. i.e. almost always inferred to be haplotype state 1. It specifies
-#'a bias tolerance value, SNPs with bias from 0.5 smaller than this value are
-#'kept.
+#'a bias tolerance value, SNPs with haplotype ratios deviating from 0.5 smaller
+#'than this value are kept. Only effective when number of cells are larger than 
+#'10
+#'
 #'@param nmad, how many mean absolute deviations lower than the median number
 #'of SNPs per cellfor a cell to be considered as low coverage cell and filtered
 #' This or `minCellSNP`, whichever is larger, is applied
@@ -150,7 +152,7 @@ readHapState <- function(sampleName,chroms=c("chr1"),path,
   ## provided minCellSNP or nmads smaller from median, whichever is larger
   madsAway <- nmad*mad(keepCells$total_SNP)
   minCellSNP <- ifelse((median(keepCells$total_SNP) - madsAway) < minCellSNP,
-                       minCellSNP, (median(keepCells$total_SNP)-madsAway))
+                       minCellSNP, (median(keepCells$total_SNP) - madsAway))
 
   keepCells <- keepCells %>%
     dplyr::filter(total_co <= maxRawCO & total_SNP > minCellSNP )
@@ -170,24 +172,27 @@ readHapState <- function(sampleName,chroms=c("chr1"),path,
   markers <- co_contr_snp
   queryR <-  IRanges::IRanges(start = markers,
                      width = 1)
-
-  markers_states <- lapply(unique(segInfo_f$ithSperm),function(ithS){
-    subjectR <- IRanges(start = segInfo_f[segInfo_f$ithSperm==ithS,]$Seg_start,
-                        end = segInfo_f[segInfo_f$ithSperm==ithS,]$Seg_end,
-                        state = segInfo_f[segInfo_f$ithSperm==ithS,]$State)
-
-    temp <- rep(0,length(markers))
-    myHits <- IRanges::findOverlaps(queryR,subjectR)
-    temp[myHits@from] <- subjectR@elementMetadata@listData$state[myHits@to]
-    temp
-  })
-  markers_states <- do.call(cbind,markers_states)
-
-  ratio <- rowSums(markers_states==1)/(rowSums(markers_states==2) +
+  if(length(unique(segInfo_f$ithSperm)) > 10 ){
+    
+    markers_states <- lapply(unique(segInfo_f$ithSperm),function(ithS){
+      subjectR <- IRanges(start = segInfo_f[segInfo_f$ithSperm==ithS,]$Seg_start,
+                          end = segInfo_f[segInfo_f$ithSperm==ithS,]$Seg_end,
+                          state = segInfo_f[segInfo_f$ithSperm==ithS,]$State)
+      
+      temp <- rep(0,length(markers))
+      myHits <- IRanges::findOverlaps(queryR,subjectR)
+      temp[myHits@from] <- subjectR@elementMetadata@listData$state[myHits@to]
+      temp
+    })
+    markers_states <- do.call(cbind,markers_states)
+    
+    ratio <- rowSums(markers_states==1)/(rowSums(markers_states==2) +
                                          rowSums(markers_states==1))
-
-  co_contr_snp <- markers[abs(ratio-0.5)<biasTol]
-  ## row numbers of these SNPs in the assay
+    
+    co_contr_snp <- markers[abs(ratio-0.5) < biasTol]
+    
+  }
+    ## row numbers of these SNPs in the assay
   ithSNP <- match(co_contr_snp,IRanges::ranges(rowRanges(se ))@start)
 
   ## subset the columns to only keep the Good cells

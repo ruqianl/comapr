@@ -53,8 +53,9 @@ used with `nmads`}
 \item{biasTol}{the SNP's haplotype ratio across all cells is assumed
 to be 1:1. This argument can be used for removing SNPs that have a biased
 haplotype. i.e. almost always inferred to be haplotype state 1. It specifies
-a bias tolerance value, SNPs with bias from 0.5 smaller than this value are
-kept.}
+a bias tolerance value, SNPs with haplotype ratios deviating from 0.5 smaller
+than this value are kept. Only effective when number of cells are larger than 
+10}
 }
 \value{
 a RangedSummarizedExperiment with rowRanges as SNP positions that contribute

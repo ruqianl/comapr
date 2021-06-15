@@ -212,13 +212,14 @@ perSegChrQC <- function(sampleName,chroms = c("chr1","chr7","chr15"),
   segInfo_chrs <- do.call(rbind,segInfo_list)
   rm(segInfo_list)
 
-  keepCells <-
+  rmCells <-
     segInfo_chrs %>% dplyr::group_by(.data$ithSperm,.data$Chrom) %>%
     dplyr::summarise(nCORaw = length(.data$nSNP)-1) %>%
-    dplyr::filter(.data$nCORaw < maxRawCO) %>%
+    dplyr::filter(.data$nCORaw >= maxRawCO) %>%
     dplyr::select(.data$ithSperm)
+  rmCells <- unique(rmCells$ithSperm)
 
-  p <- segInfo_chrs %>% dplyr::filter(.data$ithSperm %in% keepCells$ithSperm)%>%
+  p <- segInfo_chrs %>% dplyr::filter(!.data$ithSperm %in% rmCells)%>%
     dplyr::mutate(bpDist = (.data$Seg_end -.data$Seg_start)) %>%
     ggplot()+geom_point(mapping = aes(x =nSNP,y = bpDist,
                                       color = log10(logllRatio)))+

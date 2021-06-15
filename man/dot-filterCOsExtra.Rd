@@ -50,7 +50,7 @@ called across a chromosome, the cell is filtered out}
 to be 1:1. This argument can be used for removing SNPs that have a biased
 haplotype. i.e. almost always inferred to be haplotype state 1. It specifies
 a bias tolerance value, SNPs with haplotype ratios deviating from 0.5 smaller
-than this value are kept. Only effective when number of cells are larger than 
+than this value are kept. Only effective when number of cells are larger than
 10}
 
 \item{nmad, }{how many mean absolute deviations lower than the median number

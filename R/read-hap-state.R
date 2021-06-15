@@ -56,21 +56,21 @@ readHapState <- function(sampleName,chroms=c("chr1"),path,
 
     se <- SummarizedExperiment::SummarizedExperiment(assays =
                                                        list(vi_state = vi_mtx),
-                               colData = barcodes,
-                               rowRanges = GRanges(
-                                 seqnames = chr,
-                                 ranges = IRanges::IRanges(start = snpAnno$POS,
-                                                           width = 1)),
-                               metadata = data.frame(segInfo,chr=chr,
-                                                     sampleGroup=sampleName))
+                                                     colData = barcodes,
+                                                     rowRanges = GRanges(
+                                                       seqnames = chr,
+                                                       ranges = IRanges::IRanges(start = snpAnno$POS,
+                                                                                 width = 1)),
+                                                     metadata = data.frame(segInfo,chr=chr,
+                                                                           sampleGroup=sampleName))
 
     se <- .filterCOsExtra(se ,minSNP = minSNP,
-                         minlogllRatio = minlogllRatio,
-                         minCellSNP = minCellSNP,
-                         bpDist = bpDist,
-                         maxRawCO=maxRawCO,
-                         biasTol=biasTol,
-                         nmad=nmad)
+                          minlogllRatio = minlogllRatio,
+                          minCellSNP = minCellSNP,
+                          bpDist = bpDist,
+                          maxRawCO=maxRawCO,
+                          biasTol=biasTol,
+                          nmad=nmad)
     se
   })
 
@@ -102,18 +102,17 @@ readHapState <- function(sampleName,chroms=c("chr1"),path,
 #'@param minlogllRatio, the crossover(s) will be filtered out if introduced by a
 #'segment that has lower than `minlogllRatio` to its reversed state.
 #'@param minCellSNP, the minimum number of SNPs detected for a cell to be kept,
-#'used with nmad
+#'used with `nmads`
 #'@param biasTol, the SNP's haplotype ratio across all cells is assumed
 #'to be 1:1. This argument can be used for removing SNPs that have a biased
 #'haplotype. i.e. almost always inferred to be haplotype state 1. It specifies
 #'a bias tolerance value, SNPs with haplotype ratios deviating from 0.5 smaller
-#'than this value are kept. Only effective when number of cells are larger than 
+#'than this value are kept. Only effective when number of cells are larger than
 #'10
 #'
 #'@param nmad, how many mean absolute deviations lower than the median number
-#'of SNPs per cell for a cell to be considered as low coverage cell and filtered
-#'out. This or `minCellSNP`, whichever is larger, is applied when the number of
-#'cells are larger than 10.
+#'of SNPs per cellfor a cell to be considered as low coverage cell and filtered
+#' This or `minCellSNP`, whichever is larger, is applied
 #'
 #'@importFrom Matrix Matrix
 #'@importFrom SummarizedExperiment metadata<- assay<- colData rowRanges rowRanges<-
@@ -147,26 +146,20 @@ readHapState <- function(sampleName,chroms=c("chr1"),path,
 
 
   suppressMessages(
-    keepCells <- segInfo %>% dplyr::group_by(barcode) %>%
-                     dplyr::summarise(total_SNP = sum(nSNP),
-                                      total_co = length(nSNP)-1))
+    rmCells <- segInfo %>% dplyr::group_by(barcode) %>%
+      dplyr::summarise(total_SNP = sum(nSNP),
+                       total_co = length(nSNP)-1))
   ## provided minCellSNP or nmads smaller from median, whichever is larger
-  
-  madsAway <- nmad*mad(keepCells$total_SNP)
-  
-  ## when the number of cells are larger than 10
-  if(nrow(keepCells) > 10 ){
-    minCellSNP <- ifelse((median(keepCells$total_SNP) - madsAway) < minCellSNP,
-                         minCellSNP, (median(keepCells$total_SNP) - madsAway))
-    
-  }
-  
-  keepCells <- keepCells %>%
-    dplyr::filter(total_co <= maxRawCO & total_SNP > minCellSNP )
+  madsAway <- nmad*mad(rmCells$total_SNP)
+  minCellSNP <- ifelse((median(rmCells$total_SNP) - madsAway) < minCellSNP,
+                       minCellSNP, (median(rmCells$total_SNP) - madsAway))
 
-  keepCells <-  keepCells$barcode
+  rmCells <- rmCells %>%
+    dplyr::filter(total_co >= maxRawCO | total_SNP <= minCellSNP )
 
-  segInfo_f <- segInfo[segInfo$barcode %in% keepCells
+  rmCells <-  unique(rmCells$barcode)
+
+  segInfo_f <- segInfo[!segInfo$barcode %in% rmCells
                        & segInfo$nSNP > minSNP
                        & segInfo$logllRatio > minlogllRatio
                        & segInfo$bp_dist > bpDist,]
@@ -178,33 +171,33 @@ readHapState <- function(sampleName,chroms=c("chr1"),path,
   ## remove some SNPs if their inferred states are biased
   markers <- co_contr_snp
   queryR <-  IRanges::IRanges(start = markers,
-                     width = 1)
+                              width = 1)
   if(length(unique(segInfo_f$ithSperm)) > 10 ){
-    
+
     markers_states <- lapply(unique(segInfo_f$ithSperm),function(ithS){
       subjectR <- IRanges(start = segInfo_f[segInfo_f$ithSperm==ithS,]$Seg_start,
                           end = segInfo_f[segInfo_f$ithSperm==ithS,]$Seg_end,
                           state = segInfo_f[segInfo_f$ithSperm==ithS,]$State)
-      
+
       temp <- rep(0,length(markers))
       myHits <- IRanges::findOverlaps(queryR,subjectR)
       temp[myHits@from] <- subjectR@elementMetadata@listData$state[myHits@to]
       temp
     })
     markers_states <- do.call(cbind,markers_states)
-    
+
     ratio <- rowSums(markers_states==1)/(rowSums(markers_states==2) +
-                                         rowSums(markers_states==1))
-    
+                                           rowSums(markers_states==1))
+
     co_contr_snp <- markers[abs(ratio-0.5) < biasTol]
-    
+
   }
-    ## row numbers of these SNPs in the assay
+  ## row numbers of these SNPs in the assay
   ithSNP <- match(co_contr_snp,IRanges::ranges(rowRanges(se ))@start)
 
   ## subset the columns to only keep the Good cells
   colnames(se) <- colData(se)$barcodes
-  se <- se[ithSNP,keepCells]
+  se <- se[ithSNP,!colnames(se) %in% rmCells]
 
   vi_m <- Matrix(data=0,nrow=nrow(se),ncol=ncol(se))
   queryR <- IRanges::IRanges(start=co_contr_snp,

@@ -206,7 +206,7 @@ plot_count <- function(co_count, by_chr=FALSE, group_by  = "sampleGroup",
           summarise(ChrCOs = sum(COs),
                     sampleGroup = unique(sampleGroup)) %>%
           dplyr::group_by(chr,sampleGroup) %>%
-          ggplot()+geom_histogram(mapping = aes(x=ChrCOs))+facet_wrap(.~chr)
+          ggplot()+geom_histogram(mapping = aes(x=ChrCOs))+facet_wrap(.~chr))
     }
   } else {
 

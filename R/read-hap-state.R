@@ -112,7 +112,8 @@ readHapState <- function(sampleName,chroms=c("chr1"),path,
 #'
 #'@param nmad, how many mean absolute deviations lower than the median number
 #'of SNPs per cellfor a cell to be considered as low coverage cell and filtered
-#' This or `minCellSNP`, whichever is larger, is applied
+#'Only effective when number of cells are larger than 10. When effective, this or
+#'`minCellSNP`, whichever is larger, is applied
 #'
 #'@importFrom Matrix Matrix
 #'@importFrom SummarizedExperiment metadata<- assay<- colData rowRanges rowRanges<-
@@ -151,9 +152,14 @@ readHapState <- function(sampleName,chroms=c("chr1"),path,
                        total_co = length(nSNP)-1))
   ## provided minCellSNP or nmads smaller from median, whichever is larger
   madsAway <- nmad*mad(rmCells$total_SNP)
-  minCellSNP <- ifelse((median(rmCells$total_SNP) - madsAway) < minCellSNP,
-                       minCellSNP, (median(rmCells$total_SNP) - madsAway))
+  ## when there are more than 10 cells
+  if(ncol(se) > 10 ){
+    minCellSNP <- ifelse((median(rmCells$total_SNP) - madsAway) < minCellSNP,
+                         minCellSNP, (median(rmCells$total_SNP) - madsAway))
 
+  }
+
+  ## Get the cell barcodes that are poor quality (doublets/low cov)
   rmCells <- rmCells %>%
     dplyr::filter(total_co >= maxRawCO | total_SNP <= minCellSNP )
 

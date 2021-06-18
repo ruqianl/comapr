@@ -44,7 +44,8 @@ than this value are kept. Only effective when number of cells are larger than
 
 \item{nmad, }{how many mean absolute deviations lower than the median number
 of SNPs per cellfor a cell to be considered as low coverage cell and filtered
-This or `minCellSNP`, whichever is larger, is applied}
+Only effective when number of cells are larger than 10. When effective, this or
+`minCellSNP`, whichever is larger, is applied}
 }
 \value{
 A `RangedSummarizedExperment` object that have different dims with input.

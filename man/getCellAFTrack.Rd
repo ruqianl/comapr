@@ -13,8 +13,7 @@ getCellAFTrack(
   barcodeFile,
   cellBarcode,
   co_count,
-  snp_track = NULL,
-  chunk = 1000L
+  snp_track = NULL
 )
 }
 \arguments{
@@ -40,8 +39,6 @@ of crossovers in each cell.}
 \item{snp_track, }{the SNP position track which is used for obtaining the SNP
 chromosome locations. It could be omitted and the SNP positions will be acquired
 from the "*_snpAnnot.txt" file.}
-
-\item{chunk, }{the size for reading rows from the .mtx files. See \link{readColMM}}
 }
 \value{
 The DataTrack object defined in \code{\link[Gviz]{DataTrack}}

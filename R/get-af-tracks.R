@@ -31,18 +31,30 @@ getAFTracks <-  function(chrom = "chr1",
                             nwindow = 80,
                             barcodeFile,
                             co_count,
+                            chunk = 1000L,
                             snp_track = NULL){
   initial_barcodes <- read.table(file = barcodeFile)
   whichCells <- match(colnames(co_count), initial_barcodes$V1)
 
-  dpMM <- Matrix::readMM(file = paste0(path_loc, sampleName,"_",
-                                  chrom,"_totalCount.mtx"))
+  # dpMM <- Matrix::readMM(file = paste0(path_loc, sampleName,"_",
+  #                                 chrom,"_totalCount.mtx"))
+  #
+  # dpMM <-dpMM[,whichCells]
 
-  dpMM <-dpMM[,whichCells]
-  altMM <- Matrix::readMM(file = paste0(path_loc, sampleName,"_",
-                                   chrom, "_altCount.mtx"))
+  dpMM <- readColMM(file = paste0(path_loc, sampleName,"_",
+                                  chrom,"_totalCount.mtx"),
+                    which.col = whichCell,
+                    chunk = chunk)
 
-  altMM <- altMM[,whichCells]
+  # altMM <- Matrix::readMM(file = paste0(path_loc, sampleName,"_",
+  #                                  chrom, "_altCount.mtx"))
+  #
+  # altMM <- altMM[,whichCells]
+  altMM <- readColMM(file = paste0(path_loc, sampleName,"_",
+                                   chrom, "_altCount.mtx"),
+                     which.col = whichCell,
+                     chunk = chunk)
+
   af_data <- altMM/dpMM
 
   lapply(colnames(co_count), function(cell){

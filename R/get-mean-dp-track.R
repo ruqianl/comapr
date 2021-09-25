@@ -84,6 +84,8 @@ getMeanDPTrack <- function( chrom = "chr1",
 #' @param snp_track, the SNP position track which is used for obtaining the SNP
 #' chromosome locations. It could be omitted and the SNP positions will be acquired
 #' from the "*_snpAnnot.txt" file.
+#' @param chunk, A integer scalar indicating the chunk size to use, i.e., number
+#' of rows to read at any one time.
 
 #' @return The DataTrack object defined in \code{\link[Gviz]{DataTrack}}
 #' @importFrom  Gviz DataTrack
@@ -123,7 +125,7 @@ getCellDPTrack <-  function(chrom = "chr1",
                     which.col = whichCell,
                     chunk = chunk)
 
-  dpMM <-dpMM[,whichCell]
+  #dpMM <- dpMM[,whichCell]
 
   if(is.null(snp_track)){
     snp_anno <- read.table(file=paste0(path_loc,sampleName,"_",

@@ -1,7 +1,7 @@
 #' readColMM
 #'
 #' Modified the `Matrix::readMM` function for reading matrices stored in the
-#' Harwell-Boeing or MatrixMarket formats but only reading selected column.
+#' Harwell-Boeing or MatrixMarket formats but only reads selected column.
 #'
 #' See \code{\link[Matrix]{readMM}}
 #'
@@ -63,23 +63,41 @@ readColMM <- function(file,which.col,chunk=1000L)
              ## TODO: the "integer" element type should be returned as
              ##       an object of an "iMatrix" subclass--once there are
 
+             pointer.col <- 0
+             while(pointer.col!=which.col){
+               els <- scan1(what = list(i = integer(),
+                                        j = integer(),
+                                        x = numeric()))
+               pointer.col <- els$j
+             }
 
              # Reading it in, chunk by chunk (see behavior of nmax= when what=
              # is a list).
              els <- list(i=NULL,j=NULL,x=NULL)
+
              repeat {
                current <- scan(file, what=list(i= integer(),
                                                j= integer(),
                                                x= numeric()),
                                nmax=chunk, quiet=TRUE)
                checkIJ(current)
-               els <- list(i = c(els$i,current$i[current$j==which.col]),
-                           j = c(els$j,current$j[current$j==which.col]),
-                           x = c(els$x,current$x[current$j==which.col]))
-               if ( length(current$i) < chunk) {
+
+               if ( els$j[length(els$j)] != which.col){
+                 els <- list(i = c(els$i,current$i[current$j==which.col]),
+                             j = c(els$j,current$j[current$j==which.col]),
+                             x = c(els$x,current$x[current$j==which.col]))
                  break
+
+               } else if (length(current$i) < chunk) {
+                 break
+               } else {
+                 els <- list(i = c(els$i,current$i),
+                             j = c(els$j,current$j),
+                             x = c(els$x,current$x))
+
                }
-             }
+
+            }
 
              switch(sym,
                     "general" = {

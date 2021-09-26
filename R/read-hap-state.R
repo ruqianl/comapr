@@ -18,9 +18,9 @@
 #' @param sampleName, the name of the sample to parse which is used as prefix for
 #' finding relevant files for the underlying sample
 #' @inheritParams .filterCOsExtra
-#' @return a RangedSummarizedExperiment with rowRanges as SNP positions that contribute
-#' to crossovers in any cells. colData contains cells annotation including barcodes and
-#' sampleName.
+#' @return a RangedSummarizedExperiment with rowRanges as SNP positions that
+#' contribute to crossovers in any cells. colData contains cells annotation
+#' including barcodes and sampleName.
 #'
 #' @examples
 #' demo_path <-system.file("extdata",package = "comapr")
@@ -33,13 +33,16 @@
 #' @author Ruqian Lyu
 #'
 
-readHapState <- function(sampleName,chroms=c("chr1"),path,
-                         barcodeFile=NULL,minSNP = 30, minlogllRatio = 200,
-                         bpDist = 100,maxRawCO=10,nmad=1.5,minCellSNP = 200,
-                         biasTol=0.45){
+readHapState <- function(sampleName, chroms=c("chr1"), path,
+                         barcodeFile = NULL, minSNP = 30,
+                         minlogllRatio = 200,
+                         bpDist = 100, maxRawCO = 10,nmad = 1.5,
+                         minCellSNP = 200,
+                         biasTol = 0.45){
   if(is.null(barcodeFile)){
     barcodeFile <- paste0(path,sampleName,"_barcodes.txt")
   }
+
   se_list <- bplapply(chroms,function(chr){
 
     barcodes <- read.table(file=barcodeFile,stringsAsFactors = FALSE,
@@ -53,17 +56,16 @@ readHapState <- function(sampleName,chroms=c("chr1"),path,
                           col.names = c("ithSperm","Seg_start","Seg_end",
                                         "logllRatio","nSNP","State"))
     vi_mtx <- readMM(file = paste0(path,sampleName,"_",chr,"_vi.mtx"))
-
+    grrange <- GRanges(seqnames = chr,
+                       ranges = IRanges::IRanges( start =  snpAnno$POS,
+                                                  width = 1))
     se <- SummarizedExperiment::SummarizedExperiment(assays =
                                                        list(vi_state = vi_mtx),
-                                                     colData = barcodes,
-                                                     rowRanges = GRanges(
-                                                       seqnames = chr,
-                                                       ranges = IRanges::IRanges(start = snpAnno$POS,
-                                                                                 width = 1)),
-                                                     metadata = data.frame(segInfo,chr=chr,
-                                                                           sampleGroup=sampleName))
-
+                                                    colData = barcodes,
+                                                    rowRanges = grrange,
+                                                    metadata = data.frame(
+                                                      segInfo, chr=chr,
+                                                      sampleGroup=sampleName))
     se <- .filterCOsExtra(se ,minSNP = minSNP,
                           minlogllRatio = minlogllRatio,
                           minCellSNP = minCellSNP,
@@ -80,7 +82,6 @@ readHapState <- function(sampleName,chroms=c("chr1"),path,
     rbind(se1[,cc],se2[,cc])
   }
   suppressWarnings(Reduce(rbind_se,se_list))
-  #do.call(rbind,se_list)
 }
 
 #'Filter out doublet cells and uninformative SNPs

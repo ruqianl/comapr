@@ -9,8 +9,8 @@ Authors@R:
            comment = c(ORCID = "0000-0002-7736-6612"))
 Description: comapr detects crossover intervals for single cells from their 
     haplotype states matrices. The genetic distances can then be calculated via 
-    the mapping functions for the list of SNP intervals. Visualisation functions for 
-    plotting interval-based genetic map or cumulative genetic distances are 
+    the mapping functions for the list of SNP intervals. Visualisation functions 
+    for plotting interval-based genetic map or cumulative genetic distances are 
     implemented, which help reveal the variation of crossovers landscape across 
     the genome and across individuals. 
 biocViews:

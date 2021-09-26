@@ -3,6 +3,7 @@
 #'
 #' Generate the raw alternative allele frequencies tracks for all cells in the
 #' columns of provided `co_count`
+#'
 #' @inheritParams getCellAFTrack
 #'
 #' @author Ruqian Lyu
@@ -33,27 +34,28 @@ getAFTracks <-  function(chrom = "chr1",
                             co_count,
                             chunk = 1000L,
                             snp_track = NULL){
+
   initial_barcodes <- read.table(file = barcodeFile)
   whichCells <- match(colnames(co_count), initial_barcodes$V1)
 
-  # dpMM <- Matrix::readMM(file = paste0(path_loc, sampleName,"_",
-  #                                 chrom,"_totalCount.mtx"))
-  #
-  # dpMM <-dpMM[,whichCells]
+  dpMM <- Matrix::readMM(file = paste0(path_loc, sampleName,"_",
+                                  chrom,"_totalCount.mtx"))
 
-  dpMM <- readColMM(file = paste0(path_loc, sampleName,"_",
-                                  chrom,"_totalCount.mtx"),
-                    which.col = whichCell,
-                    chunk = chunk)
 
-  # altMM <- Matrix::readMM(file = paste0(path_loc, sampleName,"_",
-  #                                  chrom, "_altCount.mtx"))
-  #
-  # altMM <- altMM[,whichCells]
-  altMM <- readColMM(file = paste0(path_loc, sampleName,"_",
-                                   chrom, "_altCount.mtx"),
-                     which.col = whichCell,
-                     chunk = chunk)
+
+  # dpMM <- readColMM(file = paste0(path_loc, sampleName,"_",
+  #                                 chrom,"_totalCount.mtx"),
+  #                   which.col = whichCell,
+  #                   chunk = chunk)
+  dpMM <- dpMM[,whichCells]
+  altMM <- Matrix::readMM(file = paste0(path_loc, sampleName,"_",
+                                   chrom, "_altCount.mtx"))
+
+  # altMM <- readColMM(file = paste0(path_loc, sampleName,"_",
+  #                                  chrom, "_altCount.mtx"),
+  #                    which.col = whichCell,
+  #                    chunk = chunk)
+  altMM <- altMM[,whichCells]
 
   af_data <- altMM/dpMM
 
@@ -79,15 +81,15 @@ getAFTracks <-  function(chrom = "chr1",
                                   name = paste0(cell, " AF"),
                                   data = cell_af[keep_snp],
                                   window = nwindow,
-                                  na.rm=TRUE,
+                                  na.rm = TRUE,
                                   aggregation = "mean",
-                                  type="p")
+                                  type = "p")
       co_range_cell1 <- getCellCORange(co_count, cellBarcode = cell)
-      co_range_cell1[seqnames(co_range_cell1)==chrom,]
+      co_range_cell1[seqnames(co_range_cell1) == chrom,]
       # ht <- HighlightTrack(trackList = af_track,
       #                      co_range_cell1[seqnames(co_range_cell1)=="chr1",],
       #                      chromosome = "chr1" )
-      list(af_track=af_track, co_range =co_range_cell1)
+      list(af_track = af_track, co_range = co_range_cell1)
 
   })
 

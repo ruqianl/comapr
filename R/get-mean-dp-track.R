@@ -52,7 +52,7 @@ getMeanDPTrack <- function( chrom = "chr1",
   }
   aggregation_fun <- ifelse(log, function(x) { log10(sum(x)+1)}, sum)
 
-  meanDP_track <- DataTrack( GRanges(seqnames = chrom,
+  meanDP_track <- DataTrack(GRanges(seqnames = chrom,
                                      IRanges(start= snp_pos,
                                              width = 1,
                                              genome = "mm10")),
@@ -125,7 +125,7 @@ getCellDPTrack <-  function(chrom = "chr1",
                     which.col = whichCell,
                     chunk = chunk)
 
-  #dpMM <- dpMM[,whichCell]
+  dpMM <- dpMM[,whichCell]
 
   if(is.null(snp_track)){
     snp_anno <- read.table(file=paste0(path_loc,sampleName,"_",

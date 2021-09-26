@@ -13,7 +13,8 @@ getCellAFTrack(
   barcodeFile,
   cellBarcode,
   co_count,
-  snp_track = NULL
+  snp_track = NULL,
+  chunk = 1000L
 )
 }
 \arguments{

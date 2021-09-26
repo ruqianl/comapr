@@ -22,7 +22,7 @@ the matrix to select the column with the same index.
 }
 \description{
 Modified the `Matrix::readMM` function for reading matrices stored in the
-Harwell-Boeing or MatrixMarket formats but only reading selected column.
+Harwell-Boeing or MatrixMarket formats but only reads selected column.
 }
 \details{
 See \code{\link[Matrix]{readMM}}

@@ -8,3 +8,4 @@
 ^public$
 .travis.yml
 README.Rmd
+.Renv

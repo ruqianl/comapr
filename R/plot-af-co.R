@@ -63,6 +63,8 @@ getCellCORange <- function(co_count, cellBarcode){
 #' @param co_count, `GRange` or `RangedSummarizedExperiment` object,
 #' returned by \code{countCO} that contains the crossover intervals and the number
 #' of crossovers in each cell.
+#' @param chunk, An integer scalar indicating the chunk size to use,
+#' i.e., number of rows to read at any one time.
 #'
 #' @return The DataTrack object defined in \code{\link[Gviz]{DataTrack}}
 #' @importFrom  Gviz DataTrack
@@ -91,17 +93,22 @@ getCellAFTrack <-  function(chrom = "chr1",
                             barcodeFile,
                             cellBarcode,
                             co_count,
-                            snp_track = NULL){
+                            snp_track = NULL,
+                            chunk = 1000L){
   stopifnot(length(cellBarcode)==1)
   initial_barcodes <- read.table(file = barcodeFile)
   whichCell <- match(cellBarcode, initial_barcodes$V1)
 
-  dpMM <- readMM(file = paste0(path_loc, sampleName,"_",
-                                  chrom,"_totalCount.mtx"))
+  dpMM <- readColMM(file = paste0(path_loc, sampleName,"_",
+                                  chrom,"_totalCount.mtx"),which.col = whichCell,
+                    chunk = chunk)
 
   dpMM <- dpMM[,whichCell]
-  altMM <- readMM(file = paste0(path_loc, sampleName,"_",
-                                   chrom, "_altCount.mtx"))
+
+  altMM <- readColMM(file = paste0(path_loc, sampleName,"_",
+                                   chrom, "_altCount.mtx"),which.col = whichCell,
+                     chunk = chunk)
+
 
   altMM <- altMM[,whichCell]
   af_data <- altMM/dpMM

@@ -11,6 +11,7 @@ getAFTracks(
   nwindow = 80,
   barcodeFile,
   co_count,
+  chunk = 1000L,
   snp_track = NULL
 )
 }

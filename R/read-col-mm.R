@@ -22,6 +22,7 @@
 #'
 readColMM <- function(file,which.col,chunk=1000L)
 {
+  stopifnot(length(which.col)==1)
   if (is.character(file))
     file <- if(file == "") stdin() else file(file)
   if (!inherits(file, "connection"))
@@ -64,7 +65,7 @@ readColMM <- function(file,which.col,chunk=1000L)
              ##       an object of an "iMatrix" subclass--once there are
 
              pointer.col <- 0
-             while(pointer.col!=which.col){
+             while(pointer.col != which.col){
                els <- scan1(what = list(i = integer(),
                                         j = integer(),
                                         x = numeric()))
@@ -73,7 +74,7 @@ readColMM <- function(file,which.col,chunk=1000L)
 
              # Reading it in, chunk by chunk (see behavior of nmax= when what=
              # is a list).
-             els <- list(i=NULL,j=NULL,x=NULL)
+             els <- list(i=els$i,j=els$j,x=els$x)
 
              repeat {
                current <- scan(file, what=list(i= integer(),
@@ -82,14 +83,12 @@ readColMM <- function(file,which.col,chunk=1000L)
                                nmax=chunk, quiet=TRUE)
                checkIJ(current)
 
-               if ( els$j[length(els$j)] != which.col){
+               if ( (current$j[length(current$j)] != which.col) | (length(current$i) < chunk)){
                  els <- list(i = c(els$i,current$i[current$j==which.col]),
                              j = c(els$j,current$j[current$j==which.col]),
                              x = c(els$x,current$x[current$j==which.col]))
                  break
 
-               } else if (length(current$i) < chunk) {
-                 break
                } else {
                  els <- list(i = c(els$i,current$i),
                              j = c(els$j,current$j),

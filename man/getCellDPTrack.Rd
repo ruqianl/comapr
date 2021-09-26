@@ -38,6 +38,9 @@ as the input file for sscocaller}
 chromosome locations. It could be omitted and the SNP positions will be acquired
 from the "*_snpAnnot.txt" file.}
 
+\item{chunk, }{A integer scalar indicating the chunk size to use, i.e., number
+of rows to read at any one time.}
+
 \item{log}{whether the histogram of SNP density should be plotted on log
 scale (log10)}
 

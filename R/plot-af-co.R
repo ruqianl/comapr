@@ -138,9 +138,7 @@ getCellAFTrack <-  function(chrom = "chr1",
                        ylim=0:1)
   co_range_cell1 <- getCellCORange(co_count, cellBarcode = cellBarcode)
   co_range_cell1[seqnames(co_range_cell1)==chrom,]
-  # ht <- HighlightTrack(trackList = af_track,
-  #                      co_range_cell1[seqnames(co_range_cell1)=="chr1",],
-  #                      chromosome = "chr1" )
+
  list(af_track=af_track, co_range =co_range_cell1)
 }
 

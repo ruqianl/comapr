@@ -41,20 +41,10 @@ getAFTracks <-  function(chrom = "chr1",
   dpMM <- Matrix::readMM(file = paste0(path_loc, sampleName,"_",
                                   chrom,"_totalCount.mtx"))
 
-
-
-  # dpMM <- readColMM(file = paste0(path_loc, sampleName,"_",
-  #                                 chrom,"_totalCount.mtx"),
-  #                   which.col = whichCell,
-  #                   chunk = chunk)
   dpMM <- dpMM[,whichCells]
   altMM <- Matrix::readMM(file = paste0(path_loc, sampleName,"_",
                                    chrom, "_altCount.mtx"))
 
-  # altMM <- readColMM(file = paste0(path_loc, sampleName,"_",
-  #                                  chrom, "_altCount.mtx"),
-  #                    which.col = whichCell,
-  #                    chunk = chunk)
   altMM <- altMM[,whichCells]
 
   af_data <- altMM/dpMM
@@ -86,9 +76,7 @@ getAFTracks <-  function(chrom = "chr1",
                                   type = "p")
       co_range_cell1 <- getCellCORange(co_count, cellBarcode = cell)
       co_range_cell1[seqnames(co_range_cell1) == chrom,]
-      # ht <- HighlightTrack(trackList = af_track,
-      #                      co_range_cell1[seqnames(co_range_cell1)=="chr1",],
-      #                      chromosome = "chr1" )
+
       list(af_track = af_track, co_range = co_range_cell1)
 
   })

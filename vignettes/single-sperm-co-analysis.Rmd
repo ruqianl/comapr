@@ -67,15 +67,10 @@ list.files(demo_path)
 
 # Diagnostic functions
 
-<<<<<<< HEAD
+
 `comapr` provides quality-check functions for examining SNP coverage per chr and 
 per cell, chromosome segregation pattern checks, and summary statics for 
 filtering low confidence crossovers.
-=======
-`comapr` provides quality-control functions for examining SNP coverage per chr and 
-per cell, chromosome segregation checks, and summary statics for filtering low
-confidence crossovers.
->>>>>>> 6c39038938e71843ed91bd0a1a0c57f021702ade
 
 ## perCellChrQC
 
@@ -99,7 +94,7 @@ bpDist = 100,
 maxRawCO=10,
 minCellSNP = 1
 ```
-=======
+
 # Construct `RangedSummarizedExpriment` object 
 
 We first construct `RangedSummarizedExpriment` object from parsing output files
@@ -190,7 +185,7 @@ assay(twoSample)
 The `countCOs` function can then find out the crossover intervals according to 
 the Viterbi states for each cell and the number of crossovers per cell is then
 calculated.
-=======
+
 # Count crossovers for SNP intervals
 
 `countCOs` function will find the crossover intervals for each samples and 
@@ -242,6 +237,7 @@ The genetic distances for each interval are stored in `rowData`.
 ```{r}
 rowData(dist_gr)
 ```
+
 The above genetic distances have been calculated using all samples. We can also
 specify the group factor so that we can calculate genetic distances for different
 sample groups:

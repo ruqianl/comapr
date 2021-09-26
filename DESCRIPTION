@@ -2,8 +2,8 @@ Package: comapr
 Title: Crossover analysis for genetic map construction 
 Version: 0.99.25
 Authors@R: 
-    person(given = "Lyu",
-           family = "Ruqian",
+    person(given = "Ruqian",
+           family = "Lyu",
            role = c("aut", "cre"),
            email = "ruqianl@student.unimelb.edu.au",
            comment = c(ORCID = "0000-0002-7736-6612"))

@@ -59,9 +59,9 @@ than this value are kept. Only effective when number of cells are larger than
 10}
 }
 \value{
-a RangedSummarizedExperiment with rowRanges as SNP positions that contribute
-to crossovers in any cells. colData contains cells annotation including barcodes and
-sampleName.
+a RangedSummarizedExperiment with rowRanges as SNP positions that
+contribute to crossovers in any cells. colData contains cells annotation
+including barcodes and sampleName.
 }
 \description{
 A function that parses the viterbi state matrix (in .mtx format),

@@ -40,6 +40,9 @@ of crossovers in each cell.}
 \item{snp_track, }{the SNP position track which is used for obtaining the SNP
 chromosome locations. It could be omitted and the SNP positions will be acquired
 from the "*_snpAnnot.txt" file.}
+
+\item{chunk, }{An integer scalar indicating the chunk size to use,
+i.e., number of rows to read at any one time.}
 }
 \value{
 The DataTrack object defined in \code{\link[Gviz]{DataTrack}}

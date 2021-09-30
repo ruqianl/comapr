@@ -42,39 +42,43 @@ readHapState <- function(sampleName, chroms=c("chr1"), path,
   if(is.null(barcodeFile)){
     barcodeFile <- paste0(path,sampleName,"_barcodes.txt")
   }
+  result_fun <- function(){
+      bpl_fun <- function(chr){
 
-  se_list <- bplapply(chroms,function(chr){
+      barcodes <- read.table(file=barcodeFile,stringsAsFactors = FALSE,
+                             col.names = "barcodes")
+      snpAnno <- read.table(file=paste0(path,sampleName,"_",chr,"_snpAnnot.txt"),
+                            stringsAsFactors = FALSE,
+                            header=TRUE)
+      segInfo <- read.table(file = paste0(path,sampleName,"_",chr,
+                                          "_viSegInfo.txt"),
+                            stringsAsFactors = FALSE,
+                            col.names = c("ithSperm","Seg_start","Seg_end",
+                                          "logllRatio","nSNP","State"))
+      vi_mtx <- readMM(file = paste0(path,sampleName,"_",chr,"_vi.mtx"))
+      grrange <- GRanges(seqnames = chr,
+                         ranges = IRanges::IRanges( start =  snpAnno$POS,
+                                                    width = 1))
+      se <- SummarizedExperiment::SummarizedExperiment(assays =
+                                                         list(vi_state = vi_mtx),
+                                                       colData = barcodes,
+                                                       rowRanges = grrange,
+                                                       metadata = data.frame(
+                                                         segInfo, chr=chr,
+                                                         sampleGroup=sampleName))
+      se <- .filterCOsExtra(se ,minSNP = minSNP,
+                            minlogllRatio = minlogllRatio,
+                            minCellSNP = minCellSNP,
+                            bpDist = bpDist,
+                            maxRawCO=maxRawCO,
+                            biasTol=biasTol,
+                            nmad=nmad)
+      se
+    }
+    bplapply(chroms,function(chr) bpl_fun(chr))
+  }
 
-    barcodes <- read.table(file=barcodeFile,stringsAsFactors = FALSE,
-                           col.names = "barcodes")
-    snpAnno <- read.table(file=paste0(path,sampleName,"_",chr,"_snpAnnot.txt"),
-                          stringsAsFactors = FALSE,
-                          header=TRUE)
-    segInfo <- read.table(file = paste0(path,sampleName,"_",chr,
-                                        "_viSegInfo.txt"),
-                          stringsAsFactors = FALSE,
-                          col.names = c("ithSperm","Seg_start","Seg_end",
-                                        "logllRatio","nSNP","State"))
-    vi_mtx <- readMM(file = paste0(path,sampleName,"_",chr,"_vi.mtx"))
-    grrange <- GRanges(seqnames = chr,
-                       ranges = IRanges::IRanges( start =  snpAnno$POS,
-                                                  width = 1))
-    se <- SummarizedExperiment::SummarizedExperiment(assays =
-                                                       list(vi_state = vi_mtx),
-                                                    colData = barcodes,
-                                                    rowRanges = grrange,
-                                                    metadata = data.frame(
-                                                      segInfo, chr=chr,
-                                                      sampleGroup=sampleName))
-    se <- .filterCOsExtra(se ,minSNP = minSNP,
-                          minlogllRatio = minlogllRatio,
-                          minCellSNP = minCellSNP,
-                          bpDist = bpDist,
-                          maxRawCO=maxRawCO,
-                          biasTol=biasTol,
-                          nmad=nmad)
-    se
-  })
+  se_list <- result_fun()
 
   rbind_se <- function(se1,se2){
     cc <- intersect(colnames(se1),colnames(se2))
@@ -213,7 +217,6 @@ readHapState <- function(sampleName, chroms=c("chr1"), path,
   ##<<<<<----UPDATE,TEST--------->>>>
   vi_m <- vapply(colnames(se),function(bc){
     nthCol <- which(colnames(se)==bc)
-    #  message(nthCol)
     segs <- segInfo_f[segInfo_f$barcode==bc,]
     temp <- rep(0,length(co_contr_snp))
     mthrows <- match(co_contr_snp,as.numeric(segs[,"Seg_start"]))

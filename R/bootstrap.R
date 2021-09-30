@@ -24,7 +24,7 @@
 #' bootsDiff <- bootstrapDist(coCount, group_by = "sampleGroup",B=10)
 #' @author Ruqian Lyu
 #'
-bootstrapDist <- function(co_gr, B = 1000, mapping_fun = "k", group_by)
+bootstrapDist <- function(co_gr, B = 1000, mapping_fun = "k", group_by )
 {
     if(is(co_gr,"RangedSummarizedExperiment")) {
         count_matrix <- as.matrix(assay(co_gr))
@@ -40,20 +40,25 @@ bootstrapDist <- function(co_gr, B = 1000, mapping_fun = "k", group_by)
   }
 
   #group_size <- sapply(group_idx, length)
-  boots_result <- BiocParallel::bplapply(seq_len(B), function(b) {
-    boots_sample1 <- sample(unlist(group_idx[1]),replace = TRUE)
-    boots_sample2 <- sample(unlist(group_idx[2]),replace = TRUE)
+  result_fun <- function(){
 
-    rb_rate1 <- rowMeans(count_matrix[,boots_sample1])
-    dist_1 <- switch(mapping_fun,
-                     k = 25 * log((1 + 2*rb_rate1)/(1 - 2*rb_rate1)),
-                     h = -50 * log(1 - 2*rb_rate1))
-    rb_rate2 <- rowMeans(count_matrix[, boots_sample2])
-    dist_2 <- switch(mapping_fun,
-                     k = 25 * log((1 + 2*rb_rate2)/(1 - 2*rb_rate2)),
-                     h = -50 * log(1 - 2*rb_rate2))
-    sum(dist_1) - sum(dist_2)
-  })
+    bpl_fun <- function(b) {
+      boots_sample1 <- sample(unlist(group_idx[1]),replace = TRUE)
+      boots_sample2 <- sample(unlist(group_idx[2]),replace = TRUE)
+
+      rb_rate1 <- rowMeans(count_matrix[,boots_sample1])
+      dist_1 <- switch(mapping_fun,
+                       k = 25 * log((1 + 2*rb_rate1)/(1 - 2*rb_rate1)),
+                       h = -50 * log(1 - 2*rb_rate1))
+      rb_rate2 <- rowMeans(count_matrix[, boots_sample2])
+      dist_2 <- switch(mapping_fun,
+                       k = 25 * log((1 + 2*rb_rate2)/(1 - 2*rb_rate2)),
+                       h = -50 * log(1 - 2*rb_rate2))
+      sum(dist_1) - sum(dist_2)
+    }
+    bplapply(seq_len(B), function(b) bpl_fun(b) )
+  }
+  boots_result <- result_fun()
   unlist(boots_result)
 }
 
@@ -101,22 +106,26 @@ permuteDist <- function(co_gr,B=100,mapping_fun="k",group_by){
   ## there is a potential issue here.
   ## when the randomly generated "samples" have co_rate >0.5.
   ## Currently perhaps just abandon these trials
-  perm_result <- BiocParallel::bplapply(seq_len(B),function(b){
+  result_fun <- function(){
+    bpl_fun <- function(b){
       g1_idx <- sample(two_g_idx,size = len_1,replace = FALSE)
       g2_idx <- setdiff(two_g_idx,g1_idx)
 
       rb_rate_1 <- rowMeans(count_matrix[,g1_idx])
       rb_rate_2 <- rowMeans(count_matrix[,g2_idx])
       dist_1 <- switch(mapping_fun,
-                     k = 25*log((1+2*rb_rate_1)/(1-2*rb_rate_1)),
-                     h = -50 * log(1 - 2 * rb_rate_1))
+                       k = 25*log((1+2*rb_rate_1)/(1-2*rb_rate_1)),
+                       h = -50 * log(1 - 2 * rb_rate_1))
       dist_2 <- switch(mapping_fun,
                        k = 25*log((1+2*rb_rate_2)/(1-2*rb_rate_2)),
                        h = -50 * log(1 - 2 * rb_rate_2))
       sum(dist_1)-sum(dist_2)
       #rs
 
-  })
+    }
+    bplapply(seq_len(B),function(b) bpl_fun(b))
+  }
+  perm_result <- result_fun()
   ## calculate observed diff
   g1_idx <- group_idx[[1]]
   g2_idx <- group_idx[[2]]

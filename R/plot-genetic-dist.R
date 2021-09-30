@@ -40,6 +40,8 @@ plotGeneticDist <- function(gr,bin=TRUE,chr=NULL,cumulative=FALSE){
                                                   name="Set1")
   names(sample_group_colors)[seq_along(col_to_plot)] <- col_to_plot
 
+  sample_group_colors <- sample_group_colors[col_to_plot]
+
   if(cumulative){
     GenomicRanges::mcols(gr) <- apply(mcols(gr),2 ,
                                       function(x,

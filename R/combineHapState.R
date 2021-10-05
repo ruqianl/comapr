@@ -13,7 +13,7 @@
 #' @param groupName, a character vector of length 2 that contains the first and
 #' the second group's names
 #' @examples
-#' demo_path <-paste0(system.file("extdata",package = "comapr"),"/")
+#' demo_path <- paste0(system.file("extdata",package = "comapr"),"/")
 #' s1_rse_state <- readHapState("s1",chroms=c("chr1"),
 #'                              path=demo_path,barcodeFile=NULL,minSNP = 0,
 #'                              minlogllRatio = 50,

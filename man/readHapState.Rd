@@ -68,7 +68,7 @@ A function that parses the viterbi state matrix (in .mtx format),
 barcode.txt and snpAnno.txt files for each individual.
 }
 \examples{
-demo_path <-system.file("extdata",package = "comapr")
+demo_path <- system.file("extdata",package = "comapr")
 s1_rse_state <- readHapState(sampleName="s1",chroms=c("chr1"),
 path=paste0(demo_path,"/"),
 barcodeFile=NULL,minSNP = 0, minlogllRatio = 50,

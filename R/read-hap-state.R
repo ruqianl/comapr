@@ -23,7 +23,7 @@
 #' including barcodes and sampleName.
 #'
 #' @examples
-#' demo_path <-system.file("extdata",package = "comapr")
+#' demo_path <- system.file("extdata",package = "comapr")
 #' s1_rse_state <- readHapState(sampleName="s1",chroms=c("chr1"),
 #' path=paste0(demo_path,"/"),
 #' barcodeFile=NULL,minSNP = 0, minlogllRatio = 50,

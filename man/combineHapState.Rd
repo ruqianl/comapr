@@ -24,6 +24,7 @@ state for a list of SNPs across a set of cells. The combined result will have
 cells from two individuals and merged list of SNPs from the two.
 }
 \examples{
+BiocParallel::register(BiocParallel::SnowParam(workers = 1))
 demo_path <- paste0(system.file("extdata",package = "comapr"),"/")
 s1_rse_state <- readHapState("s1",chroms=c("chr1"),
                              path=demo_path,barcodeFile=NULL,minSNP = 0,

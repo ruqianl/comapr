@@ -14,6 +14,7 @@
 #' the second group's names
 #'
 #' @examples
+#' BiocParallel::register(BiocParallel::SnowParam(workers = 1))
 #' demo_path <- paste0(system.file("extdata",package = "comapr"),"/")
 #' s1_rse_state <- readHapState("s1",chroms=c("chr1"),
 #'                              path=demo_path,barcodeFile=NULL,minSNP = 0,

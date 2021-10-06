@@ -12,8 +12,9 @@
 #' @param rse2, the second `RangedSummarizedExperiment`
 #' @param groupName, a character vector of length 2 that contains the first and
 #' the second group's names
+#'
 #' @examples
-#' demo_path <- paste0(system.file("extdata",package = "comapr"),"/")
+#' \dontrun{ demo_path <- paste0(system.file("extdata",package = "comapr"),"/")
 #' s1_rse_state <- readHapState("s1",chroms=c("chr1"),
 #'                              path=demo_path,barcodeFile=NULL,minSNP = 0,
 #'                              minlogllRatio = 50,
@@ -28,6 +29,7 @@
 #'                              bpDist = 100,maxRawCO=10,
 #'                              minCellSNP = 1)
 #' sb <- combineHapState(s1_rse_state,s2_rse_state)
+#' }
 #' @return A `RangedSummarizedExperiment` that contains the cells and SNPs in
 #' both `rse`
 #'

@@ -51,7 +51,7 @@ perCellChrQC <- function(sampleName,chroms = c("chr1","chr7","chr15"),
   if(grepl("chr",segInfo_chrs$Chrom[1])){
     chr_levels <- paste0("chr",seq_len(23))
   } else {
-    chr_levels <- paste0(seq_len(23))
+    chr_levels <- unique(segInfo_chrs$Chrom)
   }
 
   plt_df <- segInfo_chrs %>% dplyr::group_by(.data$ithSperm,.data$Chrom) %>%

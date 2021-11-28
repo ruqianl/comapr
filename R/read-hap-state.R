@@ -75,7 +75,7 @@ readHapState <- function(sampleName, chroms=c("chr1"), path,
                                                        metadata = data.frame(
                                                          segInfo, chr=chr,
                                                          sampleGroup=sampleName))
-      se <- .filterCOsExtra(se ,minSNP = minSNP[chr],
+      se <- .filterCOsExtra(se , minSNP = minSNP[chr],
                             minlogllRatio = minlogllRatio[chr],
                             minCellSNP = minCellSNP[chr],
                             bpDist = bpDist[chr],
@@ -250,7 +250,7 @@ readHapState <- function(sampleName, chroms=c("chr1"), path,
     stopifnot(length(featureVector) == length(chroms))
   } else{
     featureVector <- rep(featureVector,length(chroms))
-    names(featureVector) <- chroms
   }
+  names(featureVector) <- chroms
   featureVector
 }

@@ -48,7 +48,8 @@ readHapState <- function(sampleName, chroms=c("chr1"), path,
 
   bpDist <- .nameFeatures(chroms,bpDist)
   minSNP <- .nameFeatures(chroms,minSNP)
-  minCellSNP <-.nameFeatures(chroms,minCellSNP)
+  minCellSNP <- .nameFeatures(chroms,minCellSNP)
+  minlogllRatio <- .nameFeatures(chroms,minlogllRatio)
 
   result_fun <- function(){
       bpl_fun <- function(chr){
@@ -74,8 +75,8 @@ readHapState <- function(sampleName, chroms=c("chr1"), path,
                                                        metadata = data.frame(
                                                          segInfo, chr=chr,
                                                          sampleGroup=sampleName))
-      se <- .filterCOsExtra(se ,minSNP = minSNP,
-                            minlogllRatio = minlogllRatio,
+      se <- .filterCOsExtra(se ,minSNP = minSNP[chr],
+                            minlogllRatio = minlogllRatio[chr],
                             minCellSNP = minCellSNP[chr],
                             bpDist = bpDist[chr],
                             maxRawCO=maxRawCO,

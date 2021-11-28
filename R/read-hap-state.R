@@ -17,6 +17,9 @@
 #' results will be concated together.
 #' @param sampleName, the name of the sample to parse which is used as prefix for
 #' finding relevant files for the underlying sample
+#' @param bpDist, the crossover(s) will be filtered out if introduced by a segment
+#'that is shorter than `bpDist` basepairs. It can be a single value or a vector
+#'that is the same length and order with `chroms`.
 #' @inheritParams .filterCOsExtra
 #' @return a RangedSummarizedExperiment with rowRanges as SNP positions that
 #' contribute to crossovers in any cells. colData contains cells annotation
@@ -42,6 +45,11 @@ readHapState <- function(sampleName, chroms=c("chr1"), path,
   if(is.null(barcodeFile)){
     barcodeFile <- paste0(path,sampleName,"_barcodes.txt")
   }
+
+  bpDist <- .nameFeatures(chroms,bpDist)
+  minSNP <- .nameFeatures(chroms,minSNP)
+  minCellSNP <-.nameFeatures(chroms,minCellSNP)
+
   result_fun <- function(){
       bpl_fun <- function(chr){
 
@@ -68,8 +76,8 @@ readHapState <- function(sampleName, chroms=c("chr1"), path,
                                                          sampleGroup=sampleName))
       se <- .filterCOsExtra(se ,minSNP = minSNP,
                             minlogllRatio = minlogllRatio,
-                            minCellSNP = minCellSNP,
-                            bpDist = bpDist,
+                            minCellSNP = minCellSNP[chr],
+                            bpDist = bpDist[chr],
                             maxRawCO=maxRawCO,
                             biasTol=biasTol,
                             nmad=nmad)
@@ -229,4 +237,19 @@ readHapState <- function(sampleName, chroms=c("chr1"), path,
   SummarizedExperiment::assays(se)[["vi_state"]] <- vi_m
   SummarizedExperiment::metadata(se) <- segInfo_f
   se
+}
+
+#' Name the feature by chromosome names so that filtering of segments can use
+#' chromosome specific values
+#' @keywords internal
+#' @noRd
+#'
+.nameFeatures <- function(chroms,featureVector){
+  if(length(featureVector)!=1){
+    stopifnot(length(featureVector) == length(chroms))
+  } else{
+    featureVector <- rep(featureVector,length(chroms))
+    names(featureVector) <- chroms
+  }
+  featureVector
 }

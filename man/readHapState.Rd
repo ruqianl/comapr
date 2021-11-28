@@ -37,8 +37,9 @@ that has fewer than `minSNP` SNPs to support.}
 \item{minlogllRatio}{the crossover(s) will be filtered out if introduced by a
 segment that has lower than `minlogllRatio` to its reversed state.}
 
-\item{bpDist}{the crossover(s) will be filtered out if introduced by a segment
-that is shorter than `bpDist` basepairs.}
+\item{bpDist, }{the crossover(s) will be filtered out if introduced by a segment
+that is shorter than `bpDist` basepairs. It can be a single value or a vector
+that is the same length and order with `chroms`.}
 
 \item{maxRawCO}{if a cell has more than `maxRawCO` number of raw crossovers
 called across a chromosome, the cell is filtered out}

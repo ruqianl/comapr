@@ -49,7 +49,7 @@ Generate the raw alternative allele frequencies tracks for all cells in the
 columns of provided `co_count`
 }
 \examples{
-  demo_path <-paste0(system.file("extdata",package = "comapr"),"/")
+demo_path <- system.file("extdata",package = "comapr")
 s1_rse_state <- readHapState("s1",chroms=c("chr1"),
                              path=demo_path,barcodeFile=NULL,minSNP = 0,
                              minlogllRatio = 50,
@@ -60,7 +60,7 @@ s1_counts <- countCOs(s1_rse_state)
 af_co_tracks <- getAFTracks(chrom ="chr1",
                                path_loc = demo_path,
                                sampleName = "s1",
-                               barcodeFile = paste0(demo_path,
+                               barcodeFile = file.path(demo_path,
                                                     "s1_barcodes.txt"),
                                co_count = s1_counts)
 

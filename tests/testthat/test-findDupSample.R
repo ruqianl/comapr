@@ -1,4 +1,5 @@
 test_that("findDupSamples works", {
+  data(snp_geno)
   or_geno <- snp_geno[,grep("X",colnames(snp_geno))]
   rownames(or_geno) <- paste0(snp_geno$CHR,"_",snp_geno$POS)
   or_geno[,1] <- or_geno[,5]
@@ -11,7 +12,7 @@ test_that("findDupSamples works", {
 
 })
 
-# 
+#
 # test_that("findDupMarkers works", {
 #   or_geno <- snp_geno[,grep("X",colnames(snp_geno))]
 #   rownames(or_geno) <- paste0(snp_geno$CHR,"_",snp_geno$POS)
@@ -21,6 +22,6 @@ test_that("findDupSamples works", {
 #                        chr = snp_geno$CHR)
 #   dups <- findDupMarkers(cr_geno,plot = TRUE)
 #   expect_true(length(dups)==2)
-# 
-# 
+#
+#
 # })

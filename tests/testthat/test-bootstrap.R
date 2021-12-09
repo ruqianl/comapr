@@ -1,7 +1,7 @@
 # test boostrap
-
+data(snp_geno_gr)
+data("parents_geno")
 test_that("bootstrapDist works", {
-  data(snp_geno_gr)
 
   corrected_geno <- correctGT(gt_matrix = mcols(snp_geno_gr),
                               ref = parents_geno$ref,
@@ -22,7 +22,6 @@ test_that("bootstrapDist works", {
 })
 
 test_that("permuteDist works", {
-  data(snp_geno_gr)
 
   corrected_geno <- correctGT(gt_matrix = mcols(snp_geno_gr),
                               ref = parents_geno$ref,

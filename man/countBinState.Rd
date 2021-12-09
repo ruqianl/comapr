@@ -23,14 +23,14 @@ a data.frame that contains chromosome bin segregation ratio
 }
 \description{
 Bins the chromosome into supplied number of bins and find the state of
-the chromosome bins across all sperms
+the chromosome bins across all gamete cells
 }
 \details{
 This function is used for checking whether chromosome segregation pattern
 obeys the expected ratio.
 }
 \examples{
-\donttest{
+
 chrom_info <- GenomeInfoDb::getChromInfoFromUCSC("mm10")
 seq_length <- chrom_info$size
 names(seq_length) <- chrom_info$chrom
@@ -53,9 +53,8 @@ snpAnno <- read.table(file = paste0(demo_path,"/", sampleName,
                       header = TRUE)
 
 countBinState(chr = "chr1",snpAnno = snpAnno,
-viState = vi_mtx,genomeRange = dna_mm10_gr,
-ntile = 1)
-}
+viState = vi_mtx,genomeRange = dna_mm10_gr, ntile = 1)
+
 }
 \author{
 Ruqian Lyu

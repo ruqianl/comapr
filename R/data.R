@@ -32,9 +32,7 @@
 #'  \item{X99}{a mouse sample }
 #'  \item{rsID}{the SNP ID}
 #' }
-#' @examples
-#'  snp_geno
-#'
+#' @usage data(snp_geno)
 "snp_geno"
 
 #' Markers by genotype results for a group of samples
@@ -66,8 +64,7 @@
 #'  \item{X99}{a mouse sample }
 #'  \item{rsID}{the SNP ID}
 #' }
-#' @examples
-#'  snp_geno_gr
+#' @usage data(snp_geno_gr)
 #'
 "snp_geno_gr"
 
@@ -77,19 +74,21 @@
 #'  \item{C57BL.6J}{genotype of reference mouse train across markers}
 #'  \item{FVB.NJ..i.}{genotype of alternative mouse train across markers}
 #'}
+#' @usage data(parents_geno)
 "parents_geno"
 
 
 #' RangedSummarizedExperiment object containing the Viterbi states SNP markers
 #' for samples from two groups. `colData(twoSamples)` contains the sample group
 #' factor.
-#'
+#' @usage data(twoSamples)
 "twoSamples"
 
 
 #' RangedSummarizedExperiment object containing the crossover counts across
 #' samples for the list of SNP marker intervals
 #'
+#' @usage data(coCount)
 "coCount"
 
 

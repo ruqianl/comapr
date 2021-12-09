@@ -9,6 +9,8 @@
 #' @export
 #' @return A ggplot object
 #' @examples
+#'
+#' data(snp_geno)
 #' or_geno <- snp_geno[,grep("X",colnames(snp_geno))]
 #' rownames(or_geno) <- paste0(snp_geno$CHR,"_",snp_geno$POS)
 #' or_geno[1,] <- rep("Fail",dim(or_geno)[2])
@@ -19,7 +21,7 @@
 
 plotGTFreq <- function(geno){
 
-  pltdf <- data.frame(geno) %>% tidyr::pivot_longer(colnames(geno),
+  pltdf <- data.frame(geno) %>% pivot_longer(colnames(geno),
                                                     names_to = "sample",
                                                     values_to="geno")
 

@@ -33,6 +33,8 @@ by `countCO`. It then draws samples from a group with replacement and
 calculate the distribution of relevant statistics.
 }
 \examples{
+data(coCount)
+
 bootsDiff <- bootstrapDist(coCount, group_by = "sampleGroup",B=10)
 }
 \author{

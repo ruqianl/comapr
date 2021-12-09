@@ -27,7 +27,8 @@ We usechisq.test for finding markers that have genotypes among samples that
 are significantly different from the 1:1 ratio and report them
 }
 \examples{
-
+data(parents_geno)
+data(snp_geno_gr)
 corrected_geno <- correctGT(gt_matrix = GenomicRanges::mcols(snp_geno_gr),
 ref = parents_geno$ref,alt = parents_geno$alt,fail = "Fail",
 wrong_label = "Homo_ref")

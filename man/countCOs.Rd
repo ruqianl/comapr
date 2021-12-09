@@ -28,6 +28,7 @@ according to marker interval base-pair sizes. Genotypes encoded with "0" are
 treated as missing value.
 }
 \examples{
+data(twoSamples)
 cocount <- countCOs(twoSamples)
 }
 \author{

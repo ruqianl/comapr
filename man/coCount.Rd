@@ -9,7 +9,7 @@ samples for the list of SNP marker intervals}
 An object of class \code{RangedSummarizedExperiment} with 3 rows and 10 columns.
 }
 \usage{
-coCount
+data(coCount)
 }
 \description{
 RangedSummarizedExperiment object containing the crossover counts across

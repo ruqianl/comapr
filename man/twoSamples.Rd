@@ -10,7 +10,7 @@ factor.}
 An object of class \code{RangedSummarizedExperiment} with 6 rows and 10 columns.
 }
 \usage{
-twoSamples
+data(twoSamples)
 }
 \description{
 RangedSummarizedExperiment object containing the Viterbi states SNP markers

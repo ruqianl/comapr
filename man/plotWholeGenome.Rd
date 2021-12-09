@@ -19,6 +19,7 @@ marker intervals across all chromosomes provided and plot the
 cumulative genetic distances
 }
 \examples{
+data(coCount)
 dist_se <- calGeneticDist(coCount)
 plotWholeGenome(SummarizedExperiment::rowRanges(dist_se))
 }

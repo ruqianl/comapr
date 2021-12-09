@@ -1,43 +1,54 @@
+#' check supplied mapping function is available
+#' @param mapping_fun, the mapping function to use, one of c("k","h")
+#' @noRd
+.check_mapping_fun <- function(mapping_fun){
+  if(!mapping_fun %in% c("k","h")){
+    message("only Kosambi and Haldane mapping function are supported at current
+            stage")
+    quit()
+  }
+
+}
 #' cal_marker_dist
 #'
 #' Covert the recombination rate to cM by mapping functions
 #' @importFrom GenomicRanges mcols
 #' @noRd
 cal_marker_dist <- function(co_count,mapping_fun="k",group_by = NULL){
-
-
   ## just covert the recombination rate to cM by mapping functions
 
   new_gr <- co_count[,0]
 
   if(is.null(group_by)){
-    co_rate <- rowMeans(as.matrix(GenomicRanges::mcols(co_count)))
+    co_rate <- rowMeans(as.matrix(mcols(co_count)))
     stopifnot(sum(co_rate>=0.5)==0)
-    if(mapping_fun=="k"){
-    kosambi_cm <- 25*log((1+2*co_rate)/(1-2*co_rate))
-    GenomicRanges::mcols(new_gr)$kosambi_cm <- kosambi_cm
-    }
-    if(mapping_fun=="h"){
-      haldane_cm <- -50 * log(1 - 2 * co_rate)
-      GenomicRanges::mcols(new_gr)$haldane_cm <- haldane_cm
-    }
+    cm_dist <- .rb_to_dist(co_rate, mapping_fun=mapping_fun)
+
+    switch(mapping_fun,
+      k =     mcols(new_gr)$kosambi_cm <- cm_dist,
+      h =     mcols(new_gr)$haldane_cm <- cm_dist)
+
   } else {
     ## group_by has the character of prefix of groups
      groups_rb <- bplapply(group_by,function(group_prefix,mapping_fun){
-       sids <- grep(group_prefix,colnames(GenomicRanges::mcols(co_count)))
-       co_rate <- rowMeans(as.matrix(GenomicRanges::mcols(co_count)[,sids]))
+       sids <- grep(group_prefix,colnames(mcols(co_count)))
+       co_rate <- rowMeans(as.matrix(mcols(co_count)[,sids]))
+       cm_dist <- .rb_to_dist(co_rate, mapping_fun=mapping_fun)
 
-      if(mapping_fun=="k"){
-        x <- 25*log((1+2*co_rate)/(1-2*co_rate))
-      }
-      if(mapping_fun=="h"){
-       x <-  -50 * log(1 - 2 * co_rate)
-      }
-       x
+      # if(mapping_fun=="k"){
+      #   x <- 25*log((1+2*co_rate)/(1-2*co_rate))
+      # }
+      # if(mapping_fun=="h"){
+      #  x <-  -50 * log(1 - 2 * co_rate)
+      # }
+      # switch(mapping_fun,
+      #         k =  x <- mcols(new_gr)$kosambi_cm <- cm_dist,
+      #         h =   x <- mcols(new_gr)$haldane_cm <- cm_dist)
+
+      cm_dist
     },mapping_fun=mapping_fun)
-
-     GenomicRanges::mcols(new_gr) <- do.call(cbind,groups_rb)
-      colnames(GenomicRanges::mcols(new_gr)) <- paste0(group_by,"_",mapping_fun)
+     mcols(new_gr) <- do.call(cbind,groups_rb)
+     colnames(mcols(new_gr)) <- paste0(group_by,"_",mapping_fun)
 
   }
   new_gr
@@ -59,8 +70,13 @@ cal_marker_dist <- function(co_count,mapping_fun="k",group_by = NULL){
 #' @param mapping_fun
 #' The mapping function to use, can be one of "k" or "h" (kosambi or haldane)
 #' @param ref_genome
-#' The reference genome name. It is used to fetch the chromosome Information
-#' from UCSC database.
+#' The reference genome name. It is used to fetch the chromosome size
+#' information from UCSC database.
+#' @param chrom_info
+#' A user supplied data.frame containing two columns with column names
+#' chrom and size, describing the chromosome names and lengths if not using
+#' ref_genome from UCSC. If supplied, the `ref_genome` is ignored.
+#'
 #' @param group_by, character vector contains the unique prefix of sample names
 #' that are used for defining different sample groups. Or the column name in
 #' colData(co_count) that specify the group factor. If missing all samples are
@@ -69,7 +85,7 @@ cal_marker_dist <- function(co_count,mapping_fun="k",group_by = NULL){
 #' @importFrom rlang .data
 #' @importFrom GenomeInfoDb getChromInfoFromUCSC genome genome<-
 #' @importFrom GenomicRanges GRanges mcolAsRleList sort width
-#' @importFrom GenomicRanges tileGenome binnedAverage mcols
+#' @importFrom GenomicRanges tileGenome binnedAverage mcols coverage
 #' @importFrom GenomeInfoDb sortSeqlevels seqlevels seqinfo
 #' @importFrom S4Vectors Rle
 #' @importClassesFrom SummarizedExperiment SummarizedExperiment
@@ -78,6 +94,7 @@ cal_marker_dist <- function(co_count,mapping_fun="k",group_by = NULL){
 #' GRanges for marker intervals or binned intervals with Haldane or Kosambi
 #' centiMorgans
 #' @examples
+#' data(coCount)
 #' dist_se <- calGeneticDist(coCount)
 #' # dist_se <- calGeneticDist(coCount,group_by="sampleGroup")
 #'
@@ -89,7 +106,8 @@ setGeneric("calGeneticDist",
                     bin_size=NULL,
                     mapping_fun="k",
                     ref_genome="mm10",
-                    group_by = NULL)
+                    group_by = NULL,
+                    chrom_info = NULL)
              standardGeneric("calGeneticDist"))
 
 #'@noRd
@@ -97,9 +115,10 @@ calGenetic_dist <- function(co_count,
                             bin_size=NULL,
                             mapping_fun="k",
                             ref_genome="mm10",
-                            group_by = NULL){
+                            group_by = NULL,
+                            chrom_info = NULL){
   stopifnot(is.null(bin_size) | is.numeric(bin_size))
-  stopifnot(mapping_fun %in% c("k","h"))
+  .check_mapping_fun(mapping_fun)
   new_gr <- cal_marker_dist(co_count = co_count,
                           mapping_fun = mapping_fun,
                           group_by = group_by)
@@ -107,7 +126,8 @@ calGenetic_dist <- function(co_count,
     return(new_gr)
   } else {
     binned_dna_mm10_gr <- cal_bin_dist(new_gr=new_gr,bin_size=bin_size,
-                                       ref_genome="mm10")
+                                       ref_genome="mm10",
+                                       chrom_info = chrom_info)
     return(binned_dna_mm10_gr)
   }
 
@@ -115,51 +135,59 @@ calGenetic_dist <- function(co_count,
 
 #'@noRd
 cal_bin_dist <- function(new_gr,bin_size,
-                         ref_genome="mm10"){
+                         ref_genome="mm10",chrom_info = NULL){
   ## bin_size supplied then.
   ## fetch the chromoInfo from GenomeInfoDb.
   ## This is only for getting the basepair lengths of the genome
 
-
-  chrom_info <- GenomeInfoDb::getChromInfoFromUCSC(ref_genome)
-  ## only for chr1-M
-  chrom_info <- chrom_info[grep("_",chrom_info$chrom,invert = TRUE),]
-
+  if(is.null(chrom_info)){
+      out <- tryCatch({
+      chrom_info <- getChromInfoFromUCSC(ref_genome)
+      chrom_info <- chrom_info[grep("_",chrom_info$chrom,invert = TRUE),]
+  },
+  error=function(cond) {
+    message("The required genome is not available from UCSC.\n
+            You can supply a chrom_info in data.frame that have\n
+            the chrom names and lengths columns with 'chrom','size'\n
+            as column names")
+    stop()
+  })
+}
+  stopifnot(c("chrom","size") %in% colnames(chrom_info))
   ## Check what seqnames is in new_gr and make it consistent
   if(!grepl("chr",as.character(seqnames(new_gr)[1]))){
     chrom_info$chrom <- gsub("chr","",chrom_info$chrom)
   }
   chrom_info <- chrom_info[chrom_info$chrom %in%
-                             GenomeInfoDb::seqlevels(new_gr),]
+                             seqlevels(new_gr),]
   ## create Granges object for chromosomes
   seq_length <- chrom_info$size
   names(seq_length) <- chrom_info$chrom
 
-  dna_mm10_gr <- GenomicRanges::GRanges(
+  dna_mm10_gr <- GRanges(
     seqnames = Rle(names(seq_length)),
     ranges = IRanges(1, end = seq_length, names = names(seq_length)),
     seqlengths = seq_length)
-  GenomeInfoDb::genome(dna_mm10_gr) <- ref_genome
+  genome(dna_mm10_gr) <- ref_genome
   #dna_mm10_gr
 
 
   ## per bp distances
-  GenomicRanges::mcols(new_gr) <- apply(GenomicRanges::mcols(new_gr),2,
+  mcols(new_gr) <- apply(mcols(new_gr),2,
                                         function(x) {
-                                          x/GenomicRanges::width(new_gr)})
+                                          x/width(new_gr)})
 
   tilewidth <- bin_size
-  tiles <- GenomicRanges::tileGenome(seqinfo(dna_mm10_gr),
+  tiles <- tileGenome(seqinfo(dna_mm10_gr),
                                      tilewidth = tilewidth)
   binned_dna_mm10_gr <- unlist(tiles)
   # binned_dna_mm10_gr
-  new_gr <- GenomicRanges::sort(GenomeInfoDb::sortSeqlevels(new_gr))
+  new_gr <- sort(sortSeqlevels(new_gr))
 
   bin_dist <-  bplapply(colnames(mcols(new_gr)), function(group_col){
     # dist_rle <- GenomicRanges::mcolAsRleList(new_gr,group_col)
     # runValue(dist_rle)[is.na(runValue(dist_rle))] <- 0
-    dist_rle <- GenomicRanges::coverage(new_gr,
-                                        weight = mcols(new_gr)[,group_col])
+    dist_rle <- coverage(new_gr,weight = mcols(new_gr)[,group_col])
     dist_bined <- binnedAverage(binned_dna_mm10_gr,dist_rle,
                                 "dist_bin_ave")
 
@@ -173,16 +201,17 @@ cal_bin_dist <- function(new_gr,bin_size,
 }
 
 #'@rdname calGeneticDist
-setMethod("calGeneticDist",signature = c(co_count = 'GRanges',
+setMethod("calGeneticDist",signature = c(co_count= 'GRanges',
                                          bin_size='missing',
                                          group_by='missing'),
 
           function(co_count,
                    bin_size=NULL,
                    mapping_fun="k",
-                   ref_genome="mm10",
-                   group_by = NULL){
-            stopifnot(mapping_fun %in% c("k","h"))
+                   ref_genome,
+                   group_by = NULL,
+                   chrom_info){
+            .check_mapping_fun(mapping_fun)
 
             new_gr <- cal_marker_dist(co_count = co_count,
                                       mapping_fun = mapping_fun,
@@ -197,14 +226,17 @@ setMethod("calGeneticDist",signature = c(co_count = 'GRanges',
           function(co_count,
                    bin_size=NULL,
                    mapping_fun="k",
-                   ref_genome="mm10",
-                   group_by = NULL){
-            stopifnot(mapping_fun %in% c("k","h"))
+                   ref_genome,
+                   group_by = NULL,
+                   chrom_info){
+            .check_mapping_fun(mapping_fun)
 
             new_gr <- calGenetic_dist(co_count = co_count,
                                       mapping_fun = mapping_fun,
                                       bin_size = bin_size,
-                                      group_by = NULL)
+                                      ref_genome = ref_genome,
+                                      group_by = NULL,
+                                      chrom_info = chrom_info)
             new_gr
           })
 
@@ -216,9 +248,10 @@ setMethod("calGeneticDist",signature = c(co_count = 'GRanges',
           function(co_count,
                    bin_size=NULL,
                    mapping_fun="k",
-                   ref_genome="mm10",
-                   group_by  ){
-            stopifnot(mapping_fun %in% c("k","h"))
+                   ref_genome,
+                   group_by = NULL,
+                   chrom_info){
+            .check_mapping_fun(mapping_fun)
 
             new_gr <- cal_marker_dist(co_count = co_count,
                                       mapping_fun = mapping_fun,
@@ -234,16 +267,32 @@ setMethod("calGeneticDist",signature = c(co_count = 'GRanges',
           function(co_count,
                    bin_size,
                    mapping_fun="k",
-                   ref_genome="mm10",
-                   group_by){
-            stopifnot(mapping_fun %in% c("k","h"))
+                   ref_genome,
+                   group_by,
+                   chrom_info ){
+            .check_mapping_fun(mapping_fun)
 
             new_gr <- calGenetic_dist(co_count = co_count,
                                       mapping_fun = mapping_fun,
                                       bin_size = bin_size,
-                                      group_by = group_by)
+                                      ref_genome = ref_genome,
+                                      group_by = group_by,
+                                      chrom_info = chrom_info)
             new_gr
           })
+
+#' @keywords internal
+#' @noRd
+.setGenDistToRowRanges <- function(co_count,mapping_fun){
+  cm_dist <- .rb_to_dist(rowRanges(co_count)$raw_rate, mapping_fun=mapping_fun)
+
+  if(mapping_fun == "k")
+    rowRanges(co_count)$kosambi <- cm_dist
+  else
+    rowRanges(co_count)$haldane <- cm_dist
+
+  co_count
+}
 
 #'@rdname calGeneticDist
 #'@importFrom SummarizedExperiment rowRanges rowRanges<-
@@ -257,15 +306,20 @@ setMethod("calGeneticDist",
                    bin_size=NULL,
                    mapping_fun="k",
                    ref_genome="mm10",
-                   group_by = NULL){
-            stopifnot(mapping_fun %in% c("k","h"))
+                   group_by = NULL,
+                   chrom_info){
+            .check_mapping_fun(mapping_fun)
             co_rate <- rowMeans(as.matrix(assay(co_count)))
             rowRanges(co_count)$raw_rate <- co_rate
-            if(mapping_fun == "k")
-              rowRanges(co_count)$kosambi <- 25*log((1+2*co_rate)/(1-2*co_rate))
-            else
-              rowRanges(co_count)$haldane <-  -50 * log(1 - 2 * co_rate)
-
+            # cm_dist <- .rb_to_dist(co_rate, mapping_fun=mapping_fun)
+            # if(mapping_fun == "k")
+            #   rowRanges(co_count)$kosambi <- cm_dist
+            # else
+            #   rowRanges(co_count)$haldane <-  cm_dist
+            #
+            # co_count
+            co_count <- .setGenDistToRowRanges(co_count,
+                                               mapping_fun = mapping_fun)
             co_count
           })
 
@@ -279,8 +333,9 @@ setMethod("calGeneticDist",
                    bin_size=NULL,
                    mapping_fun="k",
                    ref_genome="mm10",
-                   group_by ){
-            stopifnot(mapping_fun %in% c("k","h"))
+                   group_by,
+                   chrom_info){
+            .check_mapping_fun(mapping_fun)
             stopifnot(length(group_by)==1)
             ##group_by should refer to a column in colData(co_count)
             stopifnot(group_by %in% colnames(colData(co_count)))
@@ -288,15 +343,19 @@ setMethod("calGeneticDist",
 
             co_rate <- vapply(unique(as.character(fcts)),
                               function(fct){
-                                rowMeans(as.matrix(assay(co_count)[,fcts==fct]))},
+                              rowMeans(as.matrix(assay(co_count)[,fcts==fct]))},
                               FUN.VALUE = numeric(nrow(assay(co_count))))
 
             rowRanges(co_count)$raw_rate <- co_rate
-            if(mapping_fun == "k")
-              rowRanges(co_count)$kosambi <- 25*log((1+2*co_rate)/(1-2*co_rate))
-            else
-              rowRanges(co_count)$haldane <-  -50 * log(1 - 2 * co_rate)
+            # cm_dist <- .rb_to_dist(co_rate, mapping_fun=mapping_fun)
+            #
+            # if(mapping_fun == "k")
+            #   rowRanges(co_count)$kosambi <- cm_dist
+            # else
+            #   rowRanges(co_count)$haldane <- cm_dist
 
+            co_count <- .setGenDistToRowRanges(co_count,
+                                               mapping_fun = mapping_fun)
             co_count
           })
 
@@ -311,9 +370,10 @@ setMethod("calGeneticDist",
                    bin_size,
                    mapping_fun="k",
                    ref_genome="mm10",
-                   group_by ){
+                   group_by,
+                   chrom_info){
 
-            stopifnot(mapping_fun %in% c("k","h"))
+            .check_mapping_fun(mapping_fun)
             stopifnot(length(group_by)==1)
             ##group_by should refer to a column in colData(co_count)
             stopifnot(group_by %in% colnames(colData(co_count)))
@@ -324,25 +384,16 @@ setMethod("calGeneticDist",
             ####
             co_rate <- vapply(unique(as.character(fcts)),
                               function(fct){
-                                rowMeans(as.matrix(assay(co_count)[,fcts==fct]))},
+                              rowMeans(as.matrix(assay(co_count)[,fcts==fct]))},
                               FUN.VALUE = numeric(nrow(assay(co_count))))
 
             rowRanges(co_count)$raw_rate <- co_rate
             ## divide into bins
-
-            if(mapping_fun == "k"){
-              new_gr <- granges(co_count)
-              kosambi <- 25*log((1+2*co_rate)/(1-2*co_rate))
-              mcols(new_gr) <- kosambi
-              dist_gr <- cal_bin_dist(new_gr,bin_size = bin_size)
-
-              } else {
-
-              new_gr <- granges(co_count)
-              haldane <-  -50 * log(1 - 2 * co_rate)
-              mcols(new_gr) <- haldane
-              dist_gr <- cal_bin_dist(new_gr,bin_size = bin_size)
-            }
+            new_gr <- granges(co_count)
+            mcols(new_gr) <- .rb_to_dist(co_rate, mapping_fun = mapping_fun)
+            dist_gr <- cal_bin_dist(new_gr,bin_size = bin_size,
+                                    ref_genome = ref_genome,
+                                    chrom_info = chrom_info)
             dist_gr
 
           })
@@ -359,9 +410,10 @@ setMethod("calGeneticDist",
                    bin_size,
                    mapping_fun="k",
                    ref_genome="mm10",
-                   group_by =NULL){
+                   group_by =NULL,
+                   chrom_info){
 
-            stopifnot(mapping_fun %in% c("k","h"))
+            .check_mapping_fun(mapping_fun)
 
             #####
             # divide the cos into bins
@@ -370,20 +422,12 @@ setMethod("calGeneticDist",
 
             rowRanges(co_count)$raw_rate <- co_rate
             ## divide into bins
-
-            if(mapping_fun == "k"){
-              new_gr <- granges(co_count)
-              kosambi <- 25*log((1+2*co_rate)/(1-2*co_rate))
-              mcols(new_gr) <- kosambi
-              dist_gr <- cal_bin_dist(new_gr,bin_size = bin_size)
-
-            } else {
-              new_gr <- granges(co_count)
-              haldane <-  -50 * log(1 - 2 * co_rate)
-              mcols(new_gr) <- haldane
-              dist_gr <- cal_bin_dist(new_gr,bin_size = bin_size)
-            }
-          dist_gr
+            new_gr <- granges(co_count)
+            mcols(new_gr) <- .rb_to_dist(co_rate, mapping_fun = mapping_fun)
+            dist_gr <- cal_bin_dist(new_gr,bin_size = bin_size,
+                                    ref_genome = ref_genome,
+                                    chrom_info = chrom_info)
+            dist_gr
 
         })
 

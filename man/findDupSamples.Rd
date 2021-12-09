@@ -26,6 +26,7 @@ Find the duplicated samples by look at the number of matching genotypes
 in all pair-wise samples
 }
 \examples{
+data(snp_geno)
 or_geno <- snp_geno[,grep("X",colnames(snp_geno))]
 rownames(or_geno) <- paste0(snp_geno$CHR,"_",snp_geno$POS)
 or_geno[,1] <- or_geno[,5]

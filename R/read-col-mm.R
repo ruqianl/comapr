@@ -83,7 +83,8 @@ readColMM <- function(file,which.col,chunk=1000L)
                                nmax=chunk, quiet=TRUE)
                checkIJ(current)
 
-               if ( (current$j[length(current$j)] != which.col) | (length(current$i) < chunk)){
+               if ((current$j[length(current$j)] != which.col) |
+                   (length(current$i) < chunk)){
                  els <- list(i = c(els$i,current$i[current$j==which.col]),
                              j = c(els$j,current$j[current$j==which.col]),
                              x = c(els$x,current$x[current$j==which.col]))

@@ -21,22 +21,22 @@ getCellDPTrack(
 \arguments{
 \item{chrom, }{the chromosome}
 
-\item{path_loc, }{the path prefix to the output files from sscocaller including
-"*_totalCount.mtx"}
+\item{path_loc, }{the path prefix to the output files from sscocaller
+including "*_totalCount.mtx"}
 
 \item{sampleName}{the sample name, which is the prefix of sscocaller's output
 files}
 
 \item{nwindow, }{the number of windows for binning the chromosome}
 
-\item{barcodeFile, }{the barcode file containing the list of cell barcodes used
-as the input file for sscocaller}
+\item{barcodeFile, }{the barcode file containing the list of cell barcodes
+used as the input file for sscocaller}
 
 \item{cellBarcode, }{the selected cell barcode}
 
 \item{snp_track, }{the SNP position track which is used for obtaining the SNP
-chromosome locations. It could be omitted and the SNP positions will be acquired
-from the "*_snpAnnot.txt" file.}
+chromosome locations. It could be omitted and the SNP positions will be
+acquired from the "*_snpAnnot.txt" file.}
 
 \item{chunk, }{A integer scalar indicating the chunk size to use, i.e., number
 of rows to read at any one time.}
@@ -53,7 +53,7 @@ The DataTrack object defined in \code{\link[Gviz]{DataTrack}}
 It plots the total allele counts for the selected cell.
 }
 \examples{
-demo_path <-paste0(system.file("extdata",package = "comapr"),"/")
+demo_path <- system.file("extdata",package = "comapr")
 s1_rse_state <- readHapState("s1",chroms=c("chr1"),
                              path=demo_path,barcodeFile=NULL,minSNP = 0,
                              minlogllRatio = 50,
@@ -63,7 +63,7 @@ s1_counts <- countCOs(s1_rse_state)
 dp_co_tracks <- getCellDPTrack(chrom ="chr1",
                                path_loc = demo_path,
                                sampleName = "s1",
-                               barcodeFile = paste0(demo_path,
+                               barcodeFile = file.path(demo_path,
                                                     "s1_barcodes.txt"),
                                cellBarcode = "BC1")
 

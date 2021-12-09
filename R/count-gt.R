@@ -19,6 +19,7 @@
 #'
 #' @export
 #' @examples
+#' data(snp_geno_gr)
 #' genotype_counts <- countGT(GenomicRanges::mcols(snp_geno_gr))
 
 #' @return
@@ -89,6 +90,7 @@ countGT <- function(geno, plot =TRUE,interactive=FALSE){
 #' The filtered genotype matrix
 #'
 #' @examples
+#' data(snp_geno_gr)
 #' corrected_geno <- filterGT(snp_geno_gr, min_markers = 30,min_samples = 2)
 #'
 #' @export
@@ -99,8 +101,8 @@ filterGT <- function(geno, min_markers = 5, min_samples = 3){
   keep_markers <- gt_counts$n_samples >= min_samples
   keep_samples <- gt_counts$n_markers >= min_markers
 
-  message(paste0( "filter out ",sum(keep_markers==FALSE)," marker(s)"))
-  message(paste0( "filter out ",sum(keep_samples==FALSE)," sample(s)"))
+  message("filter out ",sum(keep_markers==FALSE)," marker(s)")
+  message("filter out ",sum(keep_samples==FALSE)," sample(s)")
 
   return(geno[keep_markers, keep_samples])
 
@@ -129,10 +131,10 @@ setMethod("filterGT",signature = c(geno ="GRanges",min_markers = "numeric",
             geno <- geno[keep_markers,]
 
             mcols(geno) <- mcols(geno)[,keep_samples]
-            message(paste0( "filter out ",sum(keep_markers==FALSE),
-                            " marker(s)"))
-            message(paste0( "filter out ",sum(keep_samples==FALSE),
-                            " sample(s)"))
+            message( "filter out ",sum(keep_markers==FALSE),
+                            " marker(s)")
+            message( "filter out ",sum(keep_samples==FALSE),
+                            " sample(s)")
 
             return(geno)
 

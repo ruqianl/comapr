@@ -46,7 +46,7 @@ supported by fewer number of SNPs at the ends of the chromosomes.
 demo_path <- system.file("extdata",package = "comapr")
 s1_rse_qc <- perSegChrQC(sampleName="s1",
                             chroms=c("chr1"),
-                            path=paste0(demo_path,"/"), maxRawCO=10)
+                            path=demo_path, maxRawCO=10)
 
 }
 \author{

@@ -36,7 +36,7 @@ DataTrack object plotting the SNP density histogram
 Generate the SNP density DataTrack (from `Gviz`) for selected chromosome
 }
 \examples{
-demo_path <-paste0(system.file("extdata",package = "comapr"),"/")
+demo_path <- system.file("extdata",package = "comapr")
 snp_track <- getSNPDensityTrack(chrom ="chr1",
                                path_loc = demo_path,
                                sampleName = "s1")

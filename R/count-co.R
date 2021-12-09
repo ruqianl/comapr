@@ -6,14 +6,15 @@
 #' according to marker interval base-pair sizes. Genotypes encoded with "0" are
 #' treated as missing value.
 #'
-#' @importFrom dplyr group_by
+#' @importFrom dplyr group_by lag
 #' @importFrom dplyr %>%
 #' @importFrom dplyr mutate
 #' @importFrom foreach foreach
 #' @importFrom foreach %dopar%
 #' @importFrom BiocParallel bplapply
 #' @importFrom rlang .data
-#' @importFrom GenomicRanges GRanges seqnames mcols ranges seqinfo<- mcols<- granges
+#' @importFrom GenomicRanges GRanges seqnames mcols ranges seqinfo<- mcols<-
+#' @importFrom GenomicRanges gaps granges
 #' @importFrom IRanges mergeByOverlaps
 #' @importFrom IRanges IRanges ranges start width
 #' @importClassesFrom SummarizedExperiment SummarizedExperiment
@@ -28,6 +29,7 @@
 #' and samples in columns, values as the number of COs estimated for each marker
 #' interval
 #' @examples
+#' data(twoSamples)
 #' cocount <- countCOs(twoSamples)
 #' @author Ruqian Lyu
 
@@ -62,32 +64,31 @@ setMethod("countCOs",signature = c(geno="RangedSummarizedExperiment"),
 countCOs_gr <- function(geno) {
   stopifnot(!is.null(seqnames(geno)))
 
-  crossover_counts <- bplapply(
-    GenomicRanges::mcols(geno),
+  crossover_counts <- bplapply(mcols(geno),
     FUN = function(sid_geno, snp_gr = geno[, 0]) {
-      gps_snp_gr <- GenomicRanges::gaps(snp_gr)
+      gps_snp_gr <- gaps(snp_gr)
 
       temp_df <-
         data.frame(
-          chr = as.character(GenomicRanges::seqnames(snp_gr)),
-          Pos = IRanges::start(GenomicRanges::ranges(snp_gr)),
+          chr = as.character(seqnames(snp_gr)),
+          Pos = start(ranges(snp_gr)),
           GT = as.character(sid_geno),
           stringsAsFactors = FALSE
         )
       to_re <-
-        temp_df %>% dplyr::filter((!is.na(.data$GT)) &
+        temp_df %>% filter((!is.na(.data$GT)) &
                                     (!.data$GT ==
                                        "0")) %>%
-        dplyr::group_by(.data$chr) %>%
-        dplyr::mutate(CO = (.data$GT != dplyr::lag(.data$GT)),
-                      Prev = dplyr::lag(.data$Pos)) %>%
-        dplyr::filter(.data$CO) %>% dplyr::mutate(coid = cumsum(.data$CO))
+        group_by(.data$chr) %>%
+        mutate(CO = (.data$GT != lag(.data$GT)),
+                      Prev = lag(.data$Pos)) %>%
+        filter(.data$CO) %>% mutate(coid = cumsum(.data$CO))
 
       if (nrow(to_re) == 0) {
         ## no crossovers
         mcols(gps_snp_gr)$crossovers <- 0
       } else {
-        co_gr <- GenomicRanges::GRanges(
+        co_gr <- GRanges(
           seqnames = to_re$chr,
           ranges = IRanges(start = to_re$Prev,
                            end = to_re$Pos -
@@ -95,16 +96,13 @@ countCOs_gr <- function(geno) {
           coid = to_re$coid
         )
 
-        myHits <-
-          GenomicRanges::findOverlaps(gps_snp_gr, co_gr)
-        # len_prop <- overlapsRanges(query = ranges(gps_snp_gr),subject = ranges(co_gr),
-        #                            hits = myHits)
-        len_prop <-
-          (width(ranges(gps_snp_gr))[myHits@from] + 1)/(width(ranges(co_gr))[myHits@to])
+        myHits <- findOverlaps(gps_snp_gr, co_gr)
+
+        co_gap_length <- width(ranges(gps_snp_gr))[myHits@from] + 1
+        len_prop <- (co_gap_length)/(width(ranges(co_gr))[myHits@to])
 
         mcols(gps_snp_gr)$crossovers <- 0
-        mcols(gps_snp_gr)$crossovers[myHits@from] <-
-          len_prop
+        mcols(gps_snp_gr)$crossovers[myHits@from] <- len_prop
       }
       #  colnames(mcols(gps_snp_gr)) <- names(sid_geno)
       gps_snp_gr
@@ -116,8 +114,8 @@ countCOs_gr <- function(geno) {
 
   co_gr <- crossover_counts[[1]]
   mcols(co_gr) <- final_df
-  GenomicRanges::sort(co_gr)
-  co_gr[IRanges::width(ranges(co_gr)) != 0 &
+  sort(co_gr)
+  co_gr[width(ranges(co_gr)) != 0 &
           rowSums(as.matrix(final_df))>0, ]
 
 }

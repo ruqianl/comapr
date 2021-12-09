@@ -36,13 +36,9 @@ A GRanges object:
 TBD
 }
 \usage{
-snp_geno_gr
+data(snp_geno_gr)
 }
 \description{
 Markers by genotype results for a group of samples
-}
-\examples{
- snp_geno_gr
-
 }
 \keyword{datasets}

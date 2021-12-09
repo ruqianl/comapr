@@ -1,7 +1,9 @@
 BiocParallel::register(BPPARAM =BiocParallel::SerialParam())
+data(snp_geno_gr)
+data(parents_geno)
 
 test_that("Calculate genetic distances", {
-  data(snp_geno_gr)
+
   corrected_geno <- correctGT(gt_matrix = mcols(snp_geno_gr),
                               ref = parents_geno$ref,
                               alt = parents_geno$alt)
@@ -10,7 +12,7 @@ test_that("Calculate genetic distances", {
   # melt_geno <- melt(co_geno,id= 'interval_ID')
   # colnames(melt_geno) <- c("interval_ID","SampleID","Cross_over")
   marker_gr_cos <- countCOs(snp_geno_gr)
-  
+
   expect_equal(sum(marker_gr_cos[,"X92"]$X92),3)
   dist <- calGeneticDist(marker_gr_cos)
   expect_true(sum(dist$kosambi_cm)-169.53<0.01)
@@ -18,23 +20,24 @@ test_that("Calculate genetic distances", {
   expect_true(sum(dist$kosambi_cm[as.character(seqnames(dist))=="1"]) - 47.71165 <0.001)
   expect_true(sum(dist$kosambi_cm[as.character(seqnames(dist))=="2"]) - 51.27605 <0.001)
   expect_true(sum(dist$kosambi_cm[as.character(seqnames(dist))=="4"]) - 42.82993 <0.001)
-  
-  
+
+
 })
 
 test_that("Calculate genetic distances for bined intervals", {
   data(snp_geno_gr)
+  data(parents_geno)
   corrected_geno <- correctGT(gt_matrix = mcols(snp_geno_gr),
                               ref = parents_geno$ref,
                               alt = parents_geno$alt)
   GenomicRanges::mcols(snp_geno_gr) <- corrected_geno
   marker_gr_cos <- countCOs(snp_geno_gr)
-  
+
   dist <- calGeneticDist(marker_gr_cos,bin_size = 1e7)
   expect_true(sum(dist$kosambi_cm[as.character(seqnames(dist))=="1"]) - 47.71165 <0.001)
   expect_true(sum(dist$kosambi_cm[as.character(seqnames(dist))=="2"]) - 51.27605 <0.001)
   expect_true(sum(dist$kosambi_cm[as.character(seqnames(dist))=="4"]) - 42.82993 <0.001)
-  
+
 })
 
 
@@ -50,10 +53,10 @@ test_that("Calculate genetic distances for bined intervals,
                                  bpDist = 100,
                                  maxRawCO=10,
                                  minCellSNP = 1)
-    
+
     s1_counts <- countCOs(s1_rse_state)
-    dist <- calGeneticDist(s1_counts,bin_size = 1e7) 
-    
+    dist <- calGeneticDist(s1_counts,bin_size = 1e7)
+
     #expect_equivalent(colSums(as.matrix(assay(dist))),c( 1,1,0,0,0 ))
     expect_true(sum(dist$X)-41.84747 <0.001)
 })
@@ -69,12 +72,12 @@ test_that("calGeneticDist works for RangedSummarizedExperiment ", {
                                bpDist = 100,
                                maxRawCO=10,
                                minCellSNP = 1)
-  
+
   s1_counts <- countCOs(s1_rse_state)
-  dist <- calGeneticDist(s1_counts) 
-  
+  dist <- calGeneticDist(s1_counts)
+
   expect_equivalent(colSums(as.matrix(assay(dist))), c(1,1,0,0,0 ))
   expect_true(sum(rowRanges(dist)$kosambi)-41.84747 <0.001)
-  
+
 })
 

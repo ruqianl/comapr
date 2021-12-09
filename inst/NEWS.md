@@ -13,3 +13,7 @@ Changes in version 0.99.36 (2021-11-29)
 Changes in version 0.99.37 (2021-11-29)
 + Fixed a bug in .nameFeatures in readHapState function
 
+Changes in version 0.99.38 (2021-12-09)
++ Small fix in plotCount to remove the NA legend
++ Split plot-af.R to two .R files
++ Addressed comments from BioC reviewer 

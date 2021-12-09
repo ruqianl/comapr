@@ -21,23 +21,17 @@
 #' @export
 #' @return lists of numeric genetic distances for multiple samples
 #' @examples
+#' data(coCount)
+#'
 #' bootsDiff <- bootstrapDist(coCount, group_by = "sampleGroup",B=10)
 #' @author Ruqian Lyu
 #'
 bootstrapDist <- function(co_gr, B = 1000, mapping_fun = "k", group_by )
 {
-    if(is(co_gr,"RangedSummarizedExperiment")) {
-        count_matrix <- as.matrix(assay(co_gr))
-
-        group_idx <- lapply(unique(as.character(colData(co_gr)[, group_by])),
-                        function(gp) {
-                          grep(gp, colData(co_gr)[, group_by])})
-        } else {
-          count_matrix <- as.matrix(mcols(co_gr))
-          group_idx <- lapply(group_by, function(gp){
-            grep(gp,colnames(mcols(co_gr)))
-    })
-  }
+  .check_mapping_fun(mapping_fun)
+  count_m_idex <- .get_count_matrix(co_gr_rse = co_gr, group_by = group_by )
+  group_idx <- count_m_idex$gi
+  count_matrix <- count_m_idex$c
 
   #group_size <- sapply(group_idx, length)
   result_fun <- function(){
@@ -47,13 +41,11 @@ bootstrapDist <- function(co_gr, B = 1000, mapping_fun = "k", group_by )
       boots_sample2 <- sample(unlist(group_idx[2]),replace = TRUE)
 
       rb_rate1 <- rowMeans(count_matrix[,boots_sample1])
-      dist_1 <- switch(mapping_fun,
-                       k = 25 * log((1 + 2*rb_rate1)/(1 - 2*rb_rate1)),
-                       h = -50 * log(1 - 2*rb_rate1))
+      dist_1 <- .rb_to_dist(rb_rate1,mapping_fun=mapping_fun)
+
       rb_rate2 <- rowMeans(count_matrix[, boots_sample2])
-      dist_2 <- switch(mapping_fun,
-                       k = 25 * log((1 + 2*rb_rate2)/(1 - 2*rb_rate2)),
-                       h = -50 * log(1 - 2*rb_rate2))
+      dist_2 <- .rb_to_dist(rb_rate2,mapping_fun=mapping_fun)
+
       sum(dist_1) - sum(dist_2)
     }
     bplapply(seq_len(B), function(b) bpl_fun(b) )
@@ -79,27 +71,16 @@ bootstrapDist <- function(co_gr, B = 1000, mapping_fun = "k", group_by )
 #' genetic distances of two groups, `nSample`, the number of samples in the
 #' first and second group.
 #' @examples
+#' data(coCount)
 #' perms <- permuteDist(coCount, group_by = "sampleGroup",B=10)
 #' @author Ruqian Lyu
 #'
 permuteDist <- function(co_gr,B=100,mapping_fun="k",group_by){
+  .check_mapping_fun(mapping_fun)
+  count_m_idex <- .get_count_matrix(co_gr_rse = co_gr, group_by = group_by )
+  group_idx <- count_m_idex$gi
+  count_matrix <- count_m_idex$c
 
-  if(is(co_gr,"RangedSummarizedExperiment")){
-    ## group_by contains the
-    count_matrix <- as.matrix(assay(co_gr))
-    group_idx <- lapply(unique(as.character(colData(co_gr)[, group_by])),
-                        function(gp) {
-                          grep(gp, colData(co_gr)[, group_by])})
-
-  } else {
-    ## co_gr is of GRanges class
-    count_matrix <- as.matrix(mcols(co_gr))
-    #stopifnot(length(group_by)==2)
-
-    group_idx <- lapply(group_by, function(gp){
-    grep(gp,colnames(mcols(co_gr)))
-    })
-  }
   stopifnot(length(group_idx)==2)
   two_g_idx <- unlist(group_idx)
   len_1 <- length(group_idx[[1]])
@@ -113,15 +94,12 @@ permuteDist <- function(co_gr,B=100,mapping_fun="k",group_by){
 
       rb_rate_1 <- rowMeans(count_matrix[,g1_idx])
       rb_rate_2 <- rowMeans(count_matrix[,g2_idx])
-      dist_1 <- switch(mapping_fun,
-                       k = 25*log((1+2*rb_rate_1)/(1-2*rb_rate_1)),
-                       h = -50 * log(1 - 2 * rb_rate_1))
-      dist_2 <- switch(mapping_fun,
-                       k = 25*log((1+2*rb_rate_2)/(1-2*rb_rate_2)),
-                       h = -50 * log(1 - 2 * rb_rate_2))
+
+      dist_1 <- .rb_to_dist(rb_rate_1,mapping_fun=mapping_fun)
+      dist_2 <- .rb_to_dist(rb_rate_2,mapping_fun=mapping_fun)
+
       sum(dist_1)-sum(dist_2)
       #rs
-
     }
     bplapply(seq_len(B),function(b) bpl_fun(b))
   }
@@ -132,12 +110,10 @@ permuteDist <- function(co_gr,B=100,mapping_fun="k",group_by){
 
   rb_rate_1 <- rowMeans(count_matrix[,g1_idx])
   rb_rate_2 <- rowMeans(count_matrix[,g2_idx])
-  dist_1 <- switch(mapping_fun,
-                   k = 25*log((1+2*rb_rate_1)/(1-2*rb_rate_1)),
-                   h = -50 * log(1 - 2 * rb_rate_1))
-  dist_2 <- switch(mapping_fun,
-                   k = 25*log((1+2*rb_rate_2)/(1-2*rb_rate_2)),
-                   h = -50 * log(1 - 2 * rb_rate_2))
+
+  dist_1 <- .rb_to_dist(rb_rate_1,mapping_fun=mapping_fun)
+  dist_2 <- .rb_to_dist(rb_rate_2,mapping_fun=mapping_fun)
+
   observed_diff <- sum(dist_1)-sum(dist_2)
 
 
@@ -146,4 +122,43 @@ permuteDist <- function(co_gr,B=100,mapping_fun="k",group_by){
        nSample=c(length(g1_idx),length(g2_idx)))
 }
 
+#' Kosambi mapping function
+#' @noRd
+#' @keywords internal
+.k_map <- function(rb_rate){
+  25*log((1+2*rb_rate)/(1-2*rb_rate))
+}
+#' Haldane mapping function
+#' @noRd
+#' @keywords internal
+.h_map <- function(rb_rate){
+  -50 * log(1 - 2 * rb_rate)
+}
 
+.rb_to_dist <- function(rb_rate,mapping_fun){
+  switch(mapping_fun,
+         k = .k_map(rb_rate),
+         h = .h_map(rb_rate))
+}
+#' Get the count matrix from RSE or Granges object's mcols
+#' @noRd
+#' @keywords internal
+.get_count_matrix <- function(co_gr_rse,group_by){
+
+  if(is(co_gr_rse,"RangedSummarizedExperiment")){
+    ## group_by contains the
+    count_matrix <- as.matrix(assay(co_gr_rse))
+    group_idx <- lapply(unique(as.character(colData(co_gr_rse)[, group_by])),
+                        function(gp) {
+                          grep(gp, colData(co_gr_rse)[, group_by])})
+
+  } else {
+    ## co_gr is of GRanges class
+    count_matrix <- as.matrix(mcols(co_gr_rse))
+    #stopifnot(length(group_by)==2)
+    group_idx <- lapply(group_by, function(gp){
+      grep(gp,colnames(mcols(co_gr_rse)))
+    })
+  }
+  list(c = count_matrix, gi = group_idx)
+}

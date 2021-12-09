@@ -1,4 +1,5 @@
 test_that("countGT works", {
+  data(snp_geno)
   or_geno <- snp_geno[,grep("X",colnames(snp_geno))]
   rownames(or_geno) <- paste0(snp_geno$CHR,"_",snp_geno$POS)
   or_geno[1,] <- rep("Fail",dim(or_geno)[2])

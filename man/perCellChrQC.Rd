@@ -39,7 +39,7 @@ generate cell cell (per chr) summary statistics
 \examples{
 demo_path <-system.file("extdata",package = "comapr")
 pcQC <- perCellChrQC(sampleName="s1",chroms=c("chr1"),
-path=paste0(demo_path,"/"),
+path=demo_path,
 barcodeFile=NULL)
 }
 \author{

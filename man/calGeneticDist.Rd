@@ -17,7 +17,8 @@ calGeneticDist(
   bin_size = NULL,
   mapping_fun = "k",
   ref_genome = "mm10",
-  group_by = NULL
+  group_by = NULL,
+  chrom_info = NULL
 )
 
 \S4method{calGeneticDist}{GRanges,missing,ANY,ANY,missing}(
@@ -25,7 +26,8 @@ calGeneticDist(
   bin_size = NULL,
   mapping_fun = "k",
   ref_genome = "mm10",
-  group_by = NULL
+  group_by = NULL,
+  chrom_info = NULL
 )
 
 \S4method{calGeneticDist}{GRanges,numeric,ANY,ANY,missing}(
@@ -33,7 +35,8 @@ calGeneticDist(
   bin_size = NULL,
   mapping_fun = "k",
   ref_genome = "mm10",
-  group_by = NULL
+  group_by = NULL,
+  chrom_info = NULL
 )
 
 \S4method{calGeneticDist}{GRanges,missing,ANY,ANY,character}(
@@ -41,7 +44,8 @@ calGeneticDist(
   bin_size = NULL,
   mapping_fun = "k",
   ref_genome = "mm10",
-  group_by = NULL
+  group_by = NULL,
+  chrom_info = NULL
 )
 
 \S4method{calGeneticDist}{GRanges,numeric,ANY,ANY,character}(
@@ -49,7 +53,8 @@ calGeneticDist(
   bin_size = NULL,
   mapping_fun = "k",
   ref_genome = "mm10",
-  group_by = NULL
+  group_by = NULL,
+  chrom_info = NULL
 )
 
 \S4method{calGeneticDist}{RangedSummarizedExperiment,missing,ANY,ANY,missing}(
@@ -57,7 +62,8 @@ calGeneticDist(
   bin_size = NULL,
   mapping_fun = "k",
   ref_genome = "mm10",
-  group_by = NULL
+  group_by = NULL,
+  chrom_info = NULL
 )
 
 \S4method{calGeneticDist}{RangedSummarizedExperiment,missing,ANY,ANY,character}(
@@ -65,7 +71,8 @@ calGeneticDist(
   bin_size = NULL,
   mapping_fun = "k",
   ref_genome = "mm10",
-  group_by = NULL
+  group_by = NULL,
+  chrom_info = NULL
 )
 
 \S4method{calGeneticDist}{RangedSummarizedExperiment,numeric,ANY,ANY,character}(
@@ -73,7 +80,8 @@ calGeneticDist(
   bin_size = NULL,
   mapping_fun = "k",
   ref_genome = "mm10",
-  group_by = NULL
+  group_by = NULL,
+  chrom_info = NULL
 )
 
 \S4method{calGeneticDist}{RangedSummarizedExperiment,numeric,ANY,ANY,missing}(
@@ -81,7 +89,8 @@ calGeneticDist(
   bin_size = NULL,
   mapping_fun = "k",
   ref_genome = "mm10",
-  group_by = NULL
+  group_by = NULL,
+  chrom_info = NULL
 )
 }
 \arguments{
@@ -93,13 +102,17 @@ based on recombination rate}
 
 \item{mapping_fun}{The mapping function to use, can be one of "k" or "h" (kosambi or haldane)}
 
-\item{ref_genome}{The reference genome name. It is used to fetch the chromosome Information
-from UCSC database.}
+\item{ref_genome}{The reference genome name. It is used to fetch the chromosome size
+information from UCSC database.}
 
 \item{group_by, }{character vector contains the unique prefix of sample names
 that are used for defining different sample groups. Or the column name in
 colData(co_count) that specify the group factor. If missing all samples are
 assumed to be from one group}
+
+\item{chrom_info}{A user supplied data.frame containing two columns with column names
+chrom and size, describing the chromosome names and lengths if not using
+ref_genome from UCSC. If supplied, the `ref_genome` is ignored.}
 }
 \value{
 GRanges object
@@ -113,6 +126,7 @@ recombination fraction in samples and then derive the Haldane or Kosambi
 genetic distances via mapping functions
 }
 \examples{
+data(coCount)
 dist_se <- calGeneticDist(coCount)
 # dist_se <- calGeneticDist(coCount,group_by="sampleGroup")
 

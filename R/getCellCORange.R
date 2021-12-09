@@ -31,14 +31,14 @@ getCellCORange <- function(co_count, cellBarcode){
     cell1_co <- cell1_co[cell1_co!=0]
   } else {
     cell1_co <- assay(co_count)[,cellBarcode]
-    cell1_coRange <- SummarizedExperiment::rowRanges(co_count)[cell1_co!=0]
+    cell1_coRange <- rowRanges(co_count)[cell1_co!=0]
     cell1_co <- cell1_co[cell1_co!=0]
 
     mcols(cell1_coRange) <- cell1_co
 
   }
 
-  co_range_cell1 <- GenomicRanges::reduce(cell1_coRange,min.gapwidth=2)
+  co_range_cell1 <- reduce(cell1_coRange,min.gapwidth=2)
   co_range_cell1
 }
 
@@ -100,13 +100,15 @@ getCellAFTrack <-  function(chrom = "chr1",
   whichCell <- match(cellBarcode, initial_barcodes$V1)
 
   dpMM <- readColMM(file = paste0(path_loc, sampleName,"_",
-                                  chrom,"_totalCount.mtx"),which.col = whichCell,
+                                  chrom,"_totalCount.mtx"),
+                    which.col = whichCell,
                     chunk = chunk)
 
   dpMM <- dpMM[,whichCell]
 
   altMM <- readColMM(file = paste0(path_loc, sampleName,"_",
-                                   chrom, "_altCount.mtx"),which.col = whichCell,
+                                   chrom, "_altCount.mtx"),
+                     which.col = whichCell,
                      chunk = chunk)
 
 
@@ -114,18 +116,10 @@ getCellAFTrack <-  function(chrom = "chr1",
   af_data <- altMM/dpMM
   keep_snp <- !is.na(af_data)
 
-  if(is.null(snp_track)){
-     snp_anno <- read.table(file=paste0(path_loc,sampleName,"_",
-                                        chrom, "_snpAnnot.txt"),
-                            header=TRUE)
-     snp_pos <- snp_anno$POS
+  snp_pos <- .get_snp_pos(snp_track = snp_track, path_loc = path_loc,
+                          sampleName = sampleName, chrom = chrom)
 
-  } else {
-    stopifnot(unlist(dimnames(seqinfo(snp_track))) == chrom)
-    snp_pos <- snp_track@range@ranges@start
-  }
-
-  af_track <- Gviz::DataTrack(GRanges(seqnames = chrom,
+  af_track <- DataTrack(GRanges(seqnames = chrom,
                                 IRanges(start=snp_pos[keep_snp],
                                         width = 1,
                                         genome = "mm10")),

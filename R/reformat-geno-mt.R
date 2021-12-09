@@ -49,9 +49,6 @@ NULL
   ## initialise the vector of GT with `missing`
   tem <- rep(failed,length(s_gt))
 
-  #tem <- rep("missing",length(s_gt))
-  ## keep the Fail in
-  ## tem[s_gt == missing] <- missing
   ## if the genotype is the same as reference:
   tem[s_gt == ref] <- "Homo_ref"
   ## if the genotype is the same as alternative:
@@ -201,6 +198,8 @@ fill_fail <- function(s_gt,fail = "Fail",chr = NULL){
 #' to NA.
 #'
 #' @examples
+#' data(snp_geno_gr)
+#' data(parents_geno)
 #' snp_gt_crt <- correctGT(gt_matrix = GenomicRanges::mcols(snp_geno_gr),
 #'                       ref = parents_geno$ref,
 #'                       alt = parents_geno$alt,
@@ -226,13 +225,6 @@ correctGT <- function(gt_matrix, ref, alt,
                      failed = failed)
 
 
-  ### infer and fill in Fail or put NA in Fail
-  ### Do not need to do this actually
-  # if(infer_fail){
-  #   gt_matrix <- apply(as.matrix(gt_matrix),2, fill_fail,
-  #                      fail = "Fail",chr = as.factor(chr))
-  # }
-  #
   ## change SNPs with genotype `fail` to NA
   gt_matrix <- apply(as.matrix(gt_matrix),2, .change_missing,
                      missing = failed)
@@ -245,4 +237,3 @@ correctGT <- function(gt_matrix, ref, alt,
 
 }
 
-#setMethod(correctGT, signature = c("matrix","charactor","cha"))

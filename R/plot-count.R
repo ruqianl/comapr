@@ -14,6 +14,8 @@
 #'  or "hist". Only relevant when by_chr=TRUE
 #' @return ggplot object
 #' @importFrom plyr mapvalues
+#' @importFrom tidyr pivot_longer
+#' @importFrom RColorBrewer  brewer.pal
 #' @examples
 #' demo_path <-paste0(system.file("extdata",package = "comapr"),"/")
 #' s1_rse_state <- readHapState("s1",chroms=c("chr1"),
@@ -165,33 +167,33 @@ plot_count <- function(co_count, by_chr=FALSE, group_by  = "sampleGroup",
 
   stopifnot(group_by %in% colnames(colData(co_count)))
   col_to_plot <- unique(colData(co_count)[,group_by])
-  sample_group_colors <- RColorBrewer::brewer.pal(ifelse(length(col_to_plot)> 2,
+  sample_group_colors <- brewer.pal(ifelse(length(col_to_plot)> 2,
                                                          length(col_to_plot),3),
                                                   name = "Set1")
 
   names(sample_group_colors)[seq_along(col_to_plot)] <- col_to_plot
-
+  sample_group_colors <- sample_group_colors[seq_along(col_to_plot)]
   chr <- BC <- COs <- sampleGroup <- NULL
   ChrCOs <- meanCOs <- sd <- lower <- upper <- NULL
   if(by_chr){
 
     tmp <- assay(co_count)
-    tmp$chr <- GenomicRanges::seqnames(co_count)
+    tmp$chr <- seqnames(co_count)
     tmp <- data.frame(tmp,check.names = FALSE) %>%
-      tidyr::pivot_longer(cols = colnames(co_count),
+      pivot_longer(cols = colnames(co_count),
                           values_to = "COs", names_to = "BC")
-    tmp$sampleGroup <- plyr::mapvalues(tmp$BC, from = colnames(co_count),
+    tmp$sampleGroup <- mapvalues(tmp$BC, from = colnames(co_count),
                                        to = colData(co_count)[,group_by])
 
     stopifnot(plot_type %in% c("error_bar","hist"))
 
     if(plot_type == "error_bar"){
       suppressMessages(
-        p <- tmp %>% dplyr::group_by(chr,BC) %>%
+        p <- tmp %>% group_by(chr,BC) %>%
           summarise(ChrCOs = sum(COs),
                     sampleGroup = unique(sampleGroup)) %>%
-          dplyr::group_by(chr,sampleGroup) %>%
-          dplyr::summarise(meanCOs = mean(ChrCOs),
+          group_by(chr,sampleGroup) %>%
+          summarise(meanCOs = mean(ChrCOs),
                            lower = meanCOs-sd(ChrCOs)/sqrt(length(ChrCOs)),
                            upper = meanCOs+sd(ChrCOs)/sqrt(length(ChrCOs))) %>%
           ggplot(mapping = aes(x=chr,y = meanCOs,
@@ -202,10 +204,10 @@ plot_count <- function(co_count, by_chr=FALSE, group_by  = "sampleGroup",
           theme_classic(base_size = 18))
     } else {
       suppressMessages(
-        p <- tmp %>% dplyr::group_by(chr,BC) %>%
+        p <- tmp %>% group_by(chr,BC) %>%
           summarise(ChrCOs = sum(COs),
                     sampleGroup = unique(sampleGroup)) %>%
-          dplyr::group_by(chr,sampleGroup) %>%
+          group_by(chr,sampleGroup) %>%
           ggplot()+geom_histogram(mapping = aes(x=ChrCOs))+facet_wrap(.~chr))
     }
   } else {

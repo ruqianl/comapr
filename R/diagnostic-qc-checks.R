@@ -12,6 +12,7 @@
 #' @param sampleName, the name of the sample to parse which is used as prefix
 #' for finding relevant files for the underlying sample
 #' @param doPlot, whether a plot should returned, default to TRUE
+#' @importFrom dplyr group_by summarise mutate filter select n if_else
 #'
 #' @return a list object that contains the data.frame with summarised statistics
 #' per chr per cell and a plot (if doPlot)
@@ -20,14 +21,14 @@
 #' @examples
 #' demo_path <-system.file("extdata",package = "comapr")
 #' pcQC <- perCellChrQC(sampleName="s1",chroms=c("chr1"),
-#' path=paste0(demo_path,"/"),
+#' path=demo_path,
 #' barcodeFile=NULL)
 #' @export
 #' @author Ruqian Lyu
 perCellChrQC <- function(sampleName,chroms = c("chr1","chr7","chr15"),
                          path,barcodeFile = NULL,doPlot = TRUE){
   if (is.null(barcodeFile)) {
-    barcodeFile <- paste0(path, sampleName, "_barcodes.txt")
+    barcodeFile <- file.path(path, paste0(sampleName, "_barcodes.txt"))
   }
   stopifnot(file.exists(barcodeFile))
 
@@ -36,8 +37,8 @@ perCellChrQC <- function(sampleName,chroms = c("chr1","chr7","chr15"),
 
   segInfo_list <- bplapply(chroms, function(chr) {
 
-    segInfo <- read.table(file = paste0(path, sampleName,
-                                        "_", chr, "_viSegInfo.txt"),
+    segInfo <- read.table(file = file.path(path,paste0(sampleName,
+                                        "_", chr, "_viSegInfo.txt")),
                           stringsAsFactors = FALSE,
                           col.names = c("ithSperm", "Seg_start", "Seg_end",
                                         "logllRatio", "nSNP", "State"))
@@ -54,10 +55,10 @@ perCellChrQC <- function(sampleName,chroms = c("chr1","chr7","chr15"),
     chr_levels <- unique(segInfo_chrs$Chrom)
   }
 
-  plt_df <- segInfo_chrs %>% dplyr::group_by(.data$ithSperm,.data$Chrom) %>%
-    dplyr::summarise(totalSNP = sum(.data$nSNP),
+  plt_df <- segInfo_chrs %>% group_by(.data$ithSperm,.data$Chrom) %>%
+    summarise(totalSNP = sum(.data$nSNP),
                      nCORaw = length(.data$nSNP)-1) %>%
-    dplyr::mutate(Chrom = factor(.data$Chrom,levels =  chr_levels))
+    mutate(Chrom = factor(.data$Chrom,levels =  chr_levels))
   plt_df$barcode <- barcodes$barcodes[as.numeric(gsub("ithSperm",
                                                       "",plt_df$ithSperm))+1]
   plt_df$ithSperm <- NULL
@@ -76,7 +77,7 @@ perCellChrQC <- function(sampleName,chroms = c("chr1","chr7","chr15"),
 #' countBinState
 #'
 #' Bins the chromosome into supplied number of bins and find the state of
-#' the chromosome bins across all sperms
+#' the chromosome bins across all gamete cells
 #'
 #' This function is used for checking whether chromosome segregation pattern
 #' obeys the expected ratio.
@@ -87,12 +88,14 @@ perCellChrQC <- function(sampleName,chroms = c("chr1","chr7","chr15"),
 #' `sscocaller`
 #' @param genomeRange, GRanges object with seqlengths information for the genome
 #' @param ntile, integer, how many tiles the chromosome is binned into
-#'
+#' @importFrom GenomicRanges tileGenome GRanges
+#' @importFrom GenomeInfoDb seqlengths
+#' @importFrom IRanges IRanges
 #' @return a data.frame that contains chromosome bin segregation ratio
 #'
 #'
 #' @examples
-#' \donttest{
+#'
 #' chrom_info <- GenomeInfoDb::getChromInfoFromUCSC("mm10")
 #' seq_length <- chrom_info$size
 #' names(seq_length) <- chrom_info$chrom
@@ -115,9 +118,8 @@ perCellChrQC <- function(sampleName,chroms = c("chr1","chr7","chr15"),
 #'                       header = TRUE)
 #'
 #' countBinState(chr = "chr1",snpAnno = snpAnno,
-#' viState = vi_mtx,genomeRange = dna_mm10_gr,
-#' ntile = 1)
-#' }
+#' viState = vi_mtx,genomeRange = dna_mm10_gr, ntile = 1)
+#'
 #' @author Ruqian Lyu
 #' @export
 countBinState <- function(chr,
@@ -126,30 +128,30 @@ countBinState <- function(chr,
                           genomeRange,
                           ntile = 5){
 
-  tiles <- GenomicRanges::tileGenome(GenomeInfoDb::seqlengths(genomeRange)[chr],
+  tiles <- tileGenome(seqlengths(genomeRange)[chr],
                                      ntile = ntile)
   binned_dna_mm10_gr <- unlist(tiles)
 
-  vi_gr <- GenomicRanges::GRanges(seqnames = chr,
-                                  ranges = IRanges::IRanges(start = snpAnno$POS,
+  vi_gr <- GRanges(seqnames = chr,
+                                  ranges = IRanges(start = snpAnno$POS,
                                                             width = 1))
   hits <- findOverlaps(vi_gr,binned_dna_mm10_gr)
 
 
   vi_bins <- suppressMessages(do.call(rbind,(apply(viState,2, function(x){
-    data.frame(state = x, bins = hits@to) %>% dplyr::group_by(.data$bins) %>%
-      dplyr::summarise(nstate2 = sum(.data$state ==2),
+    data.frame(state = x, bins = hits@to) %>% group_by(.data$bins) %>%
+      summarise(nstate2 = sum(.data$state ==2),
                        nstate1 = sum(.data$state ==1))
   }))))
-  vi_bins %>% dplyr::mutate(binState =
-                              dplyr::if_else(.data$nstate2>.data$nstate1,
+  vi_bins %>% mutate(binState =
+                              if_else(.data$nstate2>.data$nstate1,
                                              "state2",
                                              "state1")) %>%
-    dplyr::group_by(.data$bins) %>%
-    dplyr::summarise(binSegRatio = sum(.data$binState=="state2")/dplyr::n(),
+    group_by(.data$bins) %>%
+    summarise(binSegRatio = sum(.data$binState=="state2")/n(),
                      nstate2 =sum(.data$binState=="state2"),
                      nstate1 = sum(.data$binState=="state1")) %>%
-    dplyr::mutate(Chrom = chr)
+    mutate(Chrom = chr)
 }
 
 #' perSegChrQC
@@ -179,7 +181,7 @@ countBinState <- function(chr,
 #' demo_path <- system.file("extdata",package = "comapr")
 #' s1_rse_qc <- perSegChrQC(sampleName="s1",
 #'                             chroms=c("chr1"),
-#'                             path=paste0(demo_path,"/"), maxRawCO=10)
+#'                             path=demo_path, maxRawCO=10)
 #'
 #' @export
 #'
@@ -187,7 +189,7 @@ perSegChrQC <- function(sampleName,chroms = c("chr1","chr7","chr15"),
                         path,barcodeFile = NULL,maxRawCO=10){
   logllRatio <- nSNP <- bpDist <- NULL
   if (is.null(barcodeFile)) {
-    barcodeFile <- paste0(path, sampleName, "_barcodes.txt")
+    barcodeFile <- file.path(path,paste0(sampleName, "_barcodes.txt"))
   }
   stopifnot(file.exists(barcodeFile))
 
@@ -200,8 +202,8 @@ perSegChrQC <- function(sampleName,chroms = c("chr1","chr7","chr15"),
     # snpAnno <- read.table(file = paste0(path, sampleName,
     #   "_", chr, "_snpAnnot.txt"), stringsAsFactors = F,
     #   header = T)
-    segInfo <- read.table(file = paste0(path, sampleName,
-                                        "_", chr, "_viSegInfo.txt"),
+    segInfo <- read.table(file = file.path(path,paste0(sampleName,
+                                        "_", chr, "_viSegInfo.txt")),
                           stringsAsFactors = FALSE,
                           col.names = c("ithSperm", "Seg_start", "Seg_end",
                                         "logllRatio", "nSNP", "State"))
@@ -213,14 +215,14 @@ perSegChrQC <- function(sampleName,chroms = c("chr1","chr7","chr15"),
   rm(segInfo_list)
 
   rmCells <-
-    segInfo_chrs %>% dplyr::group_by(.data$ithSperm,.data$Chrom) %>%
-    dplyr::summarise(nCORaw = length(.data$nSNP)-1) %>%
-    dplyr::filter(.data$nCORaw >= maxRawCO) %>%
-    dplyr::select(.data$ithSperm)
+    segInfo_chrs %>% group_by(.data$ithSperm,.data$Chrom) %>%
+    summarise(nCORaw = length(.data$nSNP)-1) %>%
+    filter(.data$nCORaw >= maxRawCO) %>%
+    select(.data$ithSperm)
   rmCells <- unique(rmCells$ithSperm)
 
-  p <- segInfo_chrs %>% dplyr::filter(!.data$ithSperm %in% rmCells)%>%
-    dplyr::mutate(bpDist = (.data$Seg_end -.data$Seg_start)) %>%
+  p <- segInfo_chrs %>% filter(!.data$ithSperm %in% rmCells)%>%
+    mutate(bpDist = (.data$Seg_end -.data$Seg_start)) %>%
     ggplot()+geom_point(mapping = aes(x =nSNP,y = bpDist,
                                       color = log10(logllRatio)))+
     scale_x_log10()+scale_y_log10()+scale_color_viridis_c()

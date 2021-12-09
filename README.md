@@ -5,6 +5,15 @@ comapr
 [![Build
 Status](https://travis-ci.com/ruqianl/comapr.svg?branch=master)](https://travis-ci.com/ruqianl/comapr)
 
+## Install
+
+``` r
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("comapr")
+```
+
 ## Introduction
 
 <img src='Meta/hexComapr_crop.png' align="right" height="139" />
@@ -62,32 +71,32 @@ list.files("inst/extdata/")
 
 ## Visualizing feature of single sperms
 
-![PerCellQC](https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/public/figure/Crossover-identification-with-sscocaller-and-comapr.Rmd/unnamed-chunk-6-1.png)
+![PerCellQC](https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/figure/Crossover-identification-with-sscocaller-and-comapr.Rmd/unnamed-chunk-6-1.png)
 
 ## Crossover positions
 
 ![Crossover
-Positions](https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/public/figure/Crossover-identification-with-sscocaller-and-comapr.Rmd/unnamed-chunk-31-1.png)
+Positions](https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/figure/Crossover-identification-with-sscocaller-and-comapr.Rmd/unnamed-chunk-31-1.png)
 
 ![Crossover counts per
-group](https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/public/figure/Crossover-identification-with-sscocaller-and-comapr.Rmd/unnamed-chunk-33-1.png)
+group](https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/figure/Crossover-identification-with-sscocaller-and-comapr.Rmd/unnamed-chunk-33-1.png)
 
 ## Cumumative Genetic distances across intervals
 
 ![Genetic Distances Per
-Chromosome](https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/public/figure/Crossover-identification-with-sscocaller-and-comapr.Rmd/unnamed-chunk-41-1.png)
+Chromosome](https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/figure/Crossover-identification-with-sscocaller-and-comapr.Rmd/unnamed-chunk-41-1.png)
 ![Whole Genome Cumulative Genetic
-Distances](https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/public/figure/Crossover-identification-with-sscocaller-and-comapr.Rmd/unnamed-chunk-42-1.png)
+Distances](https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/figure/Crossover-identification-with-sscocaller-and-comapr.Rmd/unnamed-chunk-42-1.png)
 
 ## Resampling methods for comparing groups
 
-![Permutation](https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/public/figure/Crossover-identification-with-sscocaller-and-comapr.Rmd/unnamed-chunk-48-1.png)
+![Permutation](https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/figure/Crossover-identification-with-sscocaller-and-comapr.Rmd/unnamed-chunk-48-1.png)
 
-![Bootstrapping](https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/public/figure/Crossover-identification-with-sscocaller-and-comapr.Rmd/unnamed-chunk-45-1.png)
+![Bootstrapping](https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/figure/Crossover-identification-with-sscocaller-and-comapr.Rmd/unnamed-chunk-45-1.png)
 
 ## Analysis workflow for demonstration of `comapr` on a single-sperm DNAseq dataset
 
 We demonstrate the usage of `sscocaller` and `comapr` for identifying
 and visualising crossovers regions from single-sperm DNA sequencing
 dataset
-[here](https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/public/Crossover-identification-with-sscocaller-and-comapr.html)
+[here](https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/Crossover-identification-with-sscocaller-and-comapr.html)

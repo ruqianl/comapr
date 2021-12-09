@@ -35,6 +35,7 @@ It shuffles the group labels for the samples and calculate a difference
 between two groups after shuffling.
 }
 \examples{
+data(coCount)
 perms <- permuteDist(coCount, group_by = "sampleGroup",B=10)
 }
 \author{

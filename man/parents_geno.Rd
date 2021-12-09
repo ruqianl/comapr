@@ -12,7 +12,7 @@ A data.frame:
 }
 }
 \usage{
-parents_geno
+data(parents_geno)
 }
 \description{
 Parents' genotype for F1 samples in `snp_geno`

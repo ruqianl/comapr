@@ -41,13 +41,9 @@ Statistics Canada. Table 001-0008 - Production and farm value of
  maple products, annual. \url{http://www5.statcan.gc.ca/cansim/}
 }
 \usage{
-snp_geno
+data(snp_geno)
 }
 \description{
 Markers by genotype results for a group of samples
-}
-\examples{
- snp_geno
-
 }
 \keyword{datasets}

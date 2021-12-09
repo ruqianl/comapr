@@ -43,7 +43,7 @@ readHapState <- function(sampleName, chroms=c("chr1"), path,
                          minCellSNP = 200,
                          biasTol = 0.45){
   if(is.null(barcodeFile)){
-    barcodeFile <- paste0(path,sampleName,"_barcodes.txt")
+    barcodeFile <- file.path(path,paste0(sampleName,"_barcodes.txt"))
   }
 
   bpDist <- .nameFeatures(chroms,bpDist)
@@ -56,25 +56,27 @@ readHapState <- function(sampleName, chroms=c("chr1"), path,
 
       barcodes <- read.table(file=barcodeFile,stringsAsFactors = FALSE,
                              col.names = "barcodes")
-      snpAnno <- read.table(file=paste0(path,sampleName,"_",chr,"_snpAnnot.txt"),
+      snpAnno <- read.table(file=file.path(path,paste0(sampleName,"_",chr,
+                                                       "_snpAnnot.txt")),
                             stringsAsFactors = FALSE,
                             header=TRUE)
-      segInfo <- read.table(file = paste0(path,sampleName,"_",chr,
-                                          "_viSegInfo.txt"),
+      segInfo <- read.table(file = file.path(path,paste0(sampleName,"_",chr,
+                                          "_viSegInfo.txt")),
                             stringsAsFactors = FALSE,
                             col.names = c("ithSperm","Seg_start","Seg_end",
                                           "logllRatio","nSNP","State"))
-      vi_mtx <- readMM(file = paste0(path,sampleName,"_",chr,"_vi.mtx"))
+      vi_mtx <- readMM(file = file.path(path,paste0(sampleName,"_",
+                                                    chr,"_vi.mtx")))
       grrange <- GRanges(seqnames = chr,
-                         ranges = IRanges::IRanges( start =  snpAnno$POS,
+                         ranges = IRanges( start =  snpAnno$POS,
                                                     width = 1))
-      se <- SummarizedExperiment::SummarizedExperiment(assays =
-                                                         list(vi_state = vi_mtx),
-                                                       colData = barcodes,
-                                                       rowRanges = grrange,
-                                                       metadata = data.frame(
-                                                         segInfo, chr=chr,
-                                                         sampleGroup=sampleName))
+      se <- SummarizedExperiment(assays =
+                                   list(vi_state = vi_mtx),
+                                 colData = barcodes,
+                                 rowRanges = grrange,
+                                 metadata = data.frame(
+                                   segInfo, chr=chr,
+                                   sampleGroup=sampleName))
       se <- .filterCOsExtra(se , minSNP = minSNP[chr],
                             minlogllRatio = minlogllRatio[chr],
                             minCellSNP = minCellSNP[chr],
@@ -157,12 +159,12 @@ readHapState <- function(sampleName, chroms=c("chr1"), path,
   segInfo$bp_dist <- segInfo$Seg_end - segInfo$Seg_start
   # ithSperm counts from 0. thus +1
   ithBC <- as.numeric(gsub("ithSperm","",segInfo$ithSperm))+1
-  segInfo$barcode <- SummarizedExperiment::colData(se)$barcodes[ithBC]
+  segInfo$barcode <- colData(se)$barcodes[ithBC]
 
 
   suppressMessages(
-    rmCells <- segInfo %>% dplyr::group_by(barcode) %>%
-      dplyr::summarise(total_SNP = sum(nSNP),
+    rmCells <- segInfo %>% group_by(barcode) %>%
+      summarise(total_SNP = sum(nSNP),
                        total_co = length(nSNP)-1))
   ## provided minCellSNP or nmads smaller from median, whichever is larger
   madsAway <- nmad*mad(rmCells$total_SNP)
@@ -175,7 +177,7 @@ readHapState <- function(sampleName, chroms=c("chr1"), path,
 
   ## Get the cell barcodes that are poor quality (doublets/low cov)
   rmCells <- rmCells %>%
-    dplyr::filter(total_co >= maxRawCO | total_SNP <= minCellSNP )
+    filter(total_co >= maxRawCO | total_SNP <= minCellSNP )
 
   rmCells <-  unique(rmCells$barcode)
 
@@ -190,7 +192,7 @@ readHapState <- function(sampleName, chroms=c("chr1"), path,
 
   ## remove some SNPs if their inferred states are biased
   markers <- co_contr_snp
-  queryR <-  IRanges::IRanges(start = markers,
+  queryR <-  IRanges(start = markers,
                               width = 1)
   if(length(unique(segInfo_f$ithSperm)) > 10 ){
 
@@ -200,7 +202,7 @@ readHapState <- function(sampleName, chroms=c("chr1"), path,
                           state = segInfo_f[segInfo_f$ithSperm==ithS,]$State)
 
       temp <- rep(0,length(markers))
-      myHits <- IRanges::findOverlaps(queryR,subjectR)
+      myHits <- findOverlaps(queryR,subjectR)
       temp[myHits@from] <- subjectR@elementMetadata@listData$state[myHits@to]
       temp
     })
@@ -213,14 +215,14 @@ readHapState <- function(sampleName, chroms=c("chr1"), path,
 
   }
   ## row numbers of these SNPs in the assay
-  ithSNP <- match(co_contr_snp,IRanges::ranges(rowRanges(se ))@start)
+  ithSNP <- match(co_contr_snp,ranges(rowRanges(se ))@start)
 
   ## subset the columns to only keep the Good cells
   colnames(se) <- colData(se)$barcodes
   se <- se[ithSNP,!colnames(se) %in% rmCells]
 
   vi_m <- Matrix(data=0,nrow=nrow(se),ncol=ncol(se))
-  queryR <- IRanges::IRanges(start=co_contr_snp,
+  queryR <- IRanges(start=co_contr_snp,
                              width=1)
 
   ##<<<<<----UPDATE,TEST--------->>>>
@@ -235,8 +237,8 @@ readHapState <- function(sampleName, chroms=c("chr1"), path,
     temp
   },numeric(nrow(se)))
   vi_m <- Matrix(vi_m,sparse = TRUE)
-  SummarizedExperiment::assays(se)[["vi_state"]] <- vi_m
-  SummarizedExperiment::metadata(se) <- segInfo_f
+  assays(se)[["vi_state"]] <- vi_m
+  metadata(se) <- segInfo_f
   se
 }
 

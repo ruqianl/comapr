@@ -31,6 +31,7 @@ This function takes the \code{geno} data.frame and filter the data.frame by
 the provided cut-offs.
 }
 \examples{
+data(snp_geno_gr)
 corrected_geno <- filterGT(snp_geno_gr, min_markers = 30,min_samples = 2)
 
 }

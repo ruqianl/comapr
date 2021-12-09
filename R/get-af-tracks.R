@@ -5,13 +5,14 @@
 #' columns of provided `co_count`
 #'
 #' @inheritParams getCellAFTrack
-#'
+#' @importFrom Matrix readMM
+#' @importFrom Gviz DataTrack
 #' @author Ruqian Lyu
 #' @export
 #' @return a list object, in which each element is a list of two items with the
 #' cell's alternative allele frequency DataTrack and the called crossover ranges.
 #' @examples
-#'   demo_path <-paste0(system.file("extdata",package = "comapr"),"/")
+#' demo_path <- system.file("extdata",package = "comapr")
 #' s1_rse_state <- readHapState("s1",chroms=c("chr1"),
 #'                              path=demo_path,barcodeFile=NULL,minSNP = 0,
 #'                              minlogllRatio = 50,
@@ -22,7 +23,7 @@
 #' af_co_tracks <- getAFTracks(chrom ="chr1",
 #'                                path_loc = demo_path,
 #'                                sampleName = "s1",
-#'                                barcodeFile = paste0(demo_path,
+#'                                barcodeFile = file.path(demo_path,
 #'                                                     "s1_barcodes.txt"),
 #'                                co_count = s1_counts)
 #'
@@ -34,16 +35,16 @@ getAFTracks <-  function(chrom = "chr1",
                             co_count,
                             chunk = 1000L,
                             snp_track = NULL){
-
+  stopifnot(file.exists(barcodeFile))
   initial_barcodes <- read.table(file = barcodeFile)
   whichCells <- match(colnames(co_count), initial_barcodes$V1)
 
-  dpMM <- Matrix::readMM(file = paste0(path_loc, sampleName,"_",
-                                  chrom,"_totalCount.mtx"))
+  dpMM <- readMM(file = file.path(path_loc, paste0(sampleName,"_",
+                                  chrom,"_totalCount.mtx")))
 
   dpMM <- dpMM[,whichCells]
-  altMM <- Matrix::readMM(file = paste0(path_loc, sampleName,"_",
-                                   chrom, "_altCount.mtx"))
+  altMM <- readMM(file = file.path(path_loc, paste0(sampleName,"_",
+                                   chrom, "_altCount.mtx")))
 
   altMM <- altMM[,whichCells]
 
@@ -54,8 +55,8 @@ getAFTracks <-  function(chrom = "chr1",
     cell_af <- af_data[,ithCell]
     keep_snp <- !is.na(cell_af)
     if(is.null(snp_track)){
-      snp_anno <- read.table(file=paste0(path_loc,sampleName,"_",
-                                         chrom, "_snpAnnot.txt"),
+      snp_anno <- read.table(file=file.path(path_loc, paste0(sampleName,"_",
+                                         chrom, "_snpAnnot.txt")),
                              header=TRUE)
       snp_pos <- snp_anno$POS
 
@@ -64,7 +65,7 @@ getAFTracks <-  function(chrom = "chr1",
       snp_pos <- snp_track@range@ranges@start
     }
 
-      af_track <- Gviz::DataTrack(GRanges(seqnames = chrom,
+      af_track <- DataTrack(GRanges(seqnames = chrom,
                                           IRanges(start=snp_pos[keep_snp],
                                                   width = 1,
                                                   genome = "mm10")),

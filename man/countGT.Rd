@@ -24,6 +24,7 @@ helps identify poor samples or poor markers for filtering. It can also generate
 plots that help identify outlier samples/markers
 }
 \examples{
+data(snp_geno_gr)
 genotype_counts <- countGT(GenomicRanges::mcols(snp_geno_gr))
 }
 \author{

@@ -14,7 +14,8 @@
 #' @return data.frame with each row representing one SNP marker and columns
 #' containing the chisq.test results
 #' @examples
-#'
+#' data(parents_geno)
+#' data(snp_geno_gr)
 #' corrected_geno <- correctGT(gt_matrix = GenomicRanges::mcols(snp_geno_gr),
 #' ref = parents_geno$ref,alt = parents_geno$alt,fail = "Fail",
 #' wrong_label = "Homo_ref")
@@ -24,18 +25,22 @@
 #' @export
 
 getDistortedMarkers <- function(geno, p = c(0.5,0.5),adj.method="BH"){
-  geno_table <- vapply(seq_len(nrow(geno)), function(nthRow){
+  geno_table <-
+    vapply(seq_len(nrow(geno)), function(nthRow){
     list(Het = ifelse(is.na(table(unlist(geno[nthRow,]),useNA = "no")["Het"]),
                       0,
                       table(unlist(geno[nthRow,]),useNA = "no")["Het"]),
-         Homo_alt = ifelse(is.na(table(unlist(geno[nthRow,]),useNA = "no")["Homo_alt"]),
+         Homo_alt = ifelse(is.na(table(unlist(geno[nthRow,]),
+                                       useNA = "no")["Homo_alt"]),
                            0,
-                           table(unlist(geno[nthRow,]),useNA = "no")["Homo_alt"]))
+                           table(unlist(geno[nthRow,]),
+                                 useNA = "no")["Homo_alt"]))
     },FUN.VALUE = vector(mode = "list",length = 2))
 
   geno_table <- data.frame(Markers = seq_len(ncol(geno_table)),
                            No.Hets =  as.character(unlist(geno_table["Het",])),
-                           No.Homo_alt = as.character(unlist(geno_table["Homo_alt",])),
+                           No.Homo_alt =
+                             as.character(unlist(geno_table["Homo_alt",])),
                            stringsAsFactors = FALSE)
 
   pvals <- vapply(seq_len(nrow(geno_table)), function(marker){

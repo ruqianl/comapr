@@ -19,6 +19,7 @@
 #' The paris of duplicated samples.
 #'
 #' @examples
+#' data(snp_geno)
 #' or_geno <- snp_geno[,grep("X",colnames(snp_geno))]
 #' rownames(or_geno) <- paste0(snp_geno$CHR,"_",snp_geno$POS)
 #' or_geno[,1] <- or_geno[,5]
@@ -28,9 +29,7 @@
 findDupSamples <- function(geno, threshold = 0.99,
                            in_text = FALSE){
 
-  # similarity.matrix<-apply(gt_matrix,2,function(x)colSums(identical(x,gt_matrix[,1])))
-  # diag(similarity.matrix)<-0
-  #
+
   geno <- as.matrix(geno)
   n <- seq_len( ncol(geno) )
 

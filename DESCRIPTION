@@ -1,6 +1,6 @@
 Package: comapr
 Title: Crossover analysis and genetic map construction 
-Version: 0.999
+Version: 0.99.39
 Authors@R: 
     person(given = "Ruqian",
            family = "Lyu",

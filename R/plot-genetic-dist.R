@@ -9,7 +9,7 @@
 #' @importFrom scales unit_format
 #' @importFrom tidyr pivot_longer
 #' @importFrom rlang .data
-#' @importFrom GenomeInfoDb fetchExtendedChromInfoFromUCSC genome seqinfo
+#' @importFrom GenomeInfoDb genome seqinfo
 #' @importFrom GenomicRanges GRanges mcolAsRleList sort width
 #' @importFrom GenomicRanges tileGenome binnedAverage mcols
 #' @importFrom GenomeInfoDb sortSeqlevels seqlevels

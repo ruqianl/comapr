@@ -17,3 +17,6 @@ Changes in version 0.99.38 (2021-12-09)
 + Small fix in plotCount to remove the NA legend
 + Split plot-af.R to two .R files
 + Addressed comments from BioC reviewer 
+
+Changes in version 0.99.39 (2021-12-14)
++ remove unused import from GenomeInfoDb fetchExtendedChromInfoFromUCSC

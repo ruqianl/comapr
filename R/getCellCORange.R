@@ -23,8 +23,7 @@
 #' co_ranges <- getCellCORange(cellBarcode = "BC1",
 #'                             co_count = s1_counts)
 getCellCORange <- function(co_count, cellBarcode){
-  stopifnot(class(co_count) %in% c("GRanges","RangedSummarizedExperiment"))
-
+  stopifnot(inherits(co_count, c("GRanges","RangedSummarizedExperiment")))
   if(is(co_count,"GRanges")){
     cell1_co <- mcols(co_count)[,cellBarcode]
     cell1_coRange <- granges(co_count)[cell1_co!=0]

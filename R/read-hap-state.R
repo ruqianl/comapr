@@ -136,10 +136,11 @@ readHapState <- function(sampleName, chroms=c("chr1"), path,
 #'@importFrom S4Vectors metadata
 #'@importFrom IRanges ranges
 #'@importFrom stats mad median
+#'@importFrom S4Vectors elementMetadata from to
 #'@return A `RangedSummarizedExperment` object that have different dims with input.
 #'the colnames are the cell barcodes, rowRanges specify the location of SNPs that
 #'contribute to crossovers.
-#'@details The `logllRatio` value is returned by `sscocaller` for each haplotype
+#'@details The `logllRatio` value is returned by `sgcocaller` for each haplotype
 #'segment formed by consecutive SNPs that are called to have a same state. It is
 #'calculated by taking log of ratio (likelihood of SNPs with inferred states)
 #'and (likelihood of SNPs with reversed states)
@@ -203,7 +204,7 @@ readHapState <- function(sampleName, chroms=c("chr1"), path,
 
       temp <- rep(0,length(markers))
       myHits <- findOverlaps(queryR,subjectR)
-      temp[myHits@from] <- subjectR@elementMetadata@listData$state[myHits@to]
+      temp[from(myHits)] <- elementMetadata(subjectR)$state[to(myHits)]
       temp
     })
     markers_states <- do.call(cbind,markers_states)
@@ -215,7 +216,7 @@ readHapState <- function(sampleName, chroms=c("chr1"), path,
 
   }
   ## row numbers of these SNPs in the assay
-  ithSNP <- match(co_contr_snp,ranges(rowRanges(se ))@start)
+  ithSNP <- match(co_contr_snp, start(ranges(rowRanges(se ))))
 
   ## subset the columns to only keep the Good cells
   colnames(se) <- colData(se)$barcodes

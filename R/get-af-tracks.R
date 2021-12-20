@@ -7,6 +7,7 @@
 #' @inheritParams getCellAFTrack
 #' @importFrom Matrix readMM
 #' @importFrom Gviz DataTrack
+#' @importFrom GenomicRanges start
 #' @author Ruqian Lyu
 #' @export
 #' @return a list object, in which each element is a list of two items with the
@@ -62,7 +63,7 @@ getAFTracks <-  function(chrom = "chr1",
 
     } else {
       stopifnot(unlist(dimnames(seqinfo(snp_track))) == chrom)
-      snp_pos <- snp_track@range@ranges@start
+      snp_pos <- start(snp_track)
     }
 
       af_track <- DataTrack(GRanges(seqnames = chrom,

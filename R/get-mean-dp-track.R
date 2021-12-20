@@ -142,6 +142,7 @@ getCellDPTrack <-  function(chrom = "chr1",
 #' get_snp_pos from track or snp_annot_file
 #' @return a list of SNP positions for selected chromosome
 #' @keywords internal
+#' @importFrom GenomicRanges start
 #' @noRd
 .get_snp_pos <- function(snp_track = NULL,path_loc,sampleName,chrom){
 
@@ -153,7 +154,7 @@ getCellDPTrack <-  function(chrom = "chr1",
 
   } else {
     stopifnot(unlist(dimnames(seqinfo(snp_track))) == chrom)
-    snp_pos <- snp_track@range@ranges@start
+    snp_pos <- start(snp_track)
   }
   snp_pos
 }

@@ -88,24 +88,6 @@ plotGeneticDist <- function(gr,bin=TRUE,chr=NULL,cumulative=FALSE){
     } else {
       p + ylab("centiMorgans")
     }
-
-  # } else {
-  #   ## plot cumulative distances for chr
-  #   if(is.null(chr)){
-  #     p <-  plot_df %>% group_by(seqnames,SampleGroup)%>%
-  #       mutate(cum_dist = cumsum(bin_dist)) %>%
-  #       ggplot()+
-  #       geom_step(mapping = aes(x = x_tick ,y=cum_dist,
-  #                               color=SampleGroup),size =1)
-  #   } else {
-  #     p <- plot_df %>% group_by(seqnames) %>%
-  #       filter(seqnames %in% chr )%>%
-  #       mutate(cum_dist = cumsum(bin_dist)) %>%
-  #       ggplot()+
-  #       geom_step(mapping = aes(x = end,y=cum_dist,
-  #                               color=SampleGroup),size =1)
-  #   }
-  #
 }
 
 #' Plot cumulative genetic distances across the genome

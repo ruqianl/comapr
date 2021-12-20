@@ -20,3 +20,7 @@ Changes in version 0.99.38 (2021-12-09)
 
 Changes in version 0.99.39 (2021-12-14)
 + remove unused import from GenomeInfoDb fetchExtendedChromInfoFromUCSC
+
+Changes in version 0.99.40 (2021-12-20)
++ remove unused code
++ change to use accessors from using `@`

@@ -17,6 +17,7 @@
 #' @importFrom GenomicRanges gaps granges
 #' @importFrom IRanges mergeByOverlaps
 #' @importFrom IRanges IRanges ranges start width
+#' @importFrom S4Vectors from to
 #' @importClassesFrom SummarizedExperiment SummarizedExperiment
 #' @importFrom SummarizedExperiment SummarizedExperiment
 
@@ -98,11 +99,11 @@ countCOs_gr <- function(geno) {
 
         myHits <- findOverlaps(gps_snp_gr, co_gr)
 
-        co_gap_length <- width(ranges(gps_snp_gr))[myHits@from] + 1
-        len_prop <- (co_gap_length)/(width(ranges(co_gr))[myHits@to])
+        co_gap_length <- width(ranges(gps_snp_gr))[from(myHits)] + 1
+        len_prop <- (co_gap_length)/(width(ranges(co_gr))[to(myHits)])
 
         mcols(gps_snp_gr)$crossovers <- 0
-        mcols(gps_snp_gr)$crossovers[myHits@from] <- len_prop
+        mcols(gps_snp_gr)$crossovers[from(myHits)] <- len_prop
       }
       #  colnames(mcols(gps_snp_gr)) <- names(sid_geno)
       gps_snp_gr

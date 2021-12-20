@@ -50,6 +50,5 @@ findDupSamples <- function(geno, threshold = 0.99,
 
   dups_index <- which(l_out_freq > threshold, arr.ind = TRUE)
   dups <- apply(dups_index,1,function(x)rownames(l_out_freq)[x])
-  #if(plot) dups <- list(htmap,dups)
   return(dups)
 }

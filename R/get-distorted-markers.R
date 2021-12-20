@@ -48,8 +48,6 @@ getDistortedMarkers <- function(geno, p = c(0.5,0.5),adj.method="BH"){
                         p = p)
     ctest$p.value
   }, FUN.VALUE = numeric(1))
-
-  #names(pvals) == geno_table$Markers
   geno_table$Pvals <- pvals
   geno_table$Adj.pvals <- p.adjust(pvals, method = adj.method)
 

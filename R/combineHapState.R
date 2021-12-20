@@ -8,7 +8,7 @@
 #' @importFrom IRanges findOverlaps
 #' @importFrom SummarizedExperiment rowRanges assay assay<- rowRanges<-
 #' @importFrom SummarizedExperiment assays assays<-
-#' @importFrom S4Vectors merge
+#' @importFrom S4Vectors merge from to 
 #' @param rse1, the first `RangedSummarizedExperiment`
 #' @param rse2, the second `RangedSummarizedExperiment`
 #' @param groupName, a character vector of length 2 that contains the first and
@@ -50,10 +50,10 @@ combineHapState <- function(rse1,rse2,
   t <- Matrix(data=0,nrow=length(merged_anno),ncol=(ncol(rse1)+ncol(rse2)),
               sparse = TRUE)
   se1_rows <- findOverlaps(merged_anno,rowRanges(rse1),select = "all")
-  se1_rows <- se1_rows@from
+  se1_rows <- from(se1_rows)
   t[se1_rows,seq_len(ncol(rse1))] <- assays(rse1)[["vi_state"]]
   se2_rows <- findOverlaps(merged_anno,rowRanges(rse2),select = "all")
-  se2_rows <- se2_rows@from
+  se2_rows <- from(se2_rows)
   t[se2_rows,(ncol(rse1)+1):ncol(t)] <- assay(rse2)
   combinedCols <- rbind(colData(rse1),colData(rse2))
 

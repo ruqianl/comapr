@@ -59,7 +59,7 @@ ever contribute to a crossover interval. This function should be run for
 individual chromosomes and is called internaly by `readHapState`
 }
 \details{
-The `logllRatio` value is returned by `sscocaller` for each haplotype
+The `logllRatio` value is returned by `sgcocaller` for each haplotype
 segment formed by consecutive SNPs that are called to have a same state. It is
 calculated by taking log of ratio (likelihood of SNPs with inferred states)
 and (likelihood of SNPs with reversed states)

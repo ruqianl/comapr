@@ -291,7 +291,7 @@ setMethod("calGeneticDist",
           function(co_count,
                    bin_size=NULL,
                    mapping_fun="k",
-                   ref_genome=ref_genome,
+                   ref_genome="mm10",
                    group_by = NULL,
                    chrom_info){
             .check_mapping_fun(mapping_fun)

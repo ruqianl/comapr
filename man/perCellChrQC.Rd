@@ -32,8 +32,8 @@ a list object that contains the data.frame with summarised statistics
 per chr per cell and a plot (if doPlot)
 }
 \description{
-A function that parses output ('_viSegInfo.txt' )from `sscocaller`
-\url{https://gitlab.svi.edu.au/biocellgen-public/sscocaller} and
+A function that parses output ('_viSegInfo.txt' )from `sgcocaller`
+\url{https://gitlab.svi.edu.au/biocellgen-public/sgcocaller} and
 generate cell cell (per chr) summary statistics
 }
 \examples{

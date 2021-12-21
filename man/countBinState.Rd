@@ -12,7 +12,7 @@ countBinState(chr, snpAnno, viState, genomeRange, ntile = 5)
 \item{snpAnno, }{data.frame, the SNP annotation for the supplied chromosome}
 
 \item{viState, }{dgTMatrix/Matrix, the viterbi state matrix, output from
-`sscocaller`}
+`sgcocaller`}
 
 \item{genomeRange, }{GRanges object with seqlengths information for the genome}
 

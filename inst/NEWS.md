@@ -24,3 +24,7 @@ Changes in version 0.99.39 (2021-12-14)
 Changes in version 0.99.40 (2021-12-20)
 + remove unused code
 + change to use accessors from using `@`
+
+Changes in version 0.99.41 (2021-12-31)
++ remove unused code
++ code refactoring to reduce repetition 

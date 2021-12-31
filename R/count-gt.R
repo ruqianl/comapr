@@ -32,8 +32,6 @@ countGT <- function(geno, plot =TRUE,interactive=FALSE){
   pl_df <- data.frame(counts=c(n_samples,n_markers),
                       type = c(rep("by_marker", each = length(n_samples)),
                                rep("by_sample", each= length(n_markers))))
-                      # name = c(names(n_samples),
-                      #          names(n_markers)))
   type_colors <- c("by_marker"="#003f5c",
                    "by_sample"="#ffa600")
   if(plot){
@@ -44,9 +42,6 @@ countGT <- function(geno, plot =TRUE,interactive=FALSE){
                    text = ~paste('</br> counts ID: ',counts),
                       type = c("box"))
 
-    #
-      # name = c("by_sample"="No. samples by marker",
-      #          "by_marker"="No. markers by sample")
       return(list(ply = p,n_samples = rowSums(!is.na(geno)),
                   n_markers = colSums(!is.na(geno))))
 
@@ -57,7 +52,6 @@ countGT <- function(geno, plot =TRUE,interactive=FALSE){
         geom_jitter(position = "jitter",aes(color=type),size=2,alpha=.8 )+
         theme_classic(base_size=22)+facet_wrap(.~type,scales = "free")+
         ylab("Number of samples/markers")+
-#        ggtitle("Genotype counts\nfor markers/samples")+
         scale_color_manual(values=type_colors)+
         scale_fill_manual(values=type_colors)
 

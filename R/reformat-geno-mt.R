@@ -129,14 +129,12 @@ fill_fail <- function(s_gt,fail = "Fail",chr = NULL){
     after_index <- fail_index +1
     if(any(before_index <1)){
       lo_i <- fail_index[which(before_index<1)]
-      #      s_gt[lo_i] <- "missing"
       fail_index <- fail_index[-which(before_index<1)]
       before_index <- fail_index -1
       after_index <- fail_index + 1
     }
     if(any(after_index >= length(s_gt))){
       lo_i <- fail_index[which(after_index > length(s_gt))]
-      #      s_gt[lo_i] <- "missing"
       fail_index <- fail_index[-which(after_index > length(s_gt))]
       before_index <- fail_index -1
       after_index <- fail_index + 1
@@ -212,7 +210,6 @@ fill_fail <- function(s_gt,fail = "Fail",chr = NULL){
 correctGT <- function(gt_matrix, ref, alt,
                       failed = 'Fail', wrong_label = "Homo_ref")
 {
-  # stopifnot(ref_change_to %in% c('Het','Fail'))
   stopifnot(length(ref) == length(alt))
   stopifnot(length(ref) == dim(gt_matrix)[1])
 

@@ -23,6 +23,16 @@ library(GenomicRanges)
 library(BiocParallel)
 ```
 
+# Installation
+
+Install via BiocManager as follow:
+
+```{r install, eval=FALSE}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("comapr")
+```
 
 # Introduction
 

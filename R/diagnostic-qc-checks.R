@@ -26,29 +26,13 @@
 #' @export
 #' @author Ruqian Lyu
 perCellChrQC <- function(sampleName,chroms = c("chr1","chr7","chr15"),
-                         path,barcodeFile = NULL,doPlot = TRUE){
-  if (is.null(barcodeFile)) {
-    barcodeFile <- file.path(path, paste0(sampleName, "_barcodes.txt"))
-  }
-  stopifnot(file.exists(barcodeFile))
+                         path,barcodeFile = NULL, doPlot = TRUE){
 
-  barcodes <- read.table(file = barcodeFile, stringsAsFactors = FALSE,
-                         col.names = "barcodes")
-
-  segInfo_list <- bplapply(chroms, function(chr) {
-
-    segInfo <- read.table(file = file.path(path,paste0(sampleName,
-                                        "_", chr, "_viSegInfo.txt")),
-                          stringsAsFactors = FALSE,
-                          col.names = c("ithSperm", "Seg_start", "Seg_end",
-                                        "logllRatio", "nSNP", "State"))
-    segInfo$Chrom <- chr
-    segInfo
-
-  })
-  segInfo_chrs <- do.call(rbind,segInfo_list)
-  rm(segInfo_list)
-
+  barcodes <- .get_barcodes(barcodeFile = barcodeFile, sampleName = sampleName,
+                            path = path)
+  segInfo_chrs <- .get_segInfo_chrs(chroms = chroms, path = path,
+                                    sampleName = sampleName)
+  
   if(grepl("chr",segInfo_chrs$Chrom[1])){
     chr_levels <- paste0("chr",seq_len(23))
   } else {
@@ -128,7 +112,6 @@ countBinState <- function(chr,
                           viState,
                           genomeRange,
                           ntile = 5){
-
   tiles <- tileGenome(seqlengths(genomeRange)[chr],
                                      ntile = ntile)
   binned_dna_mm10_gr <- unlist(tiles)
@@ -189,31 +172,11 @@ countBinState <- function(chr,
 perSegChrQC <- function(sampleName,chroms = c("chr1","chr7","chr15"),
                         path,barcodeFile = NULL,maxRawCO=10){
   logllRatio <- nSNP <- bpDist <- NULL
-  if (is.null(barcodeFile)) {
-    barcodeFile <- file.path(path,paste0(sampleName, "_barcodes.txt"))
-  }
-  stopifnot(file.exists(barcodeFile))
-
-  barcodes <- read.table(file = barcodeFile,
-                         stringsAsFactors = FALSE,
-                         col.names = "barcodes")
-
-  segInfo_list <- bplapply(chroms, function(chr) {
-
-    # snpAnno <- read.table(file = paste0(path, sampleName,
-    #   "_", chr, "_snpAnnot.txt"), stringsAsFactors = F,
-    #   header = T)
-    segInfo <- read.table(file = file.path(path,paste0(sampleName,
-                                        "_", chr, "_viSegInfo.txt")),
-                          stringsAsFactors = FALSE,
-                          col.names = c("ithSperm", "Seg_start", "Seg_end",
-                                        "logllRatio", "nSNP", "State"))
-    segInfo$Chrom <- chr
-    segInfo
-  })
-
-  segInfo_chrs <- do.call(rbind,segInfo_list)
-  rm(segInfo_list)
+  
+  barcodes <- .get_barcodes(barcodeFile = barcodeFile, sampleName = sampleName,
+                            path = path)
+  segInfo_chrs <- .get_segInfo_chrs(chroms = chroms, path = path,
+                                    sampleName = sampleName)
 
   rmCells <-
     segInfo_chrs %>% group_by(.data$ithSperm,.data$Chrom) %>%
@@ -228,4 +191,44 @@ perSegChrQC <- function(sampleName,chroms = c("chr1","chr7","chr15"),
                                       color = log10(logllRatio)))+
     scale_x_log10()+scale_y_log10()+scale_color_viridis_c()
  p
+}
+
+#' Read sample barcodes from barcodeFile and returne data.frame  
+#' @noRd
+#' @keywords internal
+
+.get_barcodes <- function(barcodeFile, sampleName, path){
+  
+  if (is.null(barcodeFile)) {
+    barcodeFile <- file.path(path,paste0(sampleName, "_barcodes.txt"))
+  }
+  stopifnot(file.exists(barcodeFile))
+  
+  barcodes <- read.table(file = barcodeFile,
+                         stringsAsFactors = FALSE,
+                         col.names = "barcodes")
+  barcodes
+}
+
+#' Read segment info from each chrom and bind into one data.frame
+#' @noRd
+#' @keywords internal
+.get_segInfo_chrs <- function(chroms, path, sampleName){
+  
+  result_fun <- function(){
+    bpl_fun <- function(chr){
+     segInfo <- read.table(file =
+                             file.path(path,paste0(sampleName,
+                                                   "_", chr, "_viSegInfo.txt")),
+                            stringsAsFactors = FALSE,
+                            col.names = c("ithSperm", "Seg_start", "Seg_end",
+                                          "logllRatio", "nSNP", "State"))
+      segInfo$Chrom <- chr
+      segInfo
+    } 
+     bplapply(chroms, function(chr) bpl_fun(chr))
+  }
+ 
+  segInfo_chrs <- do.call(rbind,result_fun())
+  segInfo_chrs
 }

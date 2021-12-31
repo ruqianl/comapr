@@ -58,7 +58,6 @@ plotGeneticDist <- function(gr,bin=TRUE,chr=NULL,cumulative=FALSE){
   colnames(plot_df)[rename_cols] <- col_to_plot
 
   plot_df <- plot_df %>% mutate(x_tick = 0.5*(.data$start + .data$end))
-#                                       bin_dist = mcols(gr)[,1])
 
   plot_df <- plot_df %>% pivot_longer(cols=col_to_plot,
                                              names_to = "SampleGroup",
@@ -132,7 +131,6 @@ plotWholeGenome <- function(gr){
     left_join(gr_df, ., by=c("seqnames"="seqnames")) %>%
 
     # Add a cumulative position of each SNP
-    # arrange(CHR, BP) %>%
     mutate( BPcum=end+tot,
                    x_tick = (0.5 * (start + end) + tot))
 

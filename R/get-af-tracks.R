@@ -29,57 +29,33 @@
 #'                                co_count = s1_counts)
 #'
 getAFTracks <-  function(chrom = "chr1",
-                            path_loc = "./output/firstBatch/WC_522/",
-                            sampleName = "WC_522",
-                            nwindow = 80,
-                            barcodeFile,
-                            co_count,
-                            chunk = 1000L,
-                            snp_track = NULL){
-  stopifnot(file.exists(barcodeFile))
-  initial_barcodes <- read.table(file = barcodeFile)
-  whichCells <- match(colnames(co_count), initial_barcodes$V1)
-
-  dpMM <- readMM(file = file.path(path_loc, paste0(sampleName,"_",
-                                  chrom,"_totalCount.mtx")))
-
-  dpMM <- dpMM[,whichCells]
-  altMM <- readMM(file = file.path(path_loc, paste0(sampleName,"_",
-                                   chrom, "_altCount.mtx")))
-
-  altMM <- altMM[,whichCells]
-
+                         path_loc = "./output/firstBatch/WC_522/",
+                         sampleName = "WC_522",
+                         nwindow = 80,
+                         barcodeFile,
+                         co_count,
+                         snp_track = NULL){
+  whichCells <- .get_cell_idx(barcodeFile = barcodeFile, 
+                              cellBarcode = colnames(co_count))
+  
+  dpMM <- .get_cells_mm(path_loc = path_loc,sampleName = sampleName, 
+                        chrom = chrom, whichCell = whichCells, type = "total")
+  altMM <- .get_cells_mm(path_loc = path_loc,sampleName = sampleName, 
+                         chrom = chrom, whichCell = whichCells, type = "alt")
+  
   af_data <- altMM/dpMM
 
   lapply(colnames(co_count), function(cell){
     ithCell <- match(cell,colnames(co_count))
     cell_af <- af_data[,ithCell]
     keep_snp <- !is.na(cell_af)
-    if(is.null(snp_track)){
-      snp_anno <- read.table(file=file.path(path_loc, paste0(sampleName,"_",
-                                         chrom, "_snpAnnot.txt")),
-                             header=TRUE)
-      snp_pos <- snp_anno$POS
-
-    } else {
-      stopifnot(unlist(dimnames(seqinfo(snp_track))) == chrom)
-      snp_pos <- start(snp_track)
-    }
-
-      af_track <- DataTrack(GRanges(seqnames = chrom,
-                                          IRanges(start=snp_pos[keep_snp],
-                                                  width = 1,
-                                                  genome = "mm10")),
-                                  name = paste0(cell, " AF"),
-                                  data = cell_af[keep_snp],
-                                  window = nwindow,
-                                  na.rm = TRUE,
-                                  aggregation = "mean",
-                                  type = "p")
-      co_range_cell1 <- getCellCORange(co_count, cellBarcode = cell)
-      co_range_cell1[seqnames(co_range_cell1) == chrom,]
-
-      list(af_track = af_track, co_range = co_range_cell1)
+    snp_pos  <- .get_snp_pos(snp_track = snp_track, path_loc = path_loc,
+                 sampleName = sampleName, chrom = chrom)
+    
+    .get_af_track_and_co(chrom = chrom, snp_pos = snp_pos, 
+                           keep_snp = keep_snp, cellBarcode = cell, 
+                           af_data = cell_af,
+                           nwindow = nwindow ,co_count = co_count)
 
   })
 

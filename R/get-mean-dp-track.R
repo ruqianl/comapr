@@ -20,7 +20,8 @@
 #' meanDP_track <- getMeanDPTrack(chrom ="chr1",
 #'                                path_loc = demo_path,
 #'                                sampleName = "s1",
-#'                                barcodeFile = paste0(demo_path,"s1_barcodes.txt"))
+#'                                barcodeFile = paste0(demo_path,
+#'                                                     "s1_barcodes.txt"))
 #'
 getMeanDPTrack <- function( chrom = "chr1",
                             path_loc,
@@ -34,24 +35,22 @@ getMeanDPTrack <- function( chrom = "chr1",
   initial_barcodes <- read.table(file = barcodeFile)
 
 
-  dpMM <- readMM(file =paste0(path_loc,sampleName,"_",
-                                      chrom,"_totalCount.mtx"))
+  dpMM <- readMM(file =paste0(path_loc,sampleName,"_",chrom,"_totalCount.mtx"))
   if(!is.null(selectedBarcodes))
   dpMM <- dpMM[,match(selectedBarcodes, initial_barcodes$V1)]
 
   meanDP <- rowMeans(dpMM)
-
+  
   snp_pos <- .get_snp_pos(snp_track = snp_track, path_loc = path_loc,
                sampleName = sampleName, chrom = chrom)
-  aggregation_fun <- ifelse(log, function(x) { log10(sum(x)+1)}, sum)
-
+  
   meanDP_track <- DataTrack(GRanges(seqnames = chrom,
                                      IRanges(start= snp_pos,
                                              width = 1,
                                              genome = "mm10")),
                              name = "meanDP across cells",
-                             data = meanDP,window =100,
-                             aggregation = aggregation_fun,
+                             data = meanDP,window =nwindow,
+                             aggregation = .aggregation_fun_log(log,"mean"),
                              type=plot_type,
                              background.panel = "#FFFEDB",
                              background.title = "lightblue")
@@ -110,20 +109,14 @@ getCellDPTrack <-  function(chrom = "chr1",
                             log =TRUE,
                             plot_type = "hist"){
   stopifnot(length(cellBarcode)==1)
-  stopifnot(file.exists(barcodeFile))
-  initial_barcodes <- read.table(file = barcodeFile)
-  whichCell <- match(cellBarcode, initial_barcodes$V1)
+  whichCell <- .get_cell_idx(barcodeFile = barcodeFile, 
+                            cellBarcode = cellBarcode) 
 
-  dpMM <- readColMM(file = file.path(path_loc,paste0(sampleName,"_",
-                                  chrom,"_totalCount.mtx")),
-                    which.col = whichCell,
-                    chunk = chunk)
-
-  dpMM <- dpMM[,whichCell]
-
+  dpMM <- .get_cells_mm(path_loc = path_loc, sampleName = sampleName,
+                           chrom = chrom, whichCell = whichCell, chunk = chunk,
+                           type = "total")
   snp_pos <- .get_snp_pos(snp_track = snp_track, path_loc = path_loc,
                           sampleName = sampleName, chrom = chrom)
-  aggregation_fun <- ifelse(log, function(x) { log10(mean(x)+1)}, "mean")
 
   dp_track <- DataTrack(GRanges(seqnames = chrom,
                                       IRanges(start=snp_pos,
@@ -133,11 +126,32 @@ getCellDPTrack <-  function(chrom = "chr1",
                               data = dpMM,
                               window = nwindow,
                               na.rm=TRUE,
-                              aggregation = aggregation_fun,
+                              aggregation = .aggregation_fun_log(log,"mean"),
                               type=plot_type)
 
   dp_track
 }
+
+#' get aggregation function
+#' @keywords internal
+#' @noRd
+#' 
+.aggregation_fun_log <- function(log,fun = "mean"){
+  stopifnot(fun %in% c("mean","sum"))
+  if(fun == "mean"){
+   if(log){
+      function(x) { log10(mean(x)+1)}
+    } else {
+      mean
+    }
+  } else if(fun == "sum") {
+    if(log){
+      function(x) { log10(sum(x)+1)}
+    } else {
+      sum
+    }
+  } 
+} 
 
 #' get_snp_pos from track or snp_annot_file
 #' @return a list of SNP positions for selected chromosome

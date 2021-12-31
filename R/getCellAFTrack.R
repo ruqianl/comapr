@@ -53,33 +53,30 @@ getCellAFTrack <-  function(chrom = "chr1",
                             snp_track = NULL,
                             chunk = 1000L){
   stopifnot(length(cellBarcode)==1)
-  initial_barcodes <- read.table(file = barcodeFile)
-  whichCell <- match(cellBarcode, initial_barcodes$V1)
-
-  dpMM <- readColMM(file = paste0(path_loc, sampleName,"_",
-                                  chrom,"_totalCount.mtx"),
-                    which.col = whichCell,
-                    chunk = chunk)
-
-  dpMM <- dpMM[,whichCell]
-
-  altMM <- readColMM(file = paste0(path_loc, sampleName,"_",
-                                   chrom, "_altCount.mtx"),
-                     which.col = whichCell,
-                     chunk = chunk)
-
-
-  altMM <- altMM[,whichCell]
-  af_data <- altMM/dpMM
+ 
+  af_data <- .get_af_data(chrom = chrom, path_loc = path_loc, 
+                          sampleName = sampleName, barcodeFile = barcodeFile,
+                          cellBarcode = cellBarcode, co_count = co_count,
+                          chunk = chunk)
   keep_snp <- !is.na(af_data)
 
   snp_pos <- .get_snp_pos(snp_track = snp_track, path_loc = path_loc,
                           sampleName = sampleName, chrom = chrom)
 
+  .get_af_track_and_co(chrom = chrom, snp_pos = snp_pos, 
+                       keep_snp = keep_snp, cellBarcode = cellBarcode, 
+                       af_data = af_data,
+                       nwindow = nwindow ,co_count = co_count)
+}
+#' Generate DataTrack and CO range in a list 
+#' @noRd
+#' @keywords internal
+.get_af_track_and_co <- function(chrom, snp_pos, keep_snp, cellBarcode, af_data,
+                                 nwindow,co_count){
+  
   af_track <- DataTrack(GRanges(seqnames = chrom,
                                 IRanges(start=snp_pos[keep_snp],
-                                        width = 1,
-                                        genome = "mm10")),
+                                        width = 1)),
                         name = paste0(cellBarcode, " AF"),
                         data = af_data[keep_snp],
                         window = nwindow,
@@ -89,7 +86,75 @@ getCellAFTrack <-  function(chrom = "chr1",
                         ylim=0:1)
   co_range_cell1 <- getCellCORange(co_count, cellBarcode = cellBarcode)
   co_range_cell1[seqnames(co_range_cell1)==chrom,]
+  
+  list(af_track = af_track, co_range = co_range_cell1)
+}
+#' 
+#' Get cell(s) AF data
+#' @noRd
+#' @keywords internal
+.get_af_data <- function( chrom, path_loc, sampleName, barcodeFile,
+                          cellBarcode, co_count, chunk){
+  
+  whichCell <- .get_cell_idx(barcodeFile = barcodeFile,
+                             cellBarcode = cellBarcode )
 
-  list(af_track=af_track, co_range =co_range_cell1)
+  dpMM <- .get_cells_mm(path_loc = path_loc, sampleName = sampleName,
+                           chrom = chrom, whichCell = whichCell,
+                           chunk = chunk,
+                           type = "total") 
+  altMM <- .get_cells_mm(path_loc = path_loc, sampleName = sampleName,
+                             chrom = chrom, whichCell = whichCell,
+                             chunk = chunk,
+                             type = "alt") 
+  af_data <- altMM/dpMM
+  af_data
 }
 
+#' Find cell(s) index
+#' @noRd
+#' @keywords internal
+#' 
+.get_cell_idx <- function(barcodeFile,
+                          cellBarcode){
+  stopifnot(file.exists(barcodeFile))
+  initial_barcodes <- read.table(file = barcodeFile)
+  whichCell <- match(cellBarcode, initial_barcodes$V1)
+  whichCell
+}
+
+
+#' Get cells total DP or alt counts
+#' @noRd
+#' @keywords internal
+.get_cells_mm <- function(path_loc, sampleName,
+                          chrom, whichCell,chunk = 1000L,
+                          type = "total"){
+  stopifnot(type %in% c("total","alt"))
+  
+  if(type == "total"){
+    if(length(whichCell)>1){
+      mm <- readMM(file = file.path(path_loc, paste0(sampleName, "_",
+                                    chrom, "_totalCount.mtx")))
+    } else {
+      mm <- readColMM(file = file.path(path_loc, paste0(sampleName, "_",
+                                  chrom, "_totalCount.mtx")),
+                    which.col = whichCell,
+                    chunk = chunk)
+      }
+    
+  } else {
+    if(length(whichCell)>1){
+      mm <- readMM(file = file.path(path_loc, paste0(sampleName,"_",
+                                    chrom,"_altCount.mtx")))
+    }
+    else{
+      mm <- readColMM(file = file.path(path_loc, paste0(sampleName,"_",
+                                  chrom,"_altCount.mtx")),
+                    which.col = whichCell,
+                    chunk = chunk)
+    }
+
+  }
+  mm[,whichCell]
+}

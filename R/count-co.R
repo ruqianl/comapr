@@ -105,7 +105,6 @@ countCOs_gr <- function(geno) {
         mcols(gps_snp_gr)$crossovers <- 0
         mcols(gps_snp_gr)$crossovers[from(myHits)] <- len_prop
       }
-      #  colnames(mcols(gps_snp_gr)) <- names(sid_geno)
       gps_snp_gr
     }
   )

@@ -49,7 +49,7 @@ head(snp_geno)
 
 `comapr` is also engineered to analyze the outputs from a single-sperm
 crossover calling tool
-[`sscocaller`](https://gitlab.svi.edu.au/biocellgen-public/sscocaller)
+[`sgcocaller`](https://gitlab.svi.edu.au/biocellgen-public/sgcocaller)
 
 ``` r
 list.files("inst/extdata/")
@@ -96,7 +96,7 @@ Distances](https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-proce
 
 ## Analysis workflow for demonstration of `comapr` on a single-sperm DNAseq dataset
 
-We demonstrate the usage of `sscocaller` and `comapr` for identifying
+We demonstrate the usage of `sgcocaller` and `comapr` for identifying
 and visualising crossovers regions from single-sperm DNA sequencing
 dataset
 [here](https://biocellgen-public.svi.edu.au/hinch-single-sperm-DNA-seq-processing/Crossover-identification-with-sscocaller-and-comapr.html)

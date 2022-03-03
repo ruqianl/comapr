@@ -45,7 +45,7 @@ head(snp_geno)
 #> 6   AG   GG   AG   AG   GG   GG   GG   AG   GG   GG   GG   AG   GG   GG   GG
 ```
 
-## From sscocaller’s sparse matrices
+## From sgcocaller’s sparse matrices
 
 `comapr` is also engineered to analyze the outputs from a single-sperm
 crossover calling tool

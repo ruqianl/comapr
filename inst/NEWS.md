@@ -28,3 +28,8 @@ Changes in version 0.99.40 (2021-12-20)
 Changes in version 0.99.41 (2021-12-31)
 + remove unused code
 + code refactoring to reduce repetition 
+
+Changes in version 0.99.43 (2022-03-10)
++ changes made in readHapState so that filtering cells works properly when a cell
+barcode has no read coverage
+

@@ -220,8 +220,8 @@ readHapState <- function(sampleName, chroms=c("chr1"), path,
 
   ## subset the columns to only keep the Good cells
   colnames(se) <- colData(se)$barcodes
-  se <- se[ithSNP,!colnames(se) %in% rmCells]
-
+  se <- se[ithSNP,colnames(se) %in% segInfo_f$barcode]
+  
   vi_m <- Matrix(data=0,nrow=nrow(se),ncol=ncol(se))
   queryR <- IRanges(start=co_contr_snp,
                              width=1)

@@ -30,6 +30,9 @@ This function is used for checking whether chromosome segregation pattern
 obeys the expected ratio.
 }
 \examples{
+ 
+library(IRanges)
+library(S4Vectors)
 
 chrom_info <- GenomeInfoDb::getChromInfoFromUCSC("mm10")
 seq_length <- chrom_info$size

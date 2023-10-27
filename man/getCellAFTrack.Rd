@@ -102,6 +102,4 @@ af_co_tracks <- getCellAFTrack(chrom ="chr1",
 }
 \author{
 Ruqian Lyu
-
-Ruqian Lyu
 }

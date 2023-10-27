@@ -5,7 +5,7 @@
 #' cells from two individuals and merged list of SNPs from the two.
 #'
 #' @importFrom  Matrix Matrix
-#' @importFrom IRanges findOverlaps
+#' @importFrom IRanges findOverlaps IRanges
 #' @importFrom SummarizedExperiment rowRanges assay assay<- rowRanges<-
 #' @importFrom SummarizedExperiment assays assays<-
 #' @importFrom S4Vectors merge from to 

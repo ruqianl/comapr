@@ -35,7 +35,7 @@ test_that("get cell CO range works", {
   expect_true(is(co_ranges,"GRanges"))
   expect_true(GenomicRanges::start(co_ranges)==3201)
 
-  expect_true(GenomicRanges::seqnames(co_ranges)=="chr1")
+  expect_true(as.character(GenomicRanges::seqnames(co_ranges))=="chr1")
   expect_true(GenomicRanges::end(co_ranges)=="5499")
 
 
